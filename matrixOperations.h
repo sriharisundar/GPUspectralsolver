@@ -8,5 +8,5 @@ IF IOPT=3,TRANSFORMS WITH INV.FACT.
 IOPT=4, TO GO FROM 6x6 TO 3x3x3x3 WITH Aijkl ANTISYMMETRY */
 void voigt(double C2[6][6], double C4[3][3][3][3], int iopt);
 
-void euler(double a[3][3],double euler[3],int iopt);
+void transformationMatrix(double a[3][3],double euler[3],int iopt);
 #endif
