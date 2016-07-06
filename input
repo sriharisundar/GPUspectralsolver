@@ -1,0 +1,15 @@
+* name and path of microstructure file (filetext)                                
+txfft
+* name and path of elastic moduli file (filecrys)                         
+elast.dat
+* RVE dimensions                                        
+1.  1.  1.                     delt                     
+* boundary conditions                                                     
+   -0.003      0.       0.          udot    |    vel.grad                   
+    0.        -0.003    0.                  |                               
+    0.         0.       0.01                |                                                          
+* other
+3              ictrl
+5              nsteps                                                                                          
+0.00001        err                                                        
+50             itmax                                                      
