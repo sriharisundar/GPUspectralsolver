@@ -37,6 +37,7 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
                     C2[i][j]=C4[i1][i2][j1][j2];
                 }
             }
+            
             break;
 
 		case 3:           
@@ -55,6 +56,7 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
 			        C4[i2][i1][j2][j1]=f*C2[i][j];
 				}
 			}
+			
 			break;
 
 		case 4:
@@ -79,6 +81,7 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
 				    }
 			    }
 			}
+			
 			break;
 	}
 }
@@ -86,7 +89,7 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
 //euler[0]-phi1
 //euler[1]-Phi
 //euler[2]-phi2
-void transformationMatrix(double a[3][3],double euler[3],int iopt){
+void transformationMatrix(double a[][3],double euler[],int iopt){
 	
     double sphi1,cphi1,sPhi,cPhi,sphi2,cphi2;
 	double pi=M_PI;
@@ -107,6 +110,7 @@ void transformationMatrix(double a[3][3],double euler[3],int iopt){
 	        euler[0]=euler[0]*180.0/pi;
 	        euler[1]=euler[1]*180.0/pi;
 	        euler[2]=euler[2]*180.0/pi;
+	        
 	        break;
 
 	    case 2:
@@ -116,6 +120,7 @@ void transformationMatrix(double a[3][3],double euler[3],int iopt){
 	        cPhi=cos(euler[1]*pi/180.0);
 	        sphi2=sin(euler[2]*pi/180.0);
 	        cphi2=cos(euler[2]*pi/180.0);
+	        
 	        a[0][0]=cphi2*cphi1-sphi1*sphi2*cPhi;
 	        a[1][0]=-sphi2*cphi1-sphi1*cphi2*cPhi;
 	        a[2][0]=sphi1*sPhi;
@@ -125,5 +130,7 @@ void transformationMatrix(double a[3][3],double euler[3],int iopt){
 	        a[0][2]=sPhi*sphi2;
 	        a[1][2]=cphi2*sPhi;
 	        a[2][2]=cPhi;
+
+	        break;
 	}
 }

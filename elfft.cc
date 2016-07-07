@@ -2,6 +2,10 @@
 #include <iostream>
 using namespace std;
 
+#define N1 32
+#define N2 32
+#define N3 32
+
 int main(int argc, char *argv[])
 {	
 	if (argc!=2){
@@ -9,7 +13,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	readinput(argv[1]);
+	readinput(argv[1],N1,N2,N3);
 
 	return 0;
 }
