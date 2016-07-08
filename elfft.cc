@@ -1,10 +1,7 @@
 #include "readInput.h"
+#include "globalVariables.h"
 #include <iostream>
 using namespace std;
-
-#define N1 32
-#define N2 32
-#define N3 32
 
 int main(int argc, char *argv[])
 {	
@@ -13,7 +10,8 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	readinput(argv[1],N1,N2,N3);
+	initglobal();
+	readinput(argv[1]);
 
 	return 0;
 }

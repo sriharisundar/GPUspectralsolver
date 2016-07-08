@@ -86,10 +86,7 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
 	}
 }
 
-//euler[0]-phi1
-//euler[1]-Phi
-//euler[2]-phi2
-void transformationMatrix(double a[][3],double euler[],int iopt){
+void transformationMatrix(double a[][3],double euler[3],int iopt){
 	
     double sphi1,cphi1,sPhi,cPhi,sphi2,cphi2;
 	double pi=M_PI;
@@ -133,4 +130,33 @@ void transformationMatrix(double a[][3],double euler[],int iopt){
 
 	        break;
 	}
+}
+
+void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3], double q[3][3]){
+
+	for(int i1=0;i1<3;i1++)
+	for(int j1=0;j1<3;j1++)
+	for(int k1=0;k1<3;k1++)
+	for(int l1=0;l1<3;l1++){
+		aOut[i1][j1][k1][l1]=0;		
+		for(int i2=0;i2<3;i2++)
+		for(int j2=0;j2<3;j2++)
+		for(int k2=0;k2<3;k2++)
+		for(int l2=0;l2<3;l2++)
+			aOut[i1][j1][k1][l1]=aOut[i1][j1][k1][l1]+q[i2][i1]*q[j2][j1]*q[k2][k1]*q[l2][l1]*aIn[i2][j2][k2][l2];
+	}
+}
+
+
+
+void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3]){
+
+	for(int i1=0;i1<3;i1++)
+	for(int j1=0;j1<3;j1++){
+		aOut[i1][j1]=0;
+		for(int i2=0;i2<3;i2++)
+		for(int j2=0;j2<3;j2++)
+			aOut[i1][j1]=aOut[i1][j1]+q[i2][i1]*q[j2][j1]*aIn[i2][j2];
+	}
+
 }

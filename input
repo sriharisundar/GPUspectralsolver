@@ -2,6 +2,8 @@
 txfft
 * name and path of elastic moduli file (filecrys)                         
 elast.dat
+*n voxels along X Y Z
+32 32 32
 * RVE dimensions                                        
 1.  1.  1.                     delt                     
 * boundary conditions                                                     
@@ -10,6 +12,6 @@ elast.dat
     0.         0.       0.01                |                                                          
 * other
 3              ictrl
-5              nsteps                                                                                          
+1              nsteps                                                                                          
 0.00001        err                                                        
 50             itmax                                                      
