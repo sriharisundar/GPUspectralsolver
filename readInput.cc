@@ -5,13 +5,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <stdlib.h>
+#include <stdlib.h> //for atoi()
 
 void readtexture(char filename[]){
 
 	int i,j,k,gid,pid;
 	double a[3][3];
 	double phi1,Phi,phi2;
+	double cvoxel[3][3][3][3];
 
 	std::string line;
 
@@ -19,14 +20,15 @@ void readtexture(char filename[]){
 	textureIn.open(filename, std::ios::in);
 
 	while(!textureIn.eof()){
-	textureIn>>phi1>>Phi>>phi2>>i>>j>>k>>gid>>pid;
-	euler[k-1][j-1][i-1][0]=phi1;
-	euler[k-1][j-1][i-1][1]=Phi;
-	euler[k-1][j-1][i-1][2]=phi2;
-	grainID[k-1][j-1][i-1]=gid;
-	phaseID[k-1][j-1][i-1]=pid;
+		textureIn>>phi1>>Phi>>phi2>>i>>j>>k>>gid>>pid;
+		euler[k-1][j-1][i-1][0]=phi1;
+		euler[k-1][j-1][i-1][1]=Phi;
+		euler[k-1][j-1][i-1][2]=phi2;
+		grainID[k-1][j-1][i-1]=gid;
+		phaseID[k-1][j-1][i-1]=pid;
 
-	transformationMatrix(a,euler[k-1][j-1][i-1],2);
+		transformationMatrix(a,euler[k-1][j-1][i-1],2);
+		transformFourthOrderTensor(cmat33,cvoxel,a);
 	}
 
 }
@@ -76,7 +78,7 @@ void readinput(char filename[100]){
 
 	maininputIn.getline(dummy,100);
 	maininputIn.getline(textureFile,100);
-	
+
 	maininputIn.getline(dummy,100);
 	maininputIn.getline(propsFile,100);
 	

@@ -26,6 +26,22 @@ void print2darray(double a[][3]){
 
 }
 
+void print3darray(double a[][3][6]){
+	int i,j,k;
+
+	for(i=0;i<3;i++){
+		for(j=0;j<3;j++){
+			for(k=0;k<6;k++)
+				std::cout<<a[i][j][k]<<std::setw(8)<<" ";
+			std::cout<<"\t";
+		}
+		std::cout<<std::endl;
+	}	
+	std::cout<<std::endl;	
+
+}
+
+
 void print4darray(double a[3][3][3][3]){
 	int i,j,k,l;
 

@@ -1,27 +1,43 @@
 #ifndef matrix_operations
 #define matrix_operations
 
-void change_basis(double CE2[6][6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int IOPT);
+void change_basis(double CE2[6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int iopt);
 
 /* 
-TRANSFORMS SECOND ORDER MATRIX C2 INTO FOURTH ORDER TENSOR C4 IF IOPT=1 
-IOPT=2, C4 to C2  
-IF IOPT=3,TRANSFORMS WITH INV.FACT.
-IOPT=4, TO GO FROM 6x6 TO 3x3x3x3 WITH Aijkl ANTISYMMETRY */
+	iopt=1, Transforms second order matrix c2 into fourth order tensor c4 
+	iopt=2, c4 to c2  
+	iopt=3, transforms with inv.fact.
+	iopt=4, to go from 6x6 to 3x3x3x3 with aijkl antisymmetry */
 void voigt(double C2[6][6], double C4[3][3][3][3], int iopt);
 
 /*  a --> transformation matrix
 	euler[0]-phi1
 	euler[1]-Phi
 	euler[2]-phi2
-
-CALCULATE THE EULER ANGLES ASSOCIATED WITH THE TRANSFORMATION
-MATRIX A(I,J) IF IOPT=1 AND VICEVERSA IF IOPT=2
-A(i,j) TRANSFORMS FROM SYSTEM sa TO SYSTEM ca.*/
+	all angles in degrees
+	Calculate the euler angles associated with the transformation
+	matrix a(i,j) if iopt=1 and viceversa if iopt=2
+	a(i,j) transforms from system sa to system ca.*/
 void transformationMatrix(double a[][3],double euler[3],int iopt);
 
-void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3], double q[3][3]);
+/*
+	aIn --> 4th order tensor in reference frame
+	aOut --> transformed 4th order tensor
+	q --> Transformation matrix for frame a to frame b transform
+	Transforms 4th order tensor using transformation matrix q()
+	iopt=1 transform from frame a to frame b
+	iopt=2 transform from frame b to frame a
+*/
+void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3], double q[3][3], int iopt);
 
-void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3]);
+/*
+	aIn --> 2nd order tensor in reference frame
+	aOut --> transformed 2nd order tensor
+	q --> Transformation matrix for frame a to frame b transform
+	Transforms 4th order tensor using transformation matrix q()
+	iopt=1 transform from frame a to frame b
+	iopt=2 transform from frame b to frame a
+*/
+void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3], int iopt);
 
 #endif

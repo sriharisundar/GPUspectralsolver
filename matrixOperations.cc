@@ -1,8 +1,54 @@
 #include "matrixOperations.h"
+#include "globalVariables.h"
 #define _USE_MATH_DEFINES 
 #include <cmath>
-void change_basis(double CE2[6][6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int iopt){
+void change_basis(double CE2[6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int iopt){
 
+	int i,j,k,l,m,n;
+
+	switch(iopt){
+		case 1:
+			for(i=0;i<3;i++)
+				for(j=0;j<3;j++){
+					C2[i][j]=0;
+					for(k=0;k<6;k++)
+						C2[i][j]+=CE2[k]*basis[i][j][k];
+				}
+			break;
+
+		case 2:
+			for(k=0;k<6;k++){
+				CE2[k]=0.0;
+				for(i=0;i<3;i++)
+					for(j=0;j<3;j++)
+						CE2[k]+=C2[i][j]*basis[i][j][k];
+			}
+			break;
+
+		case 3:
+			for(i=0;i<3;i++)
+				for(k=0;k<3;k++)
+					for(j=0;j<3;j++)
+						for(l=0;l<3;l++){
+							C4[i][j][k][l]=0.0;
+							for(n=0;n<6;n++)
+								for(m=0;m<6;m++)
+									C4[i][j][k][l]+=CE4[n][m]*basis[i][j][n]*basis[k][l][m];
+						}
+			break;
+
+		case 4:
+			for(n=0;n<6;n++)
+				for(m=0;m<6;m++){
+					CE4[n][m]=0.0;
+					for(i=0;i<3;i++)
+						for(k=0;k<3;k++)
+							for(j=0;j<3;j++)
+								for(l=0;l<3;l++)
+									CE4[n][m]+=C4[i][j][k][l]*basis[i][j][n]*basis[k][l][m];
+				}
+			break;
+	}
 }
 
 void voigt(double C2[6][6], double C4[3][3][3][3], int iopt){
@@ -132,31 +178,60 @@ void transformationMatrix(double a[][3],double euler[3],int iopt){
 	}
 }
 
-void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3], double q[3][3]){
+void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3], double q[3][3], int iopt){
 
-	for(int i1=0;i1<3;i1++)
-	for(int j1=0;j1<3;j1++)
-	for(int k1=0;k1<3;k1++)
-	for(int l1=0;l1<3;l1++){
-		aOut[i1][j1][k1][l1]=0;		
-		for(int i2=0;i2<3;i2++)
-		for(int j2=0;j2<3;j2++)
-		for(int k2=0;k2<3;k2++)
-		for(int l2=0;l2<3;l2++)
-			aOut[i1][j1][k1][l1]=aOut[i1][j1][k1][l1]+q[i2][i1]*q[j2][j1]*q[k2][k1]*q[l2][l1]*aIn[i2][j2][k2][l2];
+	switch(iopt){
+		case 1:
+			for(int i1=0;i1<3;i1++)
+			for(int j1=0;j1<3;j1++)
+			for(int k1=0;k1<3;k1++)
+			for(int l1=0;l1<3;l1++){
+				aOut[i1][j1][k1][l1]=0;		
+				for(int i2=0;i2<3;i2++)
+				for(int j2=0;j2<3;j2++)
+				for(int k2=0;k2<3;k2++)
+				for(int l2=0;l2<3;l2++)
+					aOut[i1][j1][k1][l1]=aOut[i1][j1][k1][l1]+q[i2][i1]*q[j2][j1]*q[k2][k1]*q[l2][l1]*aIn[i2][j2][k2][l2];
+			}
+			break;
+
+		case 2:
+			for(int i1=0;i1<3;i1++)
+			for(int j1=0;j1<3;j1++)
+			for(int k1=0;k1<3;k1++)
+			for(int l1=0;l1<3;l1++){
+				aOut[i1][j1][k1][l1]=0;		
+				for(int i2=0;i2<3;i2++)
+				for(int j2=0;j2<3;j2++)
+				for(int k2=0;k2<3;k2++)
+				for(int l2=0;l2<3;l2++)
+					aOut[i1][j1][k1][l1]=aOut[i1][j1][k1][l1]+q[i1][i2]*q[j1][j2]*q[k1][k2]*q[l1][l2]*aIn[i2][j2][k2][l2];
+			}
 	}
 }
 
 
 
-void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3]){
+void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3], int iopt){
 
-	for(int i1=0;i1<3;i1++)
-	for(int j1=0;j1<3;j1++){
-		aOut[i1][j1]=0;
-		for(int i2=0;i2<3;i2++)
-		for(int j2=0;j2<3;j2++)
-			aOut[i1][j1]=aOut[i1][j1]+q[i2][i1]*q[j2][j1]*aIn[i2][j2];
+	switch(iopt){
+		case 1:
+			for(int i1=0;i1<3;i1++)
+			for(int j1=0;j1<3;j1++){
+				aOut[i1][j1]=0;
+				for(int i2=0;i2<3;i2++)
+				for(int j2=0;j2<3;j2++)
+					aOut[i1][j1]=aOut[i1][j1]+q[i2][i1]*q[j2][j1]*aIn[i2][j2];
+			}
+			break;
+
+		case 2:
+			for(int i1=0;i1<3;i1++)
+			for(int j1=0;j1<3;j1++){
+				aOut[i1][j1]=0;
+				for(int i2=0;i2<3;i2++)
+				for(int j2=0;j2<3;j2++)
+					aOut[i1][j1]=aOut[i1][j1]+q[i1][i2]*q[j1][j2]*aIn[i2][j2];
+			}
 	}
-
 }
