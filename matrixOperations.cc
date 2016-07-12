@@ -2,6 +2,7 @@
 #include "globalVariables.h"
 #define _USE_MATH_DEFINES 
 #include <cmath>
+
 void change_basis(double CE2[6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int iopt){
 
 	int i,j,k,l,m,n;
@@ -234,4 +235,16 @@ void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3]
 					aOut[i1][j1]=aOut[i1][j1]+q[i1][i2]*q[j1][j2]*aIn[i2][j2];
 			}
 	}
+}
+
+double tnorm(double a[6],int nrows, int ncols){
+
+	double output=0.0;
+
+	for(int i=0;i<nrows*ncols;i++)
+		output += a[i]*a[i];
+
+	output=sqrt(output);
+
+	return output;
 }

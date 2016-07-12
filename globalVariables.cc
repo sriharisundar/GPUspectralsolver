@@ -2,9 +2,11 @@
 #include "printFunctions.h"
 #include <cmath>
 
-int n1,n2,n3;
+int n1=N1,n2=N2,n3=N3;
 
-double cmat[6][6],cmat33[3][3][3][3];
+double cmat3333[3][3][3][3];
+
+double xlsec66[6][6],xlsec3333[3][3][3][3];
 
 double identityR2[3][3]={{1,0,0},{0,1,0},{0,0,1}};
 
@@ -16,21 +18,38 @@ double euler[N3][N2][N1][3];
 
 int grainID[N3][N2][N1],phaseID[N3][N2][N1];
 
+double dbar[6];
+
+double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
+
+double dtilde[N3][N2][N1][6],sg[N3][N2][N1][6];
+
+double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
+
+double wgt=1.0/n1*n2*n3;
+
+double errs,errd;
+
 void initglobal(void){
 
+	int i,j,k,l;
 	double rsq2=1.0/sqrt(2);		
 	double rsq3=1.0/sqrt(3);		
 	double rsq6=1.0/sqrt(6);		
 
 	//Initialize 4th order kronecker delta
-	for(int i=0;i<3;i++)
-		for(int j=0;j<3;j++){
-			for(int k=0;k<3;k++)
-				for(int l=0;l<3;l++)
+	for(i=0;i<3;i++)
+		for(j=0;j<3;j++){
+			for(k=0;k<3;k++)
+				for(l=0;l<3;l++)
 					identityR4[i][j][k][l]=(identityR2[i][k]*identityR2[j][l]+identityR2[i][l]*identityR2[j][k])/2.0;
-			for(int k=0;k<3;k++)
+			for(k=0;k<3;k++)
 				basis[i][j][k]=0.0;
 		}
+
+	for(i=0;i<6;i++)
+		for(j=0;j<6;j++)
+			xlsec66[i][j]=0;
 
     basis[0][0][1]=-rsq6;
     basis[1][1][1]=-rsq6;
