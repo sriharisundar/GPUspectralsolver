@@ -2,7 +2,7 @@
 #include "printFunctions.h"
 #include <cmath>
 
-int n1=N1,n2=N2,n3=N3;
+//int n1=N1,n2=N2,n3=N3;
 
 double cmat3333[3][3][3][3];
 
@@ -26,9 +26,22 @@ double dtilde[N3][N2][N1][6],sg[N3][N2][N1][6];
 
 double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 
-double wgt=1.0/n1*n2*n3;
+double RVEdim[3];
 
-double errs,errd;
+double velgrad33[3][3];
+
+double straingradrate33[3][3],straingradrate6[6];
+
+double rotationrate33[3][3];
+
+double IDstraingradrate[6];
+
+double wgt=1.0/N1*N2*N3;
+
+double stressref,strainref,errstress,errstrain,error;
+
+int nsteps,itermax;
+
 
 void initglobal(void){
 

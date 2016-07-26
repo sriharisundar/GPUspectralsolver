@@ -1,6 +1,7 @@
 #include "readInput.h"
 #include "globalVariables.h"
 #include <iostream>
+#include <fftw3.h>
 using namespace std;
 
 int main(int argc, char *argv[])

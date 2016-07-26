@@ -5,7 +5,7 @@
 #define N2 32
 #define N3 32
 
-extern int n1,n2,n3;
+//extern int n1,n2,n3;
 
 extern double cmat3333[3][3][3][3];
 extern double xlsec66[6][6],xlsec3333[3][3][3][3];
@@ -19,7 +19,14 @@ extern double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
 extern double dtilde[N3][N2][N1][6],sg[N3][N2][N1][6];
 extern double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 extern double wgt;
-extern double errs,errd;
+extern double stressref,strainref,errstress,errstrain,error;
+extern double RVEdim[3];
+extern double velgrad33[3][3];
+extern double straingradrate33[3][3],straingradrate6[6];
+extern double rotationrate33[3][3];
+extern double IDstraingradrate[6];
+extern int nsteps,itermax;
+
 
 void initglobal(void);
 

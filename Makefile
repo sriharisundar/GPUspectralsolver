@@ -1,12 +1,15 @@
 include ./CBLAS/Makefile.in
 
-CC=g++
-CFLAGS=-I. -Wall
+CC=g++ -std=c++11
+CFLAGS=-I. -Wall -lfftw3 -lm
 DEPS = matrixOperations.h readInput.h globalVariables.h printFunctions.h solverFunctions.h
-OBJ = elfft.o matrixOperations.o readInput.o globalVariables.o printFunctions.o solverFunctions.o
+OBJ = matrixOperations.o readInput.o globalVariables.o printFunctions.o solverFunctions.o
 
 %.o: %.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-elfft: $(OBJ)
+elfft: elfft.o $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+testinverse: testInverse.o $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)

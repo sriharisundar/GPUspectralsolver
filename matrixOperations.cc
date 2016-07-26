@@ -2,6 +2,7 @@
 #include "globalVariables.h"
 #define _USE_MATH_DEFINES 
 #include <cmath>
+#include <iostream>
 
 void change_basis(double CE2[6],double C2[3][3],double CE4[6][6],double C4[3][3][3][3],int iopt){
 
@@ -237,7 +238,7 @@ void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3]
 	}
 }
 
-double tnorm(double a[6],int nrows, int ncols){
+double tnorm(double *a,int nrows, int ncols){
 
 	double output=0.0;
 
@@ -248,3 +249,50 @@ double tnorm(double a[6],int nrows, int ncols){
 
 	return output;
 }
+
+//void Doolittle(int d,double*S,double*D){
+//   for(int k=0;k<d;++k){
+//      for(int j=k;j<d;++j){
+//         double sum=0.;
+//         for(int p=0;p<k;++p)sum+=D[k*d+p]*D[p*d+j];
+//         D[k*d+j]=(S[k*d+j]-sum); // not dividing by diagonals
+//      }
+//      for(int i=k+1;i<d;++i){
+//         double sum=0.;
+//         for(int p=0;p<k;++p)sum+=D[i*d+p]*D[p*d+k];
+//         D[i*d+k]=(S[i*d+k]-sum)/D[k*d+k];
+//      }
+//   }
+//}
+//
+//void solveDoolittle(int d,double*LU,double*b,double*x){
+//   double y[d];
+//   for(int i=0;i<d;++i){
+//      double sum=0.;
+//      for(int k=0;k<i;++k)sum+=LU[i*d+k]*y[k];
+//      y[i]=(b[i]-sum); // not dividing by diagonals
+//   }
+//   for(int i=d-1;i>=0;--i){
+//      double sum=0.;
+//      for(int k=i+1;k<d;++k)sum+=LU[i*d+k]*x[k];
+//      x[i]=(y[i]-sum)/LU[i*d+i];
+//   }
+//}
+
+//void forwardsub(float **a,float *b,float *x){
+	//for(i=0;i<n;i++){
+		//sum=0;
+		//for(j=0;j<i;j++)
+			//sum+=a[i][j]*x[j];
+		//x[i]=(b[i]-sum)/a[i][i];
+	//}
+//}
+//
+//void backwardsub(float **a,float *x){
+	//for(i=n-1;i>=0;i--){
+		//sum=0;
+		//for(j=n-1;j>i;j--)
+			//sum+=a[j][i]*x[j];
+		//x[i]=(x[i]-sum)/a[i][i];
+	//}
+//}

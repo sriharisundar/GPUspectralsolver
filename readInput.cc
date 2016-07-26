@@ -3,11 +3,13 @@
 #include "globalVariables.h"
 #include "printFunctions.h"
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <iterator>
 #include <stdlib.h> //for atoi()
-
-void readtexture(char filename[]){
+void readtexture(std::string filename){
 
 	int i,j,k,n,m,p;
 	int gid,pid;
@@ -22,7 +24,7 @@ void readtexture(char filename[]){
 	std::string line;
 
 	std::fstream textureIn;
-	textureIn.open(filename, std::ios::in);
+	textureIn.open(filename.c_str(), std::ios::in);
 
 	while(!textureIn.eof()){
 		textureIn>>phi1>>Phi>>phi2>>i>>j>>k>>gid>>pid;
@@ -42,9 +44,11 @@ void readtexture(char filename[]){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
 				xlsec66[n][m]+=cvoxel66[n][m]*wgt;
 			}
+
 	}
 
 	change_basis(aux6,aux33,xlsec66,xlsec3333,3);
+
 
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
@@ -54,37 +58,38 @@ void readtexture(char filename[]){
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k-1][j-1][i-1][n][m];
 
-				//minv(saux,6,det,minv1,minv2);
+				//minv((double **)saux,6);
 
-				for(n=0;n<6;n++)
-					for(m=0;m<6;m++){
-						dummy=0.0;
-						for(p=0;p<6;p++)
-							dummy+=xlsec66[n][p]*saux[p][m];
-						taux[n][m]=(i/j)*(j/i)+dummy;
-					}
-
-				//minv(taux,6,det,minv1,minv2);
-
-				for(n=0;n<6;n++)
-					for(m=0;m<6;m++){
-						dummy=0.0;
-						for(p=0;p<6;p++)
-							dummy+=saux[n][p]*taux[p][m];
-						fsloc[k-1][j-1][i-1][n][m]=dummy;
-					}
+//				for(n=0;n<6;n++)
+//					for(m=0;m<6;m++){
+//						dummy=0.0;
+//						for(p=0;p<6;p++)
+//							dummy+=xlsec66[n][p]*saux[p][m];
+//						taux[n][m]=(i/j)*(j/i)+dummy;
+//					}
+//
+//				//minv(taux,6,det,minv1,minv2);
+//
+//				for(n=0;n<6;n++)
+//					for(m=0;m<6;m++){
+//						dummy=0.0;
+//						for(p=0;p<6;p++)
+//							dummy+=saux[n][p]*taux[p][m];
+//						fsloc[k-1][j-1][i-1][n][m]=dummy;
+//					}
 		}
 
 }
 
-void readprops(char filename[]){
+void readprops(std::string filename){
 	char line[100];
 	int i,j,k,l;
 	double youngs,poisson,mu,lambda;
 	double cmat66[6][6];
 
 	std::fstream textureIn;
-	textureIn.open(filename, std::ios::in);
+
+	textureIn.open(filename.c_str(), std::ios::in);
 
 	textureIn.getline(line,99);
 	if(atoi(line)==0){
@@ -111,29 +116,158 @@ void readprops(char filename[]){
 						cmat3333[i][j][k][l]=lambda*identityR2[i][j]*identityR2[k][l]+2.0*mu*identityR4[i][j][k][l];
 
 	}
+	
 }
 
 void readinput(char filename[100]){
 	
-	char textureFile[100],propsFile[100],dummy[100];
+	std::string textureFile,propsFile;
+	std::string line;
+	double aux66[6][6],aux3333[3][3][3][3];
 	int n1,n2,n3;
+	int ictrl,ictrl1,ictrl2;
+	int i,j;
+
 
 	std::fstream maininputIn;
 	maininputIn.open(filename, std::ios::in);
 
-	maininputIn.getline(dummy,100);
-	maininputIn.getline(textureFile,100);
-
-	maininputIn.getline(dummy,100);
-	maininputIn.getline(propsFile,100);
+	//Read in propsfile name and execute reading that file
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+										std::istream_iterator<std::string>{}};
+		
+		propsFile=tokens[0];
+		readprops(propsFile);
+	}
 	
-	maininputIn.getline(dummy,100);
-	maininputIn>>n1>>n2>>n3;
+	
+	//Read in propsfile name and execute reading that file
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+										std::istream_iterator<std::string>{}};
+		
+		textureFile=tokens[0];
+		readtexture(textureFile);
+	}
 
-	readprops(propsFile);
-	readtexture(textureFile);
+	//
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		n1=std::stoi(tokens[0]);
+		n2=std::stoi(tokens[1]);
+		n3=std::stoi(tokens[2]);}
+		
+		{std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		RVEdim[0]=std::stod(tokens[0]);
+		RVEdim[1]=std::stod(tokens[1]);
+		RVEdim[2]=std::stod(tokens[2]);
+	}
+	
+	//
+	{
+		for(i=0;i<3;i++){
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		velgrad33[i][0]=std::stod(tokens[0]);
+		velgrad33[i][1]=std::stod(tokens[1]);
+		velgrad33[i][2]=std::stod(tokens[2]);
+		}
+
+		print2darray(velgrad33);
+
+		for(i=0;i<3;i++)
+			for (j=0;j<3;j++){
+				straingradrate33[i][j]=0.5*(velgrad33[i][j]+velgrad33[j][i]);
+				rotationrate33[i][j]=0.5*(velgrad33[i][j]+velgrad33[j][i]);
+			}
+
+		for(i=0;i<3;i++)
+			IDstraingradrate[i]=straingradrate33[i][i];
+
+		IDstraingradrate[3]=0;
+		if(velgrad33[1][2]==1 && velgrad33[3][2]==1)IDstraingradrate[3]=1;
+		IDstraingradrate[4]=0;
+		if(velgrad33[0][2]==1 && velgrad33[2][0]==1)IDstraingradrate[4]=1;
+		IDstraingradrate[5]=0;
+		if(velgrad33[0][1]==1 && velgrad33[1][0]==1)IDstraingradrate[5]=1;
+
+		change_basis(straingradrate6,straingradrate33,aux66,aux3333,2);
+	}
+
+	//
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		ictrl=std::stoi(tokens[0]);
+	
+		if(ictrl<=3){
+			ictrl1=ictrl-1;
+			ictrl2=ictrl-1;
+		}
+		else if(ictrl==4){
+			ictrl1=1;
+			ictrl2=2;
+		}
+		else if(ictrl==5){
+			ictrl1=0;
+			ictrl2=2;
+		}
+		else{
+			ictrl1=1;
+			ictrl2=2;
+		}
+
+		strainref=straingradrate33[ictrl1][ictrl2];
 
 
-//	print2darray(cmat);
-//	print4darray(cmat33);
+	}
+
+	//
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		error=std::stod(tokens[0]);
+	}
+
+	//
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		nsteps=std::stoi(tokens[0]);
+	}
+
+	//
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		itermax=std::stoi(tokens[0]);
+	}
 }

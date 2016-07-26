@@ -43,10 +43,10 @@ void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3]
 /*
 	Find norm of matrix (linearized).
 */
-double tnorm(double a[6],int nrows, int ncols);
+double tnorm(double *a,int nrows, int ncols);
 
 /*
 	Find minv (????)
 */
-void minv();
+void minv(double **A, int order);
 #endif

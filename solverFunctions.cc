@@ -36,8 +36,8 @@ void augmentLagrangian(void){
 					sg[k][j][i][n]+=dsg[n];
 				}
 
-				errd+=tnorm(ddg,6,1)*wgt;
-				errs+=tnorm(dsg,6,1)*wgt;
+				errd+=tnorm((double *)ddg,6,1)*wgt;
+				errs+=tnorm((double *)dsg,6,1)*wgt;
 
 			}		
 }
