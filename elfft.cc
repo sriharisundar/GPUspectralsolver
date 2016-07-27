@@ -1,6 +1,7 @@
 #include "readInput.h"
 #include "globalVariables.h"
 #include <iostream>
+#include <fstream>
 #include <fftw3.h>
 using namespace std;
 
@@ -13,6 +14,13 @@ int main(int argc, char *argv[])
 
 	initglobal();
 	readinput(argv[1]);
+
+	cout<<outputFile<<endl;
+	fstream fieldsOut;
+	fieldsOut.open(outputFile,ios::out);
+
+	fstream errorOut;
+	errorOut.open("err.out",ios::out);
 
 	return 0;
 }

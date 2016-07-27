@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <iterator>
 #include <stdlib.h> //for atoi()
@@ -19,7 +20,6 @@ void readtexture(std::string filename){
 	double cvoxel66[6][6];
 	double aux6[6],aux33[3][3];
 	double saux[6][6],taux[6][6];
-	double dummy;
 
 	std::string line;
 
@@ -87,24 +87,24 @@ void readprops(std::string filename){
 	double youngs,poisson,mu,lambda;
 	double cmat66[6][6];
 
-	std::fstream textureIn;
+	std::fstream propsIn;
 
-	textureIn.open(filename.c_str(), std::ios::in);
+	propsIn.open(filename.c_str(), std::ios::in);
 
-	textureIn.getline(line,99);
+	propsIn.getline(line,99);
 	if(atoi(line)==0){
 		std::cout<<"Not isotropic"<<std::endl;
 
 		for(i=0;i<6;i++)
 			for(j=0;j<6;j++)
-				textureIn>>cmat66[i][j];
+				propsIn>>cmat66[i][j];
 
 		voigt(cmat66,cmat3333,1);
 	}
 
 	else{
 		std::cout<<"Isotropic"<<std::endl;
-		textureIn>>youngs>>poisson;
+		propsIn>>youngs>>poisson;
 
 		mu=youngs/(2.0*(1+poisson));
 		lambda=2.0*mu*poisson/(1.0-2.0*poisson);
@@ -144,7 +144,7 @@ void readinput(char filename[100]){
 	}
 	
 	
-	//Read in propsfile name and execute reading that file
+	//Read in texturefile name and execute reading that file
 	{
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);
@@ -153,6 +153,16 @@ void readinput(char filename[100]){
 		
 		textureFile=tokens[0];
 		readtexture(textureFile);
+	}
+
+	//Read in ouputfile name and store it in outfile variable
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+										std::istream_iterator<std::string>{}};
+		
+		std::strcpy(outputFile, tokens[0].c_str());
 	}
 
 	//
@@ -164,9 +174,12 @@ void readinput(char filename[100]){
 		
 		n1=std::stoi(tokens[0]);
 		n2=std::stoi(tokens[1]);
-		n3=std::stoi(tokens[2]);}
-		
-		{std::getline(maininputIn,line);
+		n3=std::stoi(tokens[2]);
+	}
+	
+	//	
+	{	
+		std::getline(maininputIn,line);
 		std::istringstream iss(line);
 		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
 	                     		   std::istream_iterator<std::string>{}};
@@ -188,8 +201,6 @@ void readinput(char filename[100]){
 		velgrad33[i][1]=std::stod(tokens[1]);
 		velgrad33[i][2]=std::stod(tokens[2]);
 		}
-
-		print2darray(velgrad33);
 
 		for(i=0;i<3;i++)
 			for (j=0;j<3;j++){

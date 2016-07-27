@@ -1,6 +1,7 @@
 #include "globalVariables.h"
 #include "printFunctions.h"
 #include <cmath>
+#include <string>
 
 //int n1=N1,n2=N2,n3=N3;
 
@@ -22,7 +23,7 @@ double dbar[6];
 
 double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
 
-double dtilde[N3][N2][N1][6],sg[N3][N2][N1][6];
+double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6];
 
 double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 
@@ -42,6 +43,7 @@ double stressref,strainref,errstress,errstrain,error;
 
 int nsteps,itermax;
 
+char *outputFile;
 
 void initglobal(void){
 
@@ -49,6 +51,7 @@ void initglobal(void){
 	double rsq2=1.0/sqrt(2);		
 	double rsq3=1.0/sqrt(3);		
 	double rsq6=1.0/sqrt(6);		
+	outputFile=new char[100];
 
 	//Initialize 4th order kronecker delta
 	for(i=0;i<3;i++)
