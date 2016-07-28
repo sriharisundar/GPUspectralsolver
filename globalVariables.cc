@@ -19,7 +19,7 @@ double euler[N3][N2][N1][3];
 
 int grainID[N3][N2][N1],phaseID[N3][N2][N1];
 
-double dbar[6];
+double strainbar[6],stressbar[6];
 
 double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
 
@@ -42,6 +42,8 @@ double wgt=1.0/N1*N2*N3;
 double stressref,strainref,errstress,errstrain,error;
 
 int nsteps,itermax;
+
+int ictrl,ictrl1,ictrl2;
 
 char *outputFile;
 

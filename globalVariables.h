@@ -15,7 +15,7 @@ extern double identityR4[3][3][3][3];
 extern double basis[3][3][6];
 extern double euler[N3][N2][N1][3];
 extern int grainID[N3][N2][N1],phaseID[N3][N2][N1];
-extern double strainbar[6];
+extern double strainbar[6],stressbar[6];
 extern double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
 extern double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6];
 extern double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
@@ -27,6 +27,7 @@ extern double straingradrate33[3][3],straingradrate6[6];
 extern double rotationrate33[3][3];
 extern double IDstraingradrate[6];
 extern int nsteps,itermax;
+extern int ictrl,ictrl1,ictrl2;
 extern char *outputFile;
 
 void initglobal(void);

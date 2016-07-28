@@ -125,7 +125,6 @@ void readinput(char filename[100]){
 	std::string line;
 	double aux66[6][6],aux3333[3][3][3][3];
 	int n1,n2,n3;
-	int ictrl,ictrl1,ictrl2;
 	int i,j;
 
 
