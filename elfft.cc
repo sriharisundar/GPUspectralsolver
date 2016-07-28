@@ -1,5 +1,6 @@
 #include "readInput.h"
 #include "globalVariables.h"
+#include "solverFunctions.h"
 #include <iostream>
 #include <fstream>
 #include <fftw3.h>
@@ -22,5 +23,6 @@ int main(int argc, char *argv[])
 	fstream errorOut;
 	errorOut.open("err.out",ios::out);
 
+	//augmentLagrangian();
 	return 0;
 }

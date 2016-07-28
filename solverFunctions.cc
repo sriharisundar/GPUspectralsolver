@@ -11,7 +11,7 @@ void augmentLagrangian(void){
 
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
-		for(i=0;i<N1;i++){
+			for(i=0;i<N1;i++){
 				
 				for(n=0;n<6;n++)
 					dg[n]=dbar[n]+dtilde[k][j][i][n];
@@ -39,5 +39,5 @@ void augmentLagrangian(void){
 				errd+=tnorm((double *)ddg,6,1)*wgt;
 				errs+=tnorm((double *)dsg,6,1)*wgt;
 
-			}		
+		}		
 }
