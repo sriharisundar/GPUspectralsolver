@@ -7,6 +7,6 @@ elfft.out	* name and path of output file
 0.        -0.003    0.          udot    |    vel.grad                    
 0.         0.       0.01                |                                                          
 3              *ictrl
-1              *nsteps                                                                                          
 0.00001        *err                                                        
+1              *nsteps                                                   
 50             *itmax                                                      
