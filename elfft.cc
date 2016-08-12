@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
 					}
 
-			// Linearize the array delta for each innermost index n and do FFT. Store in deltaim arrays.
+			//FFT
 	
 		}
 	}

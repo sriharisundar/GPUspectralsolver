@@ -46,7 +46,8 @@ void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3]
 double tnorm(double *a,int nrows, int ncols);
 
 /*
-	Find minv (????)
+	Use LU decomposition to find the inverse of a matrix.
+	Currently implemented for 6x6 matrices only
 */
-void minv(double **A, int order);
+int findInverse(double *in, int order);
 #endif

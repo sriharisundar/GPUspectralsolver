@@ -15,7 +15,7 @@ void readtexture(std::string filename){
 	int i,j,k,n,m,p;
 	int gid,pid;
 	double a[3][3];
-	double phi1,Phi,phi2;
+	double phi1,Phi,phi2,dummy;
 	double cvoxel3333[3][3][3][3];
 	double cvoxel66[6][6];
 	double aux6[6],aux33[3][3];
@@ -58,25 +58,25 @@ void readtexture(std::string filename){
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k-1][j-1][i-1][n][m];
 
-				//minv((double **)saux,6);
+				findInverse((double *)saux,6);
 
-//				for(n=0;n<6;n++)
-//					for(m=0;m<6;m++){
-//						dummy=0.0;
-//						for(p=0;p<6;p++)
-//							dummy+=xlsec66[n][p]*saux[p][m];
-//						taux[n][m]=(i/j)*(j/i)+dummy;
-//					}
-//
-//				//minv(taux,6,det,minv1,minv2);
-//
-//				for(n=0;n<6;n++)
-//					for(m=0;m<6;m++){
-//						dummy=0.0;
-//						for(p=0;p<6;p++)
-//							dummy+=saux[n][p]*taux[p][m];
-//						fsloc[k-1][j-1][i-1][n][m]=dummy;
-//					}
+				for(n=0;n<6;n++)
+					for(m=0;m<6;m++){
+						dummy=0.0;
+						for(p=0;p<6;p++)
+							dummy+=xlsec66[n][p]*saux[p][m];
+						taux[n][m]=(i/j)*(j/i)+dummy;
+					}
+
+				findInverse((double *)taux,6);
+
+				for(n=0;n<6;n++)
+					for(m=0;m<6;m++){
+						dummy=0.0;
+						for(p=0;p<6;p++)
+							dummy+=saux[n][p]*taux[p][m];
+						fsloc[k-1][j-1][i-1][n][m]=dummy;
+					}
 		}
 
 }
