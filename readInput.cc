@@ -44,16 +44,14 @@ void readtexture(std::string filename){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
 				xlsec66[n][m]+=cvoxel66[n][m]*wgt;
 			}
-
 	}
 
 	change_basis(aux6,aux33,xlsec66,xlsec3333,3);
 
-
-	for(k=0;k<N3;k++)
-		for(j=0;j<N2;j++)
-			for(i=0;i<N1;i++){
-		
+	for(k=1;k<N3;k++)
+		for(j=1;j<N2;j++)
+			for(i=1;i<N1;i++){
+				
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k-1][j-1][i-1][n][m];
