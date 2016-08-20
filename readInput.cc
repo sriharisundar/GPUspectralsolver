@@ -48,14 +48,13 @@ void readtexture(std::string filename){
 
 	change_basis(aux6,aux33,xlsec66,xlsec3333,3);
 
-	for(k=1;k<N3;k++)
-		for(j=1;j<N2;j++)
-			for(i=1;i<N1;i++){
+	for(k=0;k<N3;k++)
+		for(j=0;j<N2;j++)
+			for(i=0;i<N1;i++){
 				
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
-						saux[n][m]=cloc[k-1][j-1][i-1][n][m];
-
+						saux[n][m]=cloc[k][j][i][n][m];
 				findInverse((double *)saux,6);
 
 				for(n=0;n<6;n++)
@@ -63,7 +62,7 @@ void readtexture(std::string filename){
 						dummy=0.0;
 						for(p=0;p<6;p++)
 							dummy+=xlsec66[n][p]*saux[p][m];
-						taux[n][m]=(i/j)*(j/i)+dummy;
+						taux[n][m]=(i+1/(j+1))*(j+1/(i+1))+dummy;
 					}
 
 				findInverse((double *)taux,6);
@@ -73,7 +72,7 @@ void readtexture(std::string filename){
 						dummy=0.0;
 						for(p=0;p<6;p++)
 							dummy+=saux[n][p]*taux[p][m];
-						fsloc[k-1][j-1][i-1][n][m]=dummy;
+						fsloc[k][j][i][n][m]=dummy;
 					}
 		}
 
