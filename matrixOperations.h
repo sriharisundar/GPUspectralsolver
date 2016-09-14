@@ -50,4 +50,6 @@ double tnorm(double *a,int nrows, int ncols);
 	Currently implemented for 6x6 matrices only
 */
 int findInverse(double *in, int order);
+
+
 #endif

@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 					for(j=0;j<N2;j++)
 						for(i=0;i<N1;i++)
 							for(m=0;m<6;m++)
-								delta[k][j][i]-=xlsec66[n][m]*straintilde[k][j][i][m];
+								delta[k][j][i]-=C0_66[n][m]*straintilde[k][j][i][m];
 				
 				fftw_execute(plan_forward);
 				

@@ -19,7 +19,7 @@ void augmentLagrangian(void){
 				for(n=0;n<6;n++){
 					x[n]=stress[k][j][i][n];
 					for(m=0;m<6;m++)
-						x[m]+=xlsec66[n][m]*dg[m];
+						x[m]+=C0_66[n][m]*dg[m];
 				}
 
 				for(n=0;n<6;n++){
@@ -32,7 +32,7 @@ void augmentLagrangian(void){
 					ddg[n]=dg[n]-edot[n];				
 					dsg[n]=0.0;
 					for(m=0;m<6;m++)
-						dsg[n]+=xlsec66[n][m]*(dg[n]-edot[n]);
+						dsg[n]+=C0_66[n][m]*(dg[n]-edot[n]);
 					stress[k][j][i][n]+=dsg[n];
 				}
 
@@ -40,4 +40,25 @@ void augmentLagrangian(void){
 				errstress+=tnorm((double *)dsg,6,1)*wgt;
 
 		}		
+}
+
+void findGammaHat(void){
+
+	int i,j,k;
+	double fourierPoint[3];
+	gammaHat=new fourthOrderTensor[N3*N2*(N1/2+1)];
+
+	for(k=0;k<N3;k++){
+		fourierPoint[2]=k;
+		if(k>N3/2) fourierPoint[2]=k-N3;
+		for(j=0;j<N2;j++){
+			fourierPoint[1]=j;
+			if(j>N2/2) fourierPoint[2]=j-N2;
+			for(i=0;i<N1/2+1;i++){
+				fourierPoint[0]=i;
+
+			}
+		}
+	}
+
 }

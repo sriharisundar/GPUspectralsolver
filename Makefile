@@ -8,7 +8,9 @@ OBJ = matrixOperations.o readInput.o globalVariables.o printFunctions.o solverFu
 
 elfft: elfft.o $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
-	rm *.o
 
 testinverse: testInverse.o $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
+
+all: elfft
+	make elfft

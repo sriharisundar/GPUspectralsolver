@@ -7,7 +7,7 @@
 
 double cmat3333[3][3][3][3];
 
-double xlsec66[6][6],xlsec3333[3][3][3][3];
+double C0_66[6][6],C0_3333[3][3][3][3];
 
 double identityR2[3][3]={{1,0,0},{0,1,0},{0,0,1}};
 
@@ -28,6 +28,8 @@ double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
 double work[N3][N2][N1/2+1][6],workim[N3][N2][N1/2+1][6];
 
 double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
+
+fourthOrderTensor *gammaHat;
 
 double RVEdim[3];
 
@@ -69,7 +71,7 @@ void initglobal(void){
 
 	for(i=0;i<6;i++)
 		for(j=0;j<6;j++)
-			xlsec66[i][j]=0;
+			C0_66[i][j]=0;
 
     basis[0][0][1]=-rsq6;
     basis[1][1][1]=-rsq6;

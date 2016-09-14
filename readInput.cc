@@ -42,11 +42,11 @@ void readtexture(std::string filename){
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
-				xlsec66[n][m]+=cvoxel66[n][m]*wgt;
+				C0_66[n][m]+=cvoxel66[n][m]*wgt;
 			}
 	}
 
-	change_basis(aux6,aux33,xlsec66,xlsec3333,3);
+	change_basis(aux6,aux33,C0_66,C0_3333,3);
 
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
@@ -61,7 +61,7 @@ void readtexture(std::string filename){
 					for(m=0;m<6;m++){
 						dummy=0.0;
 						for(p=0;p<6;p++)
-							dummy+=xlsec66[n][p]*saux[p][m];
+							dummy+=C0_66[n][p]*saux[p][m];
 						taux[n][m]=(i+1/(j+1))*(j+1/(i+1))+dummy;
 					}
 
