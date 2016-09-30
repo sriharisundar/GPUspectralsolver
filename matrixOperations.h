@@ -40,6 +40,8 @@ void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3],
 */
 void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3], int iopt);
 
+double multiply3333x33(double c[3][3], double A[3][3][3][3], double b[3][3], int m, int n);
+
 /*
 	Find norm of matrix (linearized).
 */
@@ -50,6 +52,5 @@ double tnorm(double *a,int nrows, int ncols);
 	Currently implemented for 6x6 matrices only
 */
 int findInverse(double *in, int order);
-
 
 #endif

@@ -1,64 +1,75 @@
 #include "printFunctions.h"
 #include "globalVariables.h"
 #include "matrixOperations.h"
+#include <math.h>
 
 void augmentLagrangian(void){
 
-	double x[6],dg[6],edot[6],dsg[6],ddg[6];
-	errstrain=errstress=0.0;
+    double x[6],dg[6],edot[6],dsg[6],ddg[6];
+    errstrain=errstress=0.0;
 
-	int i,j,k,n,m;
+    int i,j,k,n,m;
 
-	for(k=0;k<N3;k++)
-		for(j=0;j<N2;j++)
-			for(i=0;i<N1;i++){
-				
-				for(n=0;n<6;n++)
-					dg[n]=strainbar[n]+straintilde[k][j][i][n];
-				
-				for(n=0;n<6;n++){
-					x[n]=stress[k][j][i][n];
-					for(m=0;m<6;m++)
-						x[m]+=C0_66[n][m]*dg[m];
-				}
+    for(k=0;k<N3;k++)
+        for(j=0;j<N2;j++)
+            for(i=0;i<N1;i++){
+                
+                for(n=0;n<6;n++)
+                    dg[n]=strainbar[n]+straintilde[k][j][i][n];
+                
+                for(n=0;n<6;n++){
+                    x[n]=stress[k][j][i][n];
+                    for(m=0;m<6;m++)
+                        x[m]+=C0_66[n][m]*dg[m];
+                }
 
-				for(n=0;n<6;n++){
-					edot[n]=0.0;
-					for(m=0;m<6;m++)
-						edot[n]+=fsloc[k][j][i][n][m]*x[m];
-				}
+                for(n=0;n<6;n++){
+                    edot[n]=0.0;
+                    for(m=0;m<6;m++)
+                        edot[n]+=fsloc[k][j][i][n][m]*x[m];
+                }
 
-				for(n=0;n<6;n++){
-					ddg[n]=dg[n]-edot[n];				
-					dsg[n]=0.0;
-					for(m=0;m<6;m++)
-						dsg[n]+=C0_66[n][m]*(dg[n]-edot[n]);
-					stress[k][j][i][n]+=dsg[n];
-				}
+                for(n=0;n<6;n++){
+                    ddg[n]=dg[n]-edot[n];                
+                    dsg[n]=0.0;
+                    for(m=0;m<6;m++)
+                        dsg[n]+=C0_66[n][m]*(dg[n]-edot[n]);
+                    stress[k][j][i][n]+=dsg[n];
+                }
 
-				errstrain+=tnorm((double *)ddg,6,1)*wgt;
-				errstress+=tnorm((double *)dsg,6,1)*wgt;
+                errstrain+=tnorm((double *)ddg,6,1)*wgt;
+                errstress+=tnorm((double *)dsg,6,1)*wgt;
 
-		}		
+        }        
 }
 
-void findGammaHat(void){
+void findGammaHat(fourthOrderTensor Cref){
 
-	int i,j,k;
-	double fourierPoint[3];
-	gammaHat=new fourthOrderTensor[N3*N2*(N1/2+1)];
+    int i,j,k,p,q,r,s,l,m;
+    double fourierPoint[3],fourierTensor[3][3],normPoint;
+    double G[3][3];
+    gammaHat=new fourthOrderTensor[N3*N2*(N1/2+1)];
 
-	for(k=0;k<N3;k++){
-		fourierPoint[2]=k;
-		if(k>N3/2) fourierPoint[2]=k-N3;
-		for(j=0;j<N2;j++){
-			fourierPoint[1]=j;
-			if(j>N2/2) fourierPoint[2]=j-N2;
-			for(i=0;i<N1/2+1;i++){
-				fourierPoint[0]=i;
 
-			}
-		}
-	}
+    for(k=0;k<n3;k++){
+        fourierPoint[2]=k/(n3*RVEdim[2]);
+        if(k>N3/2) fourierPoint[2]=(k-n3)/(n3*RVEdim[2]);
+        for(j=0;j<n2;j++){
+            fourierPoint[1]=j/(n2*RVEdim[1]);
+            if(j>n2/2) fourierPoint[2]=(j-n2)/(n2*RVEdim[1]);
+            for(i=0;i<N1/2+1;i++){
+                fourierPoint[0]=i/(n1*RVEdim[0]);
+                normPoint=sqrt(pow(fourierPoint[0],2)+pow(fourierPoint[1],2)+pow(fourierPoint[2],2));
+                if (normPoint!=0)
+                    fourierPoint[0]=fourierPoint[0]/normPoint;
+                    fourierPoint[1]=fourierPoint[1]/normPoint;
+                    fourierPoint[2]=fourierPoint[2]/normPoint;
+                for(l=0;l<3;l++)
+                    for(m=0;m<3;m++)
+                    	fourierTensor[l][m]=fourierPoint[l]*fourierPoint[m];
+                
+            }
+        }
+    }
 
 }

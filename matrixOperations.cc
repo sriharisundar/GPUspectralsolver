@@ -486,3 +486,10 @@ int findInverse(double* in, int order){
 	return 1;
 
 }
+
+double multiply3333x33(double c[3][3], double A[3][3][3][3], double b[3][3], int m, int n){
+	int i,j,k,l;
+	for(i=0;i<3;i++)
+	    for(j=0;j<3;j++)
+	    	c[i][j]=0;
+}

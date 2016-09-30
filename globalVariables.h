@@ -11,6 +11,7 @@ struct fourthOrderTensor{
 	double tensor[3][3][3][3];
 };
 
+extern int n1,n2,n3;
 extern double cmat3333[3][3][3][3];
 extern double C0_66[6][6],C0_3333[3][3][3][3];
 extern double identityR2[3][3];

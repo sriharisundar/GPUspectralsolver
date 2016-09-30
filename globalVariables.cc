@@ -3,7 +3,7 @@
 #include <cmath>
 #include <string>
 
-//int n1=N1,n2=N2,n3=N3;
+int n1=N1,n2=N2,n3=N3;
 
 double cmat3333[3][3][3][3];
 
