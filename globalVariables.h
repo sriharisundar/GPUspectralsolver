@@ -1,3 +1,10 @@
+#ifndef structures
+#define structures
+struct fourthOrderTensor{
+	double tensor[3][3][3][3];
+};
+#endif
+
 #ifndef global_variables
 #define global_variables
 
@@ -6,10 +13,6 @@
 #define N3 32
 
 //extern int n1,n2,n3;
-
-struct fourthOrderTensor{
-	double tensor[3][3][3][3];
-};
 
 extern int n1,n2,n3;
 extern double cmat3333[3][3][3][3];

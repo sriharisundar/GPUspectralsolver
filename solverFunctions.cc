@@ -64,10 +64,12 @@ void findGammaHat(fourthOrderTensor Cref){
                     fourierPoint[0]=fourierPoint[0]/normPoint;
                     fourierPoint[1]=fourierPoint[1]/normPoint;
                     fourierPoint[2]=fourierPoint[2]/normPoint;
+                
                 for(l=0;l<3;l++)
                     for(m=0;m<3;m++)
                     	fourierTensor[l][m]=fourierPoint[l]*fourierPoint[m];
-                
+				
+				multiply3333x33(G,Cref,fourierTensor,2,4);
             }
         }
     }

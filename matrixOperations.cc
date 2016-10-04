@@ -487,9 +487,23 @@ int findInverse(double* in, int order){
 
 }
 
-double multiply3333x33(double c[3][3], double A[3][3][3][3], double b[3][3], int m, int n){
+void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m, int n){
 	int i,j,k,l;
-	for(i=0;i<3;i++)
-	    for(j=0;j<3;j++)
-	    	c[i][j]=0;
+	if(m==3 && n==4)
+		for(i=0;i<3;i++)
+		    for(j=0;j<3;j++){
+		    	c[i][j]=0;
+	    		for(k=0;i<3;i++)
+				    for(l=0;j<3;j++)
+				    	c[i][j]+=A.tensor[i][j][k][l]*b[k][l];
+			}
+
+	else if(m==2 && n==4)
+		for(i=0;i<3;i++)
+		    for(k=0;j<3;j++){
+		    	c[i][k]=0;
+	    		for(j=0;i<3;i++)
+				    for(l=0;j<3;j++)
+				    	c[i][k]+=A.tensor[i][j][k][l]*b[j][l];
+			}
 }

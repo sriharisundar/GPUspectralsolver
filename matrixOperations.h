@@ -1,3 +1,10 @@
+#ifndef structures
+#define structures
+struct fourthOrderTensor{
+	double tensor[3][3][3][3];
+};
+#endif
+
 #ifndef matrix_operations
 #define matrix_operations
 
@@ -40,7 +47,7 @@ void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3],
 */
 void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3], int iopt);
 
-double multiply3333x33(double c[3][3], double A[3][3][3][3], double b[3][3], int m, int n);
+void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m, int n);
 
 /*
 	Find norm of matrix (linearized).

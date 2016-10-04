@@ -173,7 +173,7 @@ void readinput(char filename[100]){
 		n3=std::stoi(tokens[2]);
 	}
 	
-	//	
+	// Read in RVE dimensions
 	{	
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);
@@ -185,7 +185,7 @@ void readinput(char filename[100]){
 		RVEdim[2]=std::stod(tokens[2]);
 	}
 	
-	//
+	// Read in boundary conditions
 	{
 		for(i=0;i<3;i++){
 		std::getline(maininputIn,line);
@@ -217,7 +217,7 @@ void readinput(char filename[100]){
 		change_basis(straingradrate6,straingradrate33,aux66,aux3333,2);
 	}
 
-	//
+	// Read in control parameters, no idea what this does
 	{
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);
@@ -248,7 +248,7 @@ void readinput(char filename[100]){
 
 	}
 
-	//
+	// Error criteria for convergence
 	{
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);
@@ -258,7 +258,7 @@ void readinput(char filename[100]){
 		error=std::stod(tokens[0]);
 	}
 
-	//
+	// Total number of steps
 	{
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);
@@ -268,7 +268,7 @@ void readinput(char filename[100]){
 		nsteps=std::stoi(tokens[0]);
 	}
 
-	//
+	// Maximum iterations per step
 	{
 		std::getline(maininputIn,line);
 		std::istringstream iss(line);

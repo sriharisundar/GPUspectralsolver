@@ -1,0 +1,14 @@
+New strain increment[t]:
+ E(t+delt)=E(t)+Edot*delt
+ Find new Cref
+ Calculate gammaHats for that increment
+ Outer loop [i](strain finding loop): 
+  Find the polarization field from the stress and strain guess
+  Find the new auxiliary strain field
+  Inner loop [j](stress finding loop, minimize residual):
+   Find sigma and epsilon (inner loop fields)
+   Calculate residual for each iteration
+   Find new stress field till convergence
+  Calculate auxiliary stress field
+  Repeat till auxiliary fields converge to inner loop fields
+ Find the rotations on grain, do hardening (evolve CRSS on every slip system)
