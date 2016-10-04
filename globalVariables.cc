@@ -5,9 +5,9 @@
 
 int n1=N1,n2=N2,n3=N3;
 
-double cmat3333[3][3][3][3];
+double C0_66[6][6];
 
-double C0_66[6][6],C0_3333[3][3][3][3];
+fourthOrderTensor C0_3333,cmat3333;
 
 double identityR2[3][3]={{1,0,0},{0,1,0},{0,0,1}};
 

@@ -2,6 +2,9 @@
 #include "globalVariables.h"
 #include "matrixOperations.h"
 #include <math.h>
+#include <iostream>
+
+using namespace std;
 
 void augmentLagrangian(void){
 
@@ -48,7 +51,7 @@ void findGammaHat(fourthOrderTensor Cref){
     int i,j,k,p,q,r,s,l,m;
     double fourierPoint[3],fourierTensor[3][3],normPoint;
     double G[3][3];
-    gammaHat=new fourthOrderTensor[N3*N2*(N1/2+1)];
+    gammaHat=new fourthOrderTensor[n3*n2*(n1/2+1)];
 
 
     for(k=0;k<n3;k++){
@@ -60,18 +63,45 @@ void findGammaHat(fourthOrderTensor Cref){
             for(i=0;i<N1/2+1;i++){
                 fourierPoint[0]=i/(n1*RVEdim[0]);
                 normPoint=sqrt(pow(fourierPoint[0],2)+pow(fourierPoint[1],2)+pow(fourierPoint[2],2));
-                if (normPoint!=0)
+                
+                if (normPoint!=0){
                     fourierPoint[0]=fourierPoint[0]/normPoint;
                     fourierPoint[1]=fourierPoint[1]/normPoint;
                     fourierPoint[2]=fourierPoint[2]/normPoint;
-                
+                }
+
                 for(l=0;l<3;l++)
                     for(m=0;m<3;m++)
                     	fourierTensor[l][m]=fourierPoint[l]*fourierPoint[m];
 				
+				if(i==1 && j ==0 && k==0){
+					print2darray(fourierTensor);
+				}
+
 				multiply3333x33(G,Cref,fourierTensor,2,4);
+	
+				if(i==1 && j ==0 && k==0){
+					print2darray(G);
+				}
+
+				findInverse((double *)G,3);
+
+				if(i==1 && j ==0 && k==0){
+					print2darray(G);
+					cout<<fourierPoint[0]<<" "<<fourierPoint[1]<<" "<<fourierPoint[2]<<endl;
+				}
+
+				for(p=0;p<3;p++)
+					for(q=0;q<3;q++)
+						for(r=0;r<3;r++)
+							for(s=0;s<3;s++)
+								gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][r];
             }
         }
     }
+
+    cout<<"Gamma Hat:"<<endl;
+
+	print4darray(gammaHat[1].tensor);
 
 }

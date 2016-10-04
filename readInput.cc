@@ -16,7 +16,7 @@ void readtexture(std::string filename){
 	int gid,pid;
 	double a[3][3];
 	double phi1,Phi,phi2,dummy;
-	double cvoxel3333[3][3][3][3];
+	fourthOrderTensor cvoxel3333;
 	double cvoxel66[6][6];
 	double aux6[6],aux33[3][3];
 	double saux[6][6],taux[6][6];
@@ -35,9 +35,9 @@ void readtexture(std::string filename){
 		phaseID[k-1][j-1][i-1]=pid;
 
 		transformationMatrix(a,euler[k-1][j-1][i-1],2);
-		transformFourthOrderTensor(cmat3333,cvoxel3333,a,1);
+		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
 	
-		change_basis(aux6,aux33,cvoxel66,cvoxel3333,4);
+		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
@@ -46,7 +46,7 @@ void readtexture(std::string filename){
 			}
 	}
 
-	change_basis(aux6,aux33,C0_66,C0_3333,3);
+	change_basis(aux6,aux33,C0_66,C0_3333.tensor,3);
 
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
@@ -96,7 +96,7 @@ void readprops(std::string filename){
 			for(j=0;j<6;j++)
 				propsIn>>cmat66[i][j];
 
-		voigt(cmat66,cmat3333,1);
+		voigt(cmat66,cmat3333.tensor,1);
 	}
 
 	else{
@@ -110,7 +110,7 @@ void readprops(std::string filename){
 			for(j=0;j<3;j++)
 				for(k=0;k<3;k++)
 					for(l=0;l<3;l++)
-						cmat3333[i][j][k][l]=lambda*identityR2[i][j]*identityR2[k][l]+2.0*mu*identityR4[i][j][k][l];
+						cmat3333.tensor[i][j][k][l]=lambda*identityR2[i][j]*identityR2[k][l]+2.0*mu*identityR4[i][j][k][l];
 
 	}
 	

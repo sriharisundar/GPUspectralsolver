@@ -71,9 +71,11 @@ int main(int argc, char *argv[])
 
 		err2mod=2*error;
 
+		findGammaHat(C0_3333);
+
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			cout<<"ITER:"<<iteration<<endl;
+			//cout<<"ITER:"<<iteration<<endl;
 
 			for(n=0;n<6;n++){
 				delta[k][j][i]=stress[k][j][i][n];
