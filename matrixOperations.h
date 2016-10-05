@@ -14,7 +14,8 @@ void change_basis(double CE2[6],double C2[3][3],double CE4[6][6],double C4[3][3]
 	iopt=1, Transforms second order matrix c2 into fourth order tensor c4 
 	iopt=2, c4 to c2  
 	iopt=3, transforms with inv.fact.
-	iopt=4, to go from 6x6 to 3x3x3x3 with aijkl antisymmetry */
+	iopt=4, to go from 6x6 to 3x3x3x3 with aijkl antisymmetry 
+*/
 void voigt(double C2[6][6], double C4[3][3][3][3], int iopt);
 
 /*  a --> transformation matrix
@@ -24,7 +25,8 @@ void voigt(double C2[6][6], double C4[3][3][3][3], int iopt);
 	all angles in degrees
 	Calculate the euler angles associated with the transformation
 	matrix a(i,j) if iopt=1 and viceversa if iopt=2
-	a(i,j) transforms from system sa to system ca.*/
+	a(i,j) transforms from system sa to system ca
+*/
 void transformationMatrix(double a[][3],double euler[3],int iopt);
 
 /*
@@ -47,10 +49,27 @@ void transformFourthOrderTensor(double aIn[3][3][3][3], double aOut[3][3][3][3],
 */
 void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3][3], int iopt);
 
+/*
+	c --> Output tensor
+	A --> input tensor 4th order
+	b --> input tensor 2nd order
+	m,n --> non repeated index numbers in right hand side
+	ex: If you want to do c_ij=A_ijkl:b_jl, then m=2, n=3
+*/
 void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m, int n);
 
 /*
-	Find norm of matrix (linearized).
+	Find symmetric part of a matrix
+*/
+void symmetric(double aIn[3][3], double aOut[3][3]);
+
+/*
+	Find antisymmetric part of a matrix
+*/
+void antisymmetric(double aIn[3][3], double aOut[3][3]);
+
+/*
+	Find norm of matrix (linearized)
 */
 double tnorm(double *a,int nrows, int ncols);
 
@@ -58,6 +77,6 @@ double tnorm(double *a,int nrows, int ncols);
 	Use LU decomposition to find the inverse of a matrix.
 	Currently implemented for 6x6 matrices only
 */
-int findInverse(double *in, int order);
+int findInverse(double *in, double det, int order);
 
 #endif

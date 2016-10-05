@@ -21,7 +21,7 @@ int grainID[N3][N2][N1],phaseID[N3][N2][N1];
 
 double strainbar[6],stressbar[6];
 
-double velgrad[N3][N2][N1][3][3],velgradim[N3][N2][N1][3][3];
+double ddefgrad[N3][N2][N1][3][3],ddefgradim[N3][N2][N1][3][3];
 
 double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
 

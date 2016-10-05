@@ -15,7 +15,7 @@ void readtexture(std::string filename){
 	int i,j,k,n,m,p;
 	int gid,pid;
 	double a[3][3];
-	double phi1,Phi,phi2,dummy;
+	double phi1,Phi,phi2,dummy,det=0;
 	fourthOrderTensor cvoxel3333;
 	double cvoxel66[6][6];
 	double aux6[6],aux33[3][3];
@@ -55,7 +55,7 @@ void readtexture(std::string filename){
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k][j][i][n][m];
-				findInverse((double *)saux,6);
+				findInverse((double *)saux,det,6);
 
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++){
@@ -65,7 +65,7 @@ void readtexture(std::string filename){
 						taux[n][m]=(i+1/(j+1))*(j+1/(i+1))+dummy;
 					}
 
-				findInverse((double *)taux,6);
+				findInverse((double *)taux,det,6);
 
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++){
@@ -121,7 +121,6 @@ void readinput(char filename[100]){
 	std::string textureFile,propsFile;
 	std::string line;
 	double aux66[6][6],aux3333[3][3][3][3];
-	int n1,n2,n3;
 	int i,j;
 
 
