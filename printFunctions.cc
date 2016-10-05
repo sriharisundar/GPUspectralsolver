@@ -14,14 +14,10 @@ void print2darray(double *a,int size){
 
 }
 
-void print2darray(double a[][6]){
-	int i,j;
-
-	for(i=0;i<6;i++){
-		for(j=0;j<6;j++)
-			std::cout<<std::setw(10)<<a[i][j]<<" ";
-		std::cout<<std::endl;
-	}	
+void print1darray(double *a,int size){
+	int i;
+	for(i=0;i<size;i++)
+		std::cout<<std::setw(10)<<a[i]<<" ";
 	std::cout<<std::endl;	
 
 }
@@ -31,6 +27,18 @@ void print2darray(double a[][3]){
 
 	for(i=0;i<3;i++){
 		for(j=0;j<3;j++)
+			std::cout<<std::setw(10)<<a[i][j]<<" ";
+		std::cout<<std::endl;
+	}	
+	std::cout<<std::endl;	
+
+}
+
+void print2darray(double a[][6]){
+	int i,j;
+
+	for(i=0;i<6;i++){
+		for(j=0;j<6;j++)
 			std::cout<<std::setw(10)<<a[i][j]<<" ";
 		std::cout<<std::endl;
 	}	

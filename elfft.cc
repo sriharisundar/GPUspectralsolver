@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 	double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
 	double err2mod;
 	double prodDim=n1*n2*n3;
+	double volumeVoxel=1.0/prodDim;
 	int iteration,step;
 
 	fftw_complex *out;
@@ -59,14 +60,13 @@ int main(int argc, char *argv[])
 					else{
 
 						for(m=0;m<6;m++)
-							stress[k][j][i][n]=cloc[k][j][i][n][m]*straintilde[k][j][i][m];
+							stress[k][j][i][n]=cloc[k][j][i][n][m]*(strainbar[m]+straintilde[k][j][i][m]);
 					}
-					stressbar[n]+=stress[k][j][i][n]*wgt;
+					stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 
-				}
-			}
+					}
+	}
 
-	
 	change_basis(stressbar,stressbar33,aux66,aux3333,1);
 	stressref=stressbar33[ictrl1][ictrl2];
 
@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			cout<<"ITER:"<<iteration<<endl;
+			cout<<"--------------------------------------------------------------"<<endl;
+			cout<<"ITERATION:"<<iteration<<endl;
 
 			//arrange data for in
 			//perform forward FFT
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 						for(i=0;i<N1;i++)
 							for(m=0;m<6;m++)
 								delta[k][j][i]-=C0_66[n][m]*straintilde[k][j][i][m];
-				
+
 				fftw_execute(plan_forward);
 				
 				for(k=0;k<N3;k++)
@@ -101,7 +102,8 @@ int main(int argc, char *argv[])
 						for(i=0;i<(N1/2+1);i++){
 							work[k][j][i][n]=out[k*N2*(N1/2+1)+j*(N1/2+1)+i][0];
 							workim[k][j][i][n]=out[k*N2*(N1/2+1)+j*(N1/2+1)+i][1];
-						}
+							//print1darray((double *)work[k][j][i],6);
+				}
 			}
 
 			//convert stress to tensorial form
@@ -148,8 +150,20 @@ int main(int argc, char *argv[])
 			}
 
 			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
-//			augmentLagrangian();
-			
+			augmentLagrangian();
+
+			for(k=0;k<N3;k++)
+				for(j=0;j<N2;j++)
+					for(i=0;i<N1;i++){
+						for(n=0;n<6;n++)
+							stressbar[n]=stress[k][j][i][n]*volumeVoxel;
+			}
+
+			change_basis(stressbar,stressbar33,aux66,aux3333,1);
+			stressref=stressbar33[ictrl1][ictrl2];
+
+            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 		}
 	}
 

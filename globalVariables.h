@@ -28,7 +28,6 @@ extern double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1]
 extern double work[N3][N2][N1/2+1][6],workim[N3][N2][N1/2+1][6];
 extern double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 extern fourthOrderTensor *gammaHat;
-extern double wgt;
 extern double stressref,strainref,errstress,errstrain,error;
 extern double RVEdim[3];
 extern double velgrad33[3][3];

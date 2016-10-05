@@ -10,6 +10,7 @@
 #include <vector>
 #include <iterator>
 #include <stdlib.h> //for atoi()
+
 void readtexture(std::string filename){
 
 	int i,j,k,n,m,p;
@@ -20,6 +21,8 @@ void readtexture(std::string filename){
 	double cvoxel66[6][6];
 	double aux6[6],aux33[3][3];
 	double saux[6][6],taux[6][6];
+	double prodDim=n1*n2*n3;
+	double volumeVoxel=1.0/prodDim;
 
 	std::string line;
 
@@ -42,7 +45,7 @@ void readtexture(std::string filename){
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
-				C0_66[n][m]+=cvoxel66[n][m]*wgt;
+				C0_66[n][m]+=cvoxel66[n][m]*volumeVoxel;
 			}
 	}
 
@@ -121,7 +124,7 @@ void readinput(char filename[100]){
 	std::string textureFile,propsFile;
 	std::string line;
 	double aux66[6][6],aux3333[3][3][3][3];
-	int i,j;
+	int i;
 
 
 	std::fstream maininputIn;
@@ -197,11 +200,8 @@ void readinput(char filename[100]){
 		velgrad33[i][2]=std::stod(tokens[2]);
 		}
 
-		for(i=0;i<3;i++)
-			for (j=0;j<3;j++){
-				straingradrate33[i][j]=0.5*(velgrad33[i][j]+velgrad33[j][i]);
-				rotationrate33[i][j]=0.5*(velgrad33[i][j]+velgrad33[j][i]);
-			}
+		symmetric(velgrad33,straingradrate33);
+		symmetric(velgrad33,rotationrate33);
 
 		for(i=0;i<3;i++)
 			IDstraingradrate[i]=straingradrate33[i][i];
@@ -213,7 +213,7 @@ void readinput(char filename[100]){
 		IDstraingradrate[5]=0;
 		if(velgrad33[0][1]==1 && velgrad33[1][0]==1)IDstraingradrate[5]=1;
 
-		change_basis(straingradrate6,straingradrate33,aux66,aux3333,2);
+		change_basis(strainbar,straingradrate33,aux66,aux3333,2);
 	}
 
 	// Read in control parameters, no idea what this does

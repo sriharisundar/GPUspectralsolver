@@ -322,55 +322,6 @@ void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m,
 				}
 }
 
-/*
-	Find symmetric part of a matrix
-*/
-void symmetric(double aIn[3][3], double aOut[3][3]){
-
-	for(int i=0; i<3;i++)
-		for(int j=0; j<3;j++)
-			aOut[i][j]=(aIn[i][j]+aOut[i][j])/2;
-
-}
-
-/*
-	Find antisymmetric part of a matrix
-*/
-void antisymmetric(double aIn[3][3], double aOut[3][3]){
-
-	for(int i=0; i<3;i++)
-		for(int j=0; j<3;j++)
-			aOut[i][j]=(aIn[i][j]-aOut[i][j])/2;
-
-}
-
-void forwardsub(double* a, int order, double b[]){
-	
-	int i,j;
-	double sum;
-
-	for(i=0;i<order;i++){
-		sum=0;
-		for(j=0;j<i;j++)
-			sum+=*((a+i*order)+j)*b[j];
-		b[i]=(b[i]-sum)*(*((a+i*order)+j));
-	}
-}
-
-void backwardsub(double* a, int order, double b[]){
-	
-	int i,j;
-	double sum;
-	
-	for(i=order-1;i>=0;i--){
-		sum=0;
-		for(j=order-1;j>i;j--)
-			sum+=*((a+i*order)+j)*b[j];
-		b[i]=(b[i]-sum)/(*((a+i*order)+j));
-	}
-}
-
-
 int findInverse(double* in, double det, int order){
 
 	int i,j;
@@ -392,6 +343,26 @@ int findInverse(double* in, double det, int order){
 
 
 	return 1;
+}
+
+/*
+	Find symmetric part of a matrix
+*/
+void symmetric(double aIn[3][3], double aOut[3][3]){
+
+	for(int i=0; i<3;i++)
+		for(int j=0; j<3;j++)
+			aOut[i][j]=0.5*(aIn[i][j]+aOut[i][j]);
 
 }
 
+/*
+	Find antisymmetric part of a matrix
+*/
+void antisymmetric(double aIn[3][3], double aOut[3][3]){
+
+	for(int i=0; i<3;i++)
+		for(int j=0; j<3;j++)
+			aOut[i][j]=0.5*(aIn[i][j]-aOut[i][j]);
+
+}

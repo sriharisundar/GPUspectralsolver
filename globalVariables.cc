@@ -41,8 +41,6 @@ double rotationrate33[3][3];
 
 double IDstraingradrate[6];
 
-double wgt=1.0/N1*N2*N3;
-
 double stressref,strainref,errstress,errstrain,error;
 
 int nsteps,itermax;

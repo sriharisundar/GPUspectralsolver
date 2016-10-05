@@ -7,8 +7,11 @@
 using namespace std;
 
 void augmentLagrangian(void){
+	
+	double prodDim=n1*n2*n3;
+	double volumeVoxel=1.0/prodDim;
+	double x[6],dg[6],edot[6],dsg[6],ddg[6];
 
-    double x[6],dg[6],edot[6],dsg[6],ddg[6];
     errstrain=errstress=0.0;
 
     int i,j,k,n,m;
@@ -19,6 +22,7 @@ void augmentLagrangian(void){
                 
                 for(n=0;n<6;n++)
                     dg[n]=strainbar[n]+straintilde[k][j][i][n];
+				//print1darray((double *)dg,6);
                 
                 for(n=0;n<6;n++){
                     x[n]=stress[k][j][i][n];
@@ -40,8 +44,8 @@ void augmentLagrangian(void){
                     stress[k][j][i][n]+=dsg[n];
                 }
 
-                errstrain+=tnorm((double *)ddg,6,1)*wgt;
-                errstress+=tnorm((double *)dsg,6,1)*wgt;
+                errstrain+=tnorm((double *)ddg,6,1)*volumeVoxel;
+                errstress+=tnorm((double *)dsg,6,1)*volumeVoxel;
 
         }        
 }
