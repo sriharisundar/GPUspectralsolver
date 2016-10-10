@@ -352,7 +352,7 @@ void symmetric(double aIn[3][3], double aOut[3][3]){
 
 	for(int i=0; i<3;i++)
 		for(int j=0; j<3;j++)
-			aOut[i][j]=0.5*(aIn[i][j]+aOut[i][j]);
+			aOut[i][j]=0.5*(aIn[i][j]+aIn[j][i]);
 
 }
 
@@ -363,6 +363,6 @@ void antisymmetric(double aIn[3][3], double aOut[3][3]){
 
 	for(int i=0; i<3;i++)
 		for(int j=0; j<3;j++)
-			aOut[i][j]=0.5*(aIn[i][j]-aOut[i][j]);
+			aOut[i][j]=0.5*(aIn[i][j]-aIn[j][i]);
 
 }

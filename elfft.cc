@@ -58,15 +58,22 @@ int main(int argc, char *argv[])
 					if(phaseID[k][j][i]==2)
 						stress[k][j][i][n]=0;
 					else{
-
+						stress[k][j][i][n]=0;
 						for(m=0;m<6;m++)
-							stress[k][j][i][n]=cloc[k][j][i][n][m]*(strainbar[m]+straintilde[k][j][i][m]);
+							stress[k][j][i][n]+=cloc[k][j][i][n][m]*(strainbar[m]);
 					}
 					stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
-
-					}
+				}
 	}
 
+			for(i=0;i<N1;i++)
+		for(j=0;j<N2;j++)
+	for(k=0;k<N3;k++){
+					cout<<"GrainID:"<<grainID[k][j][i]<<" "<<endl;
+					print2darray(cloc[k][j][i]);
+					print1darray(stress[k][j][i],6);}
+//
+	print1darray((double *) strainbar,6);
 	change_basis(stressbar,stressbar33,aux66,aux3333,1);
 	stressref=stressbar33[ictrl1][ictrl2];
 
@@ -116,6 +123,10 @@ int main(int argc, char *argv[])
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
 
+//						cout<<"Fourier point"<<i<<" "<<j<<" "<<k<<" "<<endl;
+//						print2darray(work33);
+//						print2darray(work33im);
+
 						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33,3,4);
 						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33im,3,4);
 			}
@@ -161,6 +172,8 @@ int main(int argc, char *argv[])
 
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
 			stressref=stressbar33[ictrl1][ictrl2];
+			//print1darray((double *)stressbar,6);
+			//print2darray(C0_66);
 
             cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
 			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;

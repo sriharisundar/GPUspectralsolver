@@ -100,6 +100,7 @@ void readprops(std::string filename){
 				propsIn>>cmat66[i][j];
 
 		voigt(cmat66,cmat3333.tensor,1);
+		print2darray(cmat66);
 	}
 
 	else{
