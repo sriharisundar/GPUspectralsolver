@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 //		for(j=0;j<N2;j++)
 //	for(k=0;k<N3;k++){
 //					cout<<"GrainID:"<<grainID[k][j][i]<<" "<<endl;
-//					print2darray(cloc[k][j][i]);
+////					print2darray(cloc[k][j][i]);
 //					print1darray(stress[k][j][i],6);}
 //
 //	print1darray((double *) strainbar,6);
@@ -95,16 +95,17 @@ int main(int argc, char *argv[])
 			cout<<"Forward FFT of polarization field"<<endl<<endl;
 			for(n=0;n<6;n++){
 				
-				delta[k][j][i]=stress[k][j][i][n];
-
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
-						for(i=0;i<N1;i++)
+						for(i=0;i<N1;i++){
+							delta[k][j][i]=stress[k][j][i][n];
 							for(m=0;m<6;m++)
 								delta[k][j][i]-=C0_66[n][m]*straintilde[k][j][i][m];
+						}
 
 				fftw_execute(plan_forward);
 				
+
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
 						for(i=0;i<(N1/2+1);i++){
@@ -124,7 +125,7 @@ int main(int argc, char *argv[])
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
 
-//						cout<<"Fourier point"<<i<<" "<<j<<" "<<k<<" "<<endl;
+//						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
 //						print2darray(work33);
 //						print2darray(work33im);
 
@@ -148,8 +149,10 @@ int main(int argc, char *argv[])
 
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
-							for(i=0;i<N1;i++)
+							for(i=0;i<N1;i++){
 								ddefgrad[k][j][i][m][n]=delta[k][j][i]/prodDim;
+							}
+
 			}
 
 			//get symmetric part of defgrad
@@ -157,9 +160,17 @@ int main(int argc, char *argv[])
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<N1;i++){
+//						print2darray(ddefgrad[k][j][i]);
 						symmetric(ddefgrad[k][j][i],aux33);
 						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
 			}
+
+			for(i=0;i<N1;i++)
+		for(j=0;j<N2;j++)
+	for(k=0;k<N3;k++){
+		print1darray(straintilde[k][j][i],6);
+	}
+
 
 			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
