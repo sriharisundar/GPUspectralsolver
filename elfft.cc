@@ -65,15 +65,16 @@ int main(int argc, char *argv[])
 					stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 				}
 	}
-
-			for(i=0;i<N1;i++)
-		for(j=0;j<N2;j++)
-	for(k=0;k<N3;k++){
-					cout<<"GrainID:"<<grainID[k][j][i]<<" "<<endl;
-					print2darray(cloc[k][j][i]);
-					print1darray(stress[k][j][i],6);}
 //
-	print1darray((double *) strainbar,6);
+//			for(i=0;i<N1;i++)
+//		for(j=0;j<N2;j++)
+//	for(k=0;k<N3;k++){
+//					cout<<"GrainID:"<<grainID[k][j][i]<<" "<<endl;
+//					print2darray(cloc[k][j][i]);
+//					print1darray(stress[k][j][i],6);}
+//
+//	print1darray((double *) strainbar,6);
+
 	change_basis(stressbar,stressbar33,aux66,aux3333,1);
 	stressref=stressbar33[ictrl1][ictrl2];
 
