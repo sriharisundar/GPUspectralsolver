@@ -23,6 +23,7 @@ void readtexture(std::string filename){
 	double saux[6][6],taux[6][6];
 	double prodDim=n1*n2*n3;
 	double volumeVoxel=1.0/prodDim;
+	double cmat66[6][6];
 
 	std::string line;
 
@@ -49,6 +50,9 @@ void readtexture(std::string filename){
 			}
 	}
 
+	voigt(cmat66,cmat3333.tensor,2);
+	print2darray(cmat66);
+	print2darray(C0_66);
 	change_basis(aux6,aux33,C0_66,C0_3333.tensor,3);
 
 	for(k=0;k<N3;k++)
@@ -58,6 +62,7 @@ void readtexture(std::string filename){
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k][j][i][n][m];
+
 				findInverse((double *)saux,det,6);
 
 				for(n=0;n<6;n++)
@@ -100,7 +105,7 @@ void readprops(std::string filename){
 				propsIn>>cmat66[i][j];
 
 		voigt(cmat66,cmat3333.tensor,1);
-		print2darray(cmat66);
+//		print2darray(cmat66);
 	}
 
 	else{

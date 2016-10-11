@@ -22,7 +22,6 @@ void augmentLagrangian(void){
                 
                 for(n=0;n<6;n++)
                     dg[n]=strainbar[n]+straintilde[k][j][i][n];
-				//print1darray((double *)dg,6);
                 
                 for(n=0;n<6;n++){
                     x[n]=stress[k][j][i][n];

@@ -88,12 +88,12 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			cout<<"--------------------------------------------------------------"<<endl;
-			cout<<"ITERATION:"<<iteration<<endl;
+			//cout<<"--------------------------------------------------------------"<<endl;
+			//cout<<"ITERATION:"<<iteration<<endl;
 
 			//arrange data for in
 			//perform forward FFT
-			cout<<"Forward FFT of polarization field"<<endl<<endl;
+			//cout<<"Forward FFT of polarization field"<<endl<<endl;
 			for(n=0;n<6;n++){
 				
 				for(k=0;k<N3;k++)
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
 			//convert stress to tensorial form
 			//multiply with gamma operator
-			cout<<"Gamma convolution"<<endl<<endl;
+			//cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<(N1);i++){
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
 
-//						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
+////						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
 //						print2darray(work33);
 //						print2darray(work33im);
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 			}
 			
 			//arrange data for out
-			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+			//cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
 							for(i=0;i<N1;i++){
-//								cout<<delta[k][j][i]<<endl;
+////								cout<<delta[k][j][i]<<endl;
 								ddefgrad[k][j][i][m][n]=in[k*N2*(N1)+j*(N1)+i][0]/prodDim;
 							}
 
@@ -177,23 +177,25 @@ int main(int argc, char *argv[])
 	}
 
 
-			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+			//cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
+			for(n=0;n<6;n++)
+				stressbar[n]=0;
+
 
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
-					for(i=0;i<N1;i++){
+					for(i=0;i<N1;i++)
 						for(n=0;n<6;n++)
-							stressbar[n]=stress[k][j][i][n]*volumeVoxel;
-			}
+							stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
 			stressref=stressbar33[ictrl1][ictrl2];
 			//print1darray((double *)stressbar,6);
 			//print2darray(C0_66);
 
-            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+            //cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			//cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 		}
 	}
 
