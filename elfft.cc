@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	double volumeVoxel=1.0/prodDim;
 	int iteration,step;
 
+	fftw_complex *in;
 	fftw_complex *out;
 	fftw_plan plan_backward;
 	fftw_plan plan_forward;
@@ -30,11 +31,11 @@ int main(int argc, char *argv[])
 	initglobal();
 	readinput(argv[1]);
 
-	//out = new fftw_complex [N1*N2*(N3/2+1)];
-	out=(fftw_complex *) *fftw_alloc_complex(N3*N2*(N1/2+1));
+	in=(fftw_complex *) *fftw_alloc_complex(N3*N2*(N1));
+	out=(fftw_complex *) *fftw_alloc_complex(N3*N2*(N1));
 
-	plan_forward=fftw_plan_dft_r2c_3d(N3,N2,N1,(double*) delta,out,FFTW_ESTIMATE);
-	plan_backward=fftw_plan_dft_c2r_3d ( N3, N2, N1, out, (double*) delta, FFTW_ESTIMATE );	
+	plan_forward=fftw_plan_dft_3d(N3,N2,N1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_3d ( N3, N2, N1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );	
 
 	cout<<"Output file:"<<outputFile<<endl;
 	fstream fieldsOut;
@@ -98,9 +99,10 @@ int main(int argc, char *argv[])
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
 						for(i=0;i<N1;i++){
-							delta[k][j][i]=stress[k][j][i][n];
+							in[k*N2*N1+j*N1+i][0]=stress[k][j][i][n];
+							in[k*N2*N1+j*N1+i][1]=0;
 							for(m=0;m<6;m++)
-								delta[k][j][i]-=C0_66[n][m]*straintilde[k][j][i][m];
+								in[k*N2*N1+j*N1+i][0]-=C0_66[n][m]*straintilde[k][j][i][m];
 						}
 
 				fftw_execute(plan_forward);
@@ -108,9 +110,9 @@ int main(int argc, char *argv[])
 
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
-						for(i=0;i<(N1/2+1);i++){
-							work[k][j][i][n]=out[k*N2*(N1/2+1)+j*(N1/2+1)+i][0];
-							workim[k][j][i][n]=out[k*N2*(N1/2+1)+j*(N1/2+1)+i][1];
+						for(i=0;i<(N1);i++){
+							work[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][0];
+							workim[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][1];
 							//print1darray((double *)work[k][j][i],6);
 				}
 			}
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
 			cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
-					for(i=0;i<(N1/2+1);i++){
+					for(i=0;i<(N1);i++){
 
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
@@ -129,8 +131,10 @@ int main(int argc, char *argv[])
 //						print2darray(work33);
 //						print2darray(work33im);
 
-						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33,3,4);
-						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33im,3,4);
+						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
+						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+//						print2darray(ddefgrad[k][j][i]);
+//						print2darray(ddefgradim[k][j][i]);
 			}
 			
 			//arrange data for out
@@ -140,9 +144,9 @@ int main(int argc, char *argv[])
 
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
-							for(i=0;i<(N1/2+1);i++){
-								out[k*N2*(N1/2+1)+j*(N1/2+1)+i][0]=ddefgrad[k][j][i][m][n];
-								out[k*N2*(N1/2+1)+j*(N1/2+1)+i][1]=ddefgradim[k][j][i][m][n];
+							for(i=0;i<(N1);i++){
+								out[k*N2*(N1)+j*(N1)+i][0]=ddefgrad[k][j][i][m][n];
+								out[k*N2*(N1)+j*(N1)+i][1]=ddefgradim[k][j][i][m][n];
 					}
 
 					fftw_execute(plan_backward);
@@ -150,7 +154,8 @@ int main(int argc, char *argv[])
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
 							for(i=0;i<N1;i++){
-								ddefgrad[k][j][i][m][n]=delta[k][j][i]/prodDim;
+//								cout<<delta[k][j][i]<<endl;
+								ddefgrad[k][j][i][m][n]=in[k*N2*(N1)+j*(N1)+i][0]/prodDim;
 							}
 
 			}
@@ -168,7 +173,7 @@ int main(int argc, char *argv[])
 			for(i=0;i<N1;i++)
 		for(j=0;j<N2;j++)
 	for(k=0;k<N3;k++){
-		print1darray(straintilde[k][j][i],6);
+//		print1darray(straintilde[k][j][i],6);
 	}
 
 
