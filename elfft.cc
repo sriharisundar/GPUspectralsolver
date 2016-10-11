@@ -174,12 +174,15 @@ int main(int argc, char *argv[])
 
 			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
+			
+			for(n=0;n<6;n++)
+				stressbar[n]=0;
 
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<N1;i++){
 						for(n=0;n<6;n++)
-							stressbar[n]=stress[k][j][i][n]*volumeVoxel;
+							stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 			}
 
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
