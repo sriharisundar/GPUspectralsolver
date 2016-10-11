@@ -165,11 +165,11 @@ int main(int argc, char *argv[])
 						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
 			}
 
-			for(i=0;i<N1;i++)
-		for(j=0;j<N2;j++)
-	for(k=0;k<N3;k++){
-		print1darray(straintilde[k][j][i],6);
-	}
+//			for(i=0;i<N1;i++)
+//		for(j=0;j<N2;j++)
+//	for(k=0;k<N3;k++){
+//		print1darray(straintilde[k][j][i],6);
+//	}
 
 
 			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;

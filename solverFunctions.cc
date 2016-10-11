@@ -63,7 +63,7 @@ void findGammaHat(fourthOrderTensor Cref){
         if(k>N3/2) fourierPoint[2]=(k-n3)/(n3*RVEdim[2]);
         for(j=0;j<n2;j++){
             fourierPoint[1]=j/(n2*RVEdim[1]);
-            if(j>n2/2) fourierPoint[2]=(j-n2)/(n2*RVEdim[1]);
+            if(j>n2/2) fourierPoint[1]=(j-n2)/(n2*RVEdim[1]);
             for(i=0;i<N1/2+1;i++){
                 fourierPoint[0]=i/(n1*RVEdim[0]);
                 normPoint=tnorm((double *)fourierPoint,3,1);
