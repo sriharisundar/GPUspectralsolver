@@ -8,9 +8,9 @@ struct fourthOrderTensor{
 #ifndef global_variables
 #define global_variables
 
-#define N1 4
-#define N2 4
-#define N3 4
+#define N1 32
+#define N2 32
+#define N3 32
 
 //extern int n1,n2,n3;
 

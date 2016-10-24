@@ -40,15 +40,12 @@ void readtexture(std::string filename){
 		transformationMatrix(a,euler[k-1][j-1][i-1],2);
 		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
 		
-		print4darray(cvoxel3333.tensor);
-
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
 				C0_66[n][m]=C0_66[n][m]+cvoxel66[n][m]*volumeVoxel;
-				C0_66[n][m]+=cvoxel66[n][m]/64.0;
 			}
 	}
 
@@ -60,21 +57,25 @@ void readtexture(std::string filename){
 		for(j=0;j<N2;j++)
 			for(i=0;i<N1;i++){
 				
+
 				count++;
-				std::cout<<count;			
+//				std::cout<<count;			
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k][j][i][n][m];
 
+
 				findInverse((double *)saux,det,6);
+				//print2darray(cloc[k][j][i]);							
 
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++){
 						dummy=0.0;
 						for(p=0;p<6;p++)
 							dummy+=C0_66[n][p]*saux[p][m];
-						taux[n][m]=(i+1/(j+1))*(j+1/(i+1))+dummy;
+						taux[n][m]=((n+1)/(m+1))*((m+1)/(n+1))+dummy;
 					}
+				//print2darray(taux);				
 
 				findInverse((double *)taux,det,6);
 
@@ -85,9 +86,11 @@ void readtexture(std::string filename){
 							dummy+=saux[n][p]*taux[p][m];
 						fsloc[k][j][i][n][m]=dummy;
 					}
-				
-				print2darray(fsloc[k][j][i]);
+//				print2darray(fsloc[k][j][i]);							
+
 		}
+
+//	print2darray(C0_66);
 
 }
 

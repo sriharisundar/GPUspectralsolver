@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
 	int i,j,k,n,m;
 	double stressbar33[3][3],work33[3][3],work33im[3][3];
 	double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
+	double strain[6],stress6[6];
+	double strainout[3][3],stressout[3][3];
 	double err2mod;
 	double prodDim=n1*n2*n3;
 	double volumeVoxel=1.0/prodDim;
@@ -88,12 +90,12 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			//cout<<"--------------------------------------------------------------"<<endl;
-			//cout<<"ITERATION:"<<iteration<<endl;
+			cout<<"--------------------------------------------------------------"<<endl;
+			cout<<"ITERATION:"<<iteration<<endl;
 
 			//arrange data for in
 			//perform forward FFT
-			//cout<<"Forward FFT of polarization field"<<endl<<endl;
+			cout<<"Forward FFT of polarization field"<<endl<<endl;
 			for(n=0;n<6;n++){
 				
 				for(k=0;k<N3;k++)
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
 
 			//convert stress to tensorial form
 			//multiply with gamma operator
-			//cout<<"Gamma convolution"<<endl<<endl;
+			cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<(N1);i++){
@@ -138,7 +140,7 @@ int main(int argc, char *argv[])
 			}
 			
 			//arrange data for out
-			//cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
 
@@ -170,14 +172,8 @@ int main(int argc, char *argv[])
 						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
 			}
 
-			for(i=0;i<N1;i++)
-		for(j=0;j<N2;j++)
-	for(k=0;k<N3;k++){
-//		print1darray(straintilde[k][j][i],6);
-	}
 
-
-			//cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
 			for(n=0;n<6;n++)
 				stressbar[n]=0;
@@ -194,9 +190,38 @@ int main(int argc, char *argv[])
 			//print1darray((double *)stressbar,6);
 			//print2darray(C0_66);
 
-            //cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-			//cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 		}
+	}
+
+	for(i=0;i<N1;i++)
+		for(j=0;j<N2;j++)
+			for(k=0;k<N3;k++){
+				
+				for(m=0;m<6;m++){
+					strain[m]=strainbar[m]+straintilde[k][j][i][m];
+					stress6[m]=stress[k][j][i][m];
+				}
+
+				change_basis(strain,strainout,aux66,aux3333,1);
+				change_basis(stress6,stressout,aux66,aux3333,1);
+
+				fieldsOut<<strainout[0][0]<<" ";
+				fieldsOut<<strainout[1][1]<<" ";
+				fieldsOut<<strainout[2][2]<<" ";
+				fieldsOut<<strainout[2][3]<<" ";
+				fieldsOut<<strainout[1][3]<<" ";
+				fieldsOut<<strainout[1][2]<<" ";
+
+				fieldsOut<<stressout[0][0]<<" ";
+				fieldsOut<<stressout[1][1]<<" ";
+				fieldsOut<<stressout[2][2]<<" ";
+				fieldsOut<<stressout[2][3]<<" ";
+				fieldsOut<<stressout[1][3]<<" ";
+				fieldsOut<<stressout[1][2]<<" ";
+
+				fieldsOut<<endl;
 	}
 
 	fftw_free(out);
