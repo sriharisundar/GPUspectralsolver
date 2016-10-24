@@ -13,7 +13,7 @@
 
 void readtexture(std::string filename){
 
-	int i,j,k,n,m,p;
+	int i,j,k,n,m,p,count;
 	int gid,pid;
 	double a[3][3];
 	double phi1,Phi,phi2,dummy,det=0;
@@ -23,14 +23,13 @@ void readtexture(std::string filename){
 	double saux[6][6],taux[6][6];
 	double prodDim=n1*n2*n3;
 	double volumeVoxel=1.0/prodDim;
-	double cmat66[6][6];
 
 	std::string line;
 
 	std::fstream textureIn;
 	textureIn.open(filename.c_str(), std::ios::in);
 
-	while(!textureIn.eof()){
+	for(count=0;count<prodDim;count++){
 		textureIn>>phi1>>Phi>>phi2>>i>>j>>k>>gid>>pid;
 		euler[k-1][j-1][i-1][0]=phi1;
 		euler[k-1][j-1][i-1][1]=Phi;
@@ -40,25 +39,26 @@ void readtexture(std::string filename){
 
 		transformationMatrix(a,euler[k-1][j-1][i-1],2);
 		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
-	
+		
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
-				C0_66[n][m]+=cvoxel66[n][m]*volumeVoxel;
+				C0_66[n][m]=C0_66[n][m]+cvoxel66[n][m]*volumeVoxel;
 			}
 	}
 
-	voigt(cmat66,cmat3333.tensor,2);
-	print2darray(cmat66);
-	print2darray(C0_66);
 	change_basis(aux6,aux33,C0_66,C0_3333.tensor,3);
+
+	count=0;
 
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
 			for(i=0;i<N1;i++){
 				
+				count++;
+				std::cout<<count;			
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k][j][i][n][m];
@@ -82,6 +82,8 @@ void readtexture(std::string filename){
 							dummy+=saux[n][p]*taux[p][m];
 						fsloc[k][j][i][n][m]=dummy;
 					}
+				
+				print2darray(fsloc[k][j][i]);
 		}
 
 }
@@ -105,7 +107,6 @@ void readprops(std::string filename){
 				propsIn>>cmat66[i][j];
 
 		voigt(cmat66,cmat3333.tensor,1);
-//		print2darray(cmat66);
 	}
 
 	else{
