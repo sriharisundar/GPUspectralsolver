@@ -40,21 +40,15 @@ void readtexture(std::string filename){
 		transformationMatrix(a,euler[k-1][j-1][i-1],2);
 		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
 		
-<<<<<<< HEAD
-=======
 		print4darray(cvoxel3333.tensor);
 
->>>>>>> a01848c4f4bd71787fb19a4860ec11d72c35b61b
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
 				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
-<<<<<<< HEAD
 				C0_66[n][m]=C0_66[n][m]+cvoxel66[n][m]*volumeVoxel;
-=======
 				C0_66[n][m]+=cvoxel66[n][m]/64.0;
->>>>>>> a01848c4f4bd71787fb19a4860ec11d72c35b61b
 			}
 	}
 
