@@ -38,6 +38,7 @@ void readtexture(std::string filename){
 		phaseID[k-1][j-1][i-1]=pid;
 
 		transformationMatrix(a,euler[k-1][j-1][i-1],2);
+		//print2darray(a);
 		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
 		
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
@@ -86,7 +87,7 @@ void readtexture(std::string filename){
 							dummy+=saux[n][p]*taux[p][m];
 						fsloc[k][j][i][n][m]=dummy;
 					}
-//				print2darray(fsloc[k][j][i]);							
+				//print2darray(fsloc[k][j][i]);							
 
 		}
 

@@ -2,11 +2,12 @@
 #include <iostream>
 #include <iomanip>
 
+
 void print2darray(double *a,int size){
 	int i,j;
 	for(i=0;i<size;i++){
 		for(j=0;j<size;j++){
-			std::cout<<std::setw(10)<<*((a+i*size)+j)<<" ";
+			std::cout<<std::setprecision(4)<<std::setw(10)<<*((a+i*size)+j)<<" ";
 		}
 		std::cout<<std::endl;
 	}	
@@ -69,7 +70,7 @@ void print4darray(double a[3][3][3][3]){
 		for(k=0;k<3;k++){
 			for(j=0;j<3;j++){
 				for(l=0;l<3;l++)
-					std::cout<<std::setw(10)<<a[i][j][k][l]<<" ";
+					std::cout<<std::setprecision(10)<<std::setw(10)<<a[i][j][k][l]<<" ";
 				std::cout<<"\t \t";
 			}
 			std::cout<<std::endl;

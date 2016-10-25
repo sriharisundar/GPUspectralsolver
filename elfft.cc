@@ -90,12 +90,12 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			cout<<"--------------------------------------------------------------"<<endl;
-			cout<<"ITERATION:"<<iteration<<endl;
+			//debugssh cout<<"--------------------------------------------------------------"<<endl;
+			//debugssh cout<<"ITERATION:"<<iteration<<endl;
 
 			//arrange data for in
 			//perform forward FFT
-			cout<<"Forward FFT of polarization field"<<endl<<endl;
+			//debugssh cout<<"Forward FFT of polarization field"<<endl<<endl;
 			for(n=0;n<6;n++){
 				
 				for(k=0;k<N3;k++)
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
 			//convert stress to tensorial form
 			//multiply with gamma operator
-			cout<<"Gamma convolution"<<endl<<endl;
+			//debugssh cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<(N1);i++){
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 			}
 			
 			//arrange data for out
-			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+			//debugssh cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 			}
 
 
-			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+			//debugssh cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
 			for(n=0;n<6;n++)
 				stressbar[n]=0;
@@ -190,8 +190,8 @@ int main(int argc, char *argv[])
 			//print1darray((double *)stressbar,6);
 			//print2darray(C0_66);
 
-            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+            //debugssh cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			//debugssh cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 		}
 	}
 
