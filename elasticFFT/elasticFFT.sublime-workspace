@@ -1,0 +1,1256 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"c",
+				"cvoxel66"
+			],
+			[
+				"cl",
+				"cloc"
+			],
+			[
+				"aux",
+				"aux33"
+			],
+			[
+				"ch",
+				"change_basis"
+			],
+			[
+				"cv",
+				"cvoxel66"
+			],
+			[
+				"cvo",
+				"cvoxel66"
+			],
+			[
+				"a",
+				"aux33"
+			],
+			[
+				"cmat",
+				"cmat33"
+			],
+			[
+				"ma",
+				"matrixOperations.h"
+			],
+			[
+				"err",
+				"errs"
+			],
+			[
+				"inc",
+				"inc	#include \"…\""
+			],
+			[
+				"cm",
+				"cmat33"
+			],
+			[
+				"glo",
+				"globalVariables.h"
+			],
+			[
+				"st",
+				"std"
+			],
+			[
+				"b",
+				"basis"
+			],
+			[
+				"iden",
+				"identityR4"
+			],
+			[
+				"prin",
+				"printFunctions.h"
+			],
+			[
+				"in",
+				"identityR2"
+			],
+			[
+				"p",
+				"p"
+			],
+			[
+				"ide",
+				"identityR2"
+			],
+			[
+				"m",
+				"matrix_operations"
+			],
+			[
+				"main",
+				"maininputIn"
+			],
+			[
+				"read",
+				"readinput"
+			],
+			[
+				"xp",
+				"xpart1"
+			],
+			[
+				"nt",
+				"ntot2"
+			],
+			[
+				"x",
+				"xpart2"
+			],
+			[
+				"xpa",
+				"xpart2"
+			],
+			[
+				"wce",
+				"wcell-wmat"
+			],
+			[
+				"for",
+				"forbidden_dist"
+			],
+			[
+				"nn",
+				"nnuc"
+			],
+			[
+				"sd",
+				"sdis"
+			],
+			[
+				"nd",
+				"ndis"
+			],
+			[
+				"n",
+				"n"
+			],
+			[
+				"ta",
+				"tau_obs"
+			],
+			[
+				"no",
+				"notot"
+			],
+			[
+				"to",
+				"tauo"
+			],
+			[
+				"q",
+				"qsml"
+			],
+			[
+				"tau",
+				"tau_pinning"
+			],
+			[
+				"is",
+				"islp"
+			],
+			[
+				"not",
+				"notot"
+			],
+			[
+				"sl",
+				"slopeslip"
+			],
+			[
+				"slop",
+				"slopeslip"
+			],
+			[
+				"hpart",
+				"hpart"
+			],
+			[
+				"yp",
+				"ypart2"
+			],
+			[
+				"qt",
+				"qtwo"
+			],
+			[
+				"xpar",
+				"xpart2"
+			],
+			[
+				"h",
+				"hpart"
+			],
+			[
+				"end",
+				"endif"
+			],
+			[
+				"co",
+				"cos〔function〕"
+			],
+			[
+				"0",
+				"001"
+			],
+			[
+				"node",
+				"nodes"
+			],
+			[
+				"nf",
+				"nfixed"
+			],
+			[
+				"node_f",
+				"nodes_fixed"
+			],
+			[
+				"nodes_f",
+				"nodes_fixed"
+			],
+			[
+				"nodes",
+				"nodes_disp"
+			],
+			[
+				"num",
+				"num"
+			],
+			[
+				"C",
+				"C"
+			],
+			[
+				"f",
+				"f"
+			],
+			[
+				"ele",
+				"elements"
+			],
+			[
+				"e",
+				"elements"
+			],
+			[
+				"E",
+				"END"
+			],
+			[
+				"K",
+				"Kele"
+			],
+			[
+				"nod",
+				"nodenum"
+			],
+			[
+				"element",
+				"elements"
+			],
+			[
+				"el",
+				"element"
+			],
+			[
+				"K_I",
+				"K_INITIALISE_COORDS"
+			],
+			[
+				"n1",
+				"node1"
+			],
+			[
+				"dim",
+				"DIMENSION"
+			],
+			[
+				"me",
+				"MODULE"
+			],
+			[
+				"I",
+				"I"
+			],
+			[
+				"B",
+				"BeautifulSoup"
+			],
+			[
+				"ra",
+				"raw_input"
+			],
+			[
+				"fun",
+				"func2_value"
+			],
+			[
+				"fu",
+				"func1_value"
+			],
+			[
+				"val",
+				"val"
+			],
+			[
+				"r",
+				"root_1by3"
+			],
+			[
+				"int",
+				"integral_secondorder"
+			],
+			[
+				"po",
+				"point"
+			],
+			[
+				"geom",
+				"geomoutput"
+			],
+			[
+				"con",
+				"confoutput"
+			],
+			[
+				"geo",
+				"geomoutput"
+			],
+			[
+				"def",
+				"def	Function"
+			],
+			[
+				"latt",
+				"lattice_pts"
+			],
+			[
+				"file",
+				"filename"
+			],
+			[
+				"as",
+				"asarray"
+			],
+			[
+				"i",
+				"i"
+			],
+			[
+				"mises",
+				"misesstress_increment"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "elfft.for",
+			"settings":
+			{
+				"buffer_size": 26953,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "elfft.dim",
+			"settings":
+			{
+				"buffer_size": 974,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/txfft",
+			"settings":
+			{
+				"buffer_size": 1835007,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/input",
+			"settings":
+			{
+				"buffer_size": 942,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/elfft.cc",
+			"settings":
+			{
+				"buffer_size": 279,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/readInput.cc",
+			"settings":
+			{
+				"buffer_size": 2885,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/globalVariables.h",
+			"settings":
+			{
+				"buffer_size": 675,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/matrixOperations.cc",
+			"settings":
+			{
+				"buffer_size": 7890,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/solverFunctions.cc",
+			"settings":
+			{
+				"buffer_size": 799,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/printFunctions.cc",
+			"settings":
+			{
+				"buffer_size": 1174,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/data2/srihari/DDP/cpp/printFunctions.h",
+			"settings":
+			{
+				"buffer_size": 241,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"ssfo",
+				"Set Syntax: Fortran (Fixed Form)"
+			],
+			[
+				"packa",
+				"Package Control: Remove Package"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"sspy",
+				"Set Syntax: Python"
+			],
+			[
+				"ssc",
+				"Set Syntax: C"
+			],
+			[
+				"ssp",
+				"Set Syntax: Python"
+			],
+			[
+				"pa",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 114.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/srihari/storage/DDP/elasticFFT"
+	],
+	"file_history":
+	[
+		"/home/srihari/storage/DDP/elasticFFT/cpp/input",
+		"/home/srihari/storage/DDP/elasticFFT/txfft",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/elast.dat",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/printFunctions.h",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/printFunctions.cc",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/matrixOperations.h",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/matrixOperations.cc",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/globalVariables.h",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/globalVariables.cc",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/readInput.h",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/solverFunctions.cc",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/solverFunctions.h",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/elfft.cc",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/readInput.cc",
+		"/data2/srihari/DDP/elasticFFT/cpp/CBLAS/examples/Makefile",
+		"/data2/srihari/DDP/elasticFFT/cpp/CBLAS/examples/cblas_example1.c",
+		"/data2/srihari/DDP/elasticFFT/cpp/tnt_126/tnt_array2d_utils.h",
+		"/data2/srihari/DDP/elasticFFT/cpp/tnt_126/tnt_array2d.h",
+		"/data2/srihari/DDP/elasticFFT/cpp/tnt_126/tnt_math_utils.h",
+		"/data2/srihari/DDP/elasticFFT/fields.out",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/Makefile",
+		"/home/srihari/storage/DDP/elasticFFT/elfft.dim",
+		"/home/srihari/storage/DDP/elasticFFT/elast.dat",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/srihari.m",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_zero_euler_notavg.txt",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_zero_euler_avg.txt",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_decreasing_euler_notavg.txt",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_increasing_euler_avg.txt",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_increasing_euler_notavg.txt",
+		"/data2/srihari/micromechFields/Summer2016/RVE1/analysis/tension/eulerfiles/tension_decreasing_euler_avg.txt",
+		"/home/srihari/storage/DDP/elasticFFT/cpp/elfft.in",
+		"/home/srihari/storage/DDP/elasticFFT/elfft.in",
+		"/var/tmp/kdecache-hari/krun/19576_0_plots.ipynb",
+		"/e-drive/acads/DDP/elasticFFT/cpp/readInput.cpp",
+		"/e-drive/acads/DDP/elasticFFT/readInput.cpp",
+		"/e-drive/Projects/EVPFFT/64cube",
+		"/e-drive/Projects/EVPFFT/16cube",
+		"/home/hari/lammps-10Aug15/potentials/SiC.meam",
+		"/home/hari/Downloads/report/MicroMechDDProject.tex",
+		"/home/hari/Downloads/mesh1.py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/diff_morph/mesh_60.0/comp.inp",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/diff_morph/mesh_60.0/mesh1.py",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/comp.inp",
+		"/e-drive/acads/sem_7/multiscale_modelling/H_Zr_diffusion/rand.tex",
+		"/e-drive/acads/sem_7/multiscale_modelling/H_Zr_diffusion/rand_1.tex",
+		"/home/hari/Downloads/mesh1 (1).py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_nuc.py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_obs.py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_boundary.py",
+		"/e-drive/acads/sem_8/mechMetMicro/endsem/endsem_1.py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_file.py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_file (2).py",
+		"/e-drive/acads/sem_8/microMech/dislocation_files/read_file (1).py",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/genfcc.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/params.f90",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/Instructions.txt",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/ProblemStatement.txt",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/rdfcc.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/mesh.dat",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/lusol/lusol1.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/try_newmesh/mesh.dat",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/trial/disl_particle.in",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/debug/init.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/disl_particle.in",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/Makefile",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/femt.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/genfcc.f",
+		"/home/hari/Downloads/pf.m",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/stress.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/DDstruct_disp.f90",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/dislp.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/writemesh.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/global.h",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/mesh.py",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/nudisl.f",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/xtrapl.f",
+		"/home/hari/Downloads/chrome-extensions-master/new-tab/README.md",
+		"/home/hari/Downloads/chrome-extensions-master/new-tab/new-tab.css",
+		"/home/hari/compresspdf",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/disl2.in",
+		"/e-drive/acads/sem_8/microMech/MicroMechanics/code/example/comp_backup.inp",
+		"/e-drive/Projects/micromechFields/-",
+		"/e-drive/CV,Resume/Research CV/res.cls",
+		"/e-drive/CV,Resume/IITMLatextResume-master/Srihari_charpak.tex",
+		"/e-drive/CV,Resume/Research CV/Srihari_march2016.tex",
+		"/home/hari/Downloads/DAMASK/code/lattice.f90",
+		"/e-drive/acads/sem_8/mechMetMicro/Assgn2/problem2.py",
+		"/e-drive/acads/sem_8/mechMetMicro/Assgn2/problem1.py",
+		"/e-drive/acads/sem_8/mechMetMicro/Assgn3/FK_sineSubstrate.py",
+		"/home/hari/Downloads/abstract_anand.txt",
+		"/e-drive/acads/sem_8/mechMetMicro/Assgn2/problem2.pdf",
+		"/e-drive/GSoC/sympy/examples/beginner/differentiation.py",
+		"/e-drive/GSoC/sympy/sympy/tensor/index_methods.py",
+		"/home/hari/damask_install/petscinstallcommand",
+		"/home/hari/damask_install/petscvimp",
+		"/d-drive/share/Mr. Robot/Mr.Robot.S01E09.HDTV.x264-DEFiNE.srt",
+		"/e-drive/acads/sem_7/textures/seminar/report.tex",
+		"/d-drive/share/Don Jon (2013) RC BluRay x264.srt",
+		"/e-drive/CV,Resume/IITMLatextResume-master/Srihari_charpak.log",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/functions.f90",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/platehole_3.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/main.f90",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/platehole_2.out",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/library/main/fsparv.f03",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/library/main/fkdiag.f03",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/library/main/num_to_g.f03",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/1ele.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/2ele.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/4ele.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/abaqus/Job-1.inp",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/abaqus/Job-2.inp",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/abaqus/Job-3.inp",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/platehole.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/platehole_2.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/platehole_3.out",
+		"/e-drive/SGP/UEL/uel_doc_Jul2015/uel_doc_Jul2015.tex",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/abaqus/Job-3.sta",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/debug",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/4ele.out",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/element.f",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/something",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/out",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/1ele.out",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/mesh2.in",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/README.md",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/element.in",
+		"/home/hari/5th_ed/source/library/main/invert.f03",
+		"/e-drive/acads/sem_7/multiscale_modelling/FEM_MultiscaleModeling/mesh.in"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"setw",
+			"minv",
+			"tnorm",
+			"tmismatch",
+			"dsim",
+			"taux",
+			"saux",
+			"int",
+			"n",
+			"cmat",
+			"tnorm",
+			"augm",
+			"k",
+			"sg",
+			"x",
+			"k",
+			"augm",
+			"RSQ",
+			"3",
+			"2",
+			"1",
+			"B",
+			"dbar",
+			"WGT",
+			"wgt",
+			"1",
+			"endl",
+			"cout",
+			"ios",
+			"endl",
+			"6",
+			"using",
+			"int",
+			"dde",
+			"(",
+			",",
+			"fact",
+			"[3]",
+			"[2]",
+			"[1]",
+			"1",
+			"th",
+			"ph",
+			"tm",
+			"ph",
+			"atan2",
+			"tm",
+			"ph",
+			"seuler[2]",
+			"th",
+			"a",
+			"J",
+			"j",
+			"J",
+			"I",
+			"i",
+			"I",
+			"3",
+			"2",
+			"1",
+			"matrix",
+			"[",
+			"inputFile",
+			"prosa",
+			"FFT",
+			"fft",
+			"xit('mvdisl',2)",
+			"xit",
+			"mvdisl",
+			"inclusion",
+			"100",
+			"notot",
+			"print",
+			"write(6,",
+			"unit=15",
+			"xmu",
+			"xnu",
+			"icon",
+			".and.",
+			"and",
+			"i+",
+			"i+1",
+			"i+2",
+			"i+",
+			"hmat",
+			"hpart",
+			"wmat",
+			"hmat",
+			"i+1",
+			"256",
+			"ofile",
+			"nslp",
+			"notot",
+			"2583",
+			"35",
+			"39",
+			"38",
+			"x0",
+			"21",
+			"extend",
+			"ntot",
+			"locphi",
+			"notot",
+			"sobs",
+			"21",
+			"nobs",
+			"t_FR",
+			"tau",
+			"tauo",
+			"mxnobs",
+			"tau_obs",
+			"179",
+			"+1+1",
+			"1051",
+			"sinphi",
+			"qfor",
+			"(i",
+			"i)",
+			"i",
+			"xnu",
+			"nu",
+			"i",
+			"nobs",
+			"rgauss",
+			"tau_",
+			"tauobs",
+			"tauo",
+			"phisys"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"std::endl",
+			"\\%",
+			"2",
+			"1",
+			"0",
+			"sublime-text"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "elfft.for",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 26953,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								369,
+								369
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Fortran/grammars/FortranFixedForm.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 16206.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "elfft.dim",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 974,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								633,
+								633
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/data2/srihari/DDP/cpp/txfft",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1835007,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1834951,
+								1834951
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 622250.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/data2/srihari/DDP/cpp/input",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 942,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 4,
+					"file": "/data2/srihari/DDP/cpp/elfft.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 279,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								229,
+								229
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/data2/srihari/DDP/cpp/readInput.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2885,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2410,
+								2410
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1539.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/data2/srihari/DDP/cpp/globalVariables.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 675,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/data2/srihari/DDP/cpp/matrixOperations.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7890,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7174,
+								7174
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5559.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/data2/srihari/DDP/cpp/solverFunctions.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 799,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								27,
+								27
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/data2/srihari/DDP/cpp/printFunctions.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1174,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								272,
+								272
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/data2/srihari/DDP/cpp/printFunctions.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 241,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								108,
+								108
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 34.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "elasticFFT.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"trans",
+				"cpp/matrixOperations.cc"
+			],
+			[
+				"p",
+				"cpp/printFunctions.h"
+			],
+			[
+				"pr",
+				"cpp/printFunctions.cc"
+			],
+			[
+				"mat",
+				"cpp/matrixOperations.cc"
+			],
+			[
+				"print",
+				"cpp/printFunctions.cc"
+			],
+			[
+				"readya",
+				"philipe/third_party_code/YAMLMatlab_0.4.3/ReadYamlRaw.m"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 1,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 200.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+		"max_columns": 2
+	}
+}

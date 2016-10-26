@@ -185,6 +185,8 @@ int main(int argc, char *argv[])
 						for(n=0;n<6;n++)
 							stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 
+			print1darray(stressbar,6);
+
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
 			stressref=stressbar33[ictrl1][ictrl2];
 			//print1darray((double *)stressbar,6);
