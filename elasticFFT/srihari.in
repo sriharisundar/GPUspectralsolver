@@ -1,5 +1,5 @@
 * name and path of microstructure file (filetext)                                
-1_4x4x4.texture
+32x32x32.texture
 * name and path of elastic moduli file (filecrys)                         
 elast.dat                                                                    
 * RVE dimensions                                        

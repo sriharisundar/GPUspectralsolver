@@ -91,10 +91,10 @@ c
       do while(iter.lt.itmax.and.err2mod.gt.error)
       iter=iter+1
 c
-cssh      write(*,*)'ITER = ',iter
+      write(*,*)'ITER = ',iter
 c
-cssh      write(*,*) 
-cssh     #'DIRECT FFT OF POLARIZATION AND LAGRANGE MULTIPLIER FIELDS'
+      write(*,*) 
+     #'DIRECT FFT OF POLARIZATION AND LAGRANGE MULTIPLIER FIELDS'
 cw      write(*,*)
 c
       do 300 ii=1,6
@@ -140,7 +140,7 @@ c
 c
 300   continue
 c
-cssh      write(*,*) 'CALCULATING G^pq,ij : TAU^ij ...'
+      write(*,*) 'CALCULATING G^pq,ij : TAU^ij ...'
 cw      write(*,*)
 c
       count=0;
@@ -210,13 +210,13 @@ c
       g1(p,q,i,j)=-a(p,i)*xk(q)*xk(j)
 3     continue
 c
-      if (iter .eq. 1) then
-      write(*,*) count
-      do 1900 p=1,3
-      do 1900 q=1,3
-        write(*,*) g1(p,q,:,:)
-1900     continue
-      endif
+c      if (iter .eq. 1) then
+c      write(*,*) count
+c      do 1900 p=1,3
+c      do 1900 q=1,3
+c       write(*,*) g1(p,q,:,:)
+c1900     continue
+c      endif
 
       do 4 i=1,3
       do 4 j=1,3
@@ -243,7 +243,7 @@ c
 c
 cc      call equilibrium(snormfft,snormfftim,nn,err2mod)
 c
-cssh      write(*,*) 'INVERSE FFT TO GET STRAIN FLUCTUATION FIELD'
+      write(*,*) 'INVERSE FFT TO GET STRAIN FLUCTUATION FIELD'
 c
       do 51 m=1,3
       do 51 n=1,3
@@ -289,10 +289,12 @@ c
 c
 c     DTILDE=SYM(VELGRAD)
 c
+      count=0
       do 167 kzz=1,npts3
       do 167 kyy=1,npts2
       do 167 kxx=1,npts1
 c 
+      count=count+1
       do ii=1,3
       do jj=1,3
       aux33(ii,jj)=(velgrad(ii,jj,kxx,kyy,kzz)+
@@ -305,11 +307,18 @@ c
       do m=1,6
       dtilde(m,kxx,kyy,kzz)=aux6(m)
       enddo
+
+c      if(iter .eq. 1) then
+c      write(*,*) count
+c      write(*,*) dtilde(:,kxx,kyy,kzz)
+c      endif
 c
 167   continue
 c
-cssh       write(*,*) 'UPDATE LAGRANGE MULTIPLIER FIELD'
+       write(*,*) 'UPDATE LAGRANGE MULTIPLIER FIELD'
+      if(iter .eq. 1) then
        call augm_lagr
+      endif
 c
       do ii=1,6
       sbar(ii)=0.
@@ -325,12 +334,11 @@ c
 c
 757   continue
 c
-      write(*,*) sbar
       call chg_basis(sbar,stens,aux66,aux3333,1)
       sref=stens(ictrl1,ictrl2)
 c
-cssh       write(*,*) 'STRESS FIELD ERROR =',errs/sref
-cssh       write(*,*) 'STRAIN FIELD ERROR =',errd/dref
+       write(*,*) 'STRESS FIELD ERROR =',errs/sref
+       write(*,*) 'STRAIN FIELD ERROR =',errd/dref
 c
 cw      write(21,101) iter,errd/dref,errs/sref,dref,sref
       write(21,101) iter,errd/dref,errs/sref,
@@ -1056,6 +1064,7 @@ c
         DO I=1,6
         DG(I)=DBAR(I)+DTILDE(I,II,JJ,KK)
         ENDDO
+
 c
         DO I=1,6
           X(I)=SG(I,II,JJ,KK)
@@ -1063,6 +1072,7 @@ c
             X(I)=X(I)+XLSEC(I,J)*DG(J)
           ENDDO
         ENDDO
+
 c
         DO I=1,6
           EDOT(I)=0
@@ -1082,6 +1092,7 @@ c     UPDATE SG (LAGRANGE MULTIPLIER)
        SG(I,II,JJ,KK)=SG(I,II,JJ,KK)+DSG(I)
       ENDDO
 c
+c        write(*,*) SG(:,II,JJ,KK)
       ERRD=ERRD+TNORM(DDG,6,1)*WGT
       ERRS=ERRS+TNORM(DSG,6,1)*WGT
 c

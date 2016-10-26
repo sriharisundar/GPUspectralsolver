@@ -23,11 +23,13 @@ void augmentLagrangian(void){
                 for(n=0;n<6;n++)
                     dg[n]=strainbar[n]+straintilde[k][j][i][n];
                 
+
                 for(n=0;n<6;n++){
                     x[n]=stress[k][j][i][n];
                     for(m=0;m<6;m++)
-                        x[m]+=C0_66[n][m]*dg[m];
+                        x[n]+=C0_66[n][m]*dg[m];
                 }
+
 
                 for(n=0;n<6;n++){
                     edot[n]=0.0;
@@ -46,6 +48,7 @@ void augmentLagrangian(void){
                 errstrain+=tnorm((double *)ddg,6,1)*volumeVoxel;
                 errstress+=tnorm((double *)dsg,6,1)*volumeVoxel;
 
+//                print1darray(stress[k][j][i],6);
         }        
 }
 
@@ -89,8 +92,8 @@ void findGammaHat(fourthOrderTensor Cref){
 								gammaHat[k*n2*(n1)+j*(n1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][r]; 
 
                 count++;
-                cout<<count<<endl;
-                print4darray(gammaHat[k*n2*(n1)+j*(n1)+i].tensor);
+//                cout<<count<<endl;
+//                print4darray(gammaHat[k*n2*(n1)+j*(n1)+i].tensor);
             }
         }
     }
