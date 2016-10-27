@@ -73,15 +73,29 @@ c
          sbar(ii)=sbar(ii)+sg(ii,i,j,k)*wgt
 c
       enddo
+
+c      write(*,*) cloc(:,:,i,j,k)
 c
 777   continue
 c
+    
+      do w=1,npts3
+      do t=1,npts2
+      do f=1,npts1
+      
+      write(*,*) f,t,w
+      write(*,*) sg(:,f,t,w)
+
+      end do
+      end do
+      end do
+
       call chg_basis(sbar,stens,aux66,aux3333,1)
       sref=stens(ictrl1,ictrl2)
 
       do 3000 imicro=1,nsteps
 
-cw      write(*,*) 'STEP = ',imicro
+csshcw      write(*,*) 'STEP = ',imicro
 cw      write(21,*) 'STEP = ',imicro
 cw      write(25,*) 'STEP = ',imicro
 
@@ -91,11 +105,11 @@ c
       do while(iter.lt.itmax.and.err2mod.gt.error)
       iter=iter+1
 c
-      write(*,*)'ITER = ',iter
+cssh      write(*,*)'ITER = ',iter
 c
-      write(*,*) 
-     #'DIRECT FFT OF POLARIZATION AND LAGRANGE MULTIPLIER FIELDS'
-cw      write(*,*)
+cssh      write(*,*) 
+cssh     #'DIRECT FFT OF POLARIZATION AND LAGRANGE MULTIPLIER FIELDS'
+csshcw      write(*,*)
 c
       do 300 ii=1,6
 c
@@ -140,8 +154,8 @@ c
 c
 300   continue
 c
-      write(*,*) 'CALCULATING G^pq,ij : TAU^ij ...'
-cw      write(*,*)
+cssh      write(*,*) 'CALCULATING G^pq,ij : TAU^ij ...'
+csshcw      write(*,*)
 c
       count=0;
       do 1 kzz=1,npts3
@@ -156,6 +170,10 @@ c
       d6(i)=delta(i,kxx,kyy,kzz)
       d6im(i)=deltaim(i,kxx,kyy,kzz)
 46    continue
+c      if(iter .eq.1) then
+c      write(*,*) d6(:)
+c      write(*,*) d6im(:)
+c      endif
 
       call chg_basis(d6,d33,aux66,aux3333,1)
       call chg_basis(d6im,d33im,aux66,aux3333,1)
@@ -198,7 +216,7 @@ c
       call minv(a,3,det,minv1,minv2)
 c
 c      if(det.eq.0) then
-c      write(*,*) kx,ky,kz,'  --> SINGULAR SYSTEM'
+csshc      write(*,*) kx,ky,kz,'  --> SINGULAR SYSTEM'
 c      stop
 c      pause
 c      endif
@@ -211,10 +229,10 @@ c
 3     continue
 c
 c      if (iter .eq. 1) then
-c      write(*,*) count
+csshc      write(*,*) count
 c      do 1900 p=1,3
 c      do 1900 q=1,3
-c       write(*,*) g1(p,q,:,:)
+csshc       write(*,*) g1(p,q,:,:)
 c1900     continue
 c      endif
 
@@ -237,13 +255,22 @@ c
       enddo
       enddo
 c
-4     continue
+4     continue 
 c
+
+c      if (iter .eq. 1) then
+c      write(*,*) kxx,kyy,kzz
+c      write(*,*) d6(:)
+c      write(*,*) d6im(:)
+c      write(*,*) velgrad(:,:,kxx,kyy,kzz)
+c      write(*,*) velgradim(:,:,kxx,kyy,kzz)
+c      endif
+
 1     continue
 c
 cc      call equilibrium(snormfft,snormfftim,nn,err2mod)
 c
-      write(*,*) 'INVERSE FFT TO GET STRAIN FLUCTUATION FIELD'
+cssh      write(*,*) 'INVERSE FFT TO GET STRAIN FLUCTUATION FIELD'
 c
       do 51 m=1,3
       do 51 n=1,3
@@ -277,11 +304,11 @@ c
       do 16 kyy=1,npts2
       do 16 kxx=1,npts1
       k1=k1+1
-c      write(*,*) 'REAL PART =',kxx,kyy,kzz,data(k1)
+csshc      write(*,*) 'REAL PART =',kxx,kyy,kzz,data(k1)
 
       velgrad(m,n,kxx,kyy,kzz)=data(k1)
       k1=k1+1
-c      write(*,*) 'IMAGINARY PART =',kxx,kyy,kzz,data(k1)
+csshc      write(*,*) 'IMAGINARY PART =',kxx,kyy,kzz,data(k1)
 c      pause
 16    continue
 c
@@ -299,26 +326,27 @@ c
       do jj=1,3
       aux33(ii,jj)=(velgrad(ii,jj,kxx,kyy,kzz)+
      #              velgrad(jj,ii,kxx,kyy,kzz))/2.
+
       enddo
       enddo
 c
       call chg_basis(aux6,aux33,aux66,aux3333,2)
 c
+c      write(*,*) aux6
+
       do m=1,6
       dtilde(m,kxx,kyy,kzz)=aux6(m)
       enddo
 
 c      if(iter .eq. 1) then
-c      write(*,*) count
-c      write(*,*) dtilde(:,kxx,kyy,kzz)
+csshc      write(*,*) count
+csshc      write(*,*) dtilde(:,kxx,kyy,kzz)
 c      endif
 c
 167   continue
 c
-       write(*,*) 'UPDATE LAGRANGE MULTIPLIER FIELD'
-      if(iter .eq. 1) then
+cssh       write(*,*) 'UPDATE LAGRANGE MULTIPLIER FIELD'
        call augm_lagr
-      endif
 c
       do ii=1,6
       sbar(ii)=0.
@@ -328,6 +356,10 @@ c
       do 757 j=1,npts2
       do 757 k=1,npts3
 c
+c      if(iter .eq. 50) then
+c      write(*,*) SG(:,I,J,K)
+c      endif
+
       do ii=1,6
       sbar(ii)=sbar(ii)+sg(ii,i,j,k)*wgt
       enddo
@@ -337,8 +369,8 @@ c
       call chg_basis(sbar,stens,aux66,aux3333,1)
       sref=stens(ictrl1,ictrl2)
 c
-       write(*,*) 'STRESS FIELD ERROR =',errs/sref
-       write(*,*) 'STRAIN FIELD ERROR =',errd/dref
+cssh       write(*,*) 'STRESS FIELD ERROR =',errs/sref
+cssh       write(*,*) 'STRAIN FIELD ERROR =',errd/dref
 c
 cw      write(21,101) iter,errd/dref,errs/sref,dref,sref
       write(21,101) iter,errd/dref,errs/sref,
@@ -351,6 +383,7 @@ c
 c     ENDDO ... WHILE
 c
       enddo
+c      write(*,*) xlsec
 cw
 cw      IF(IUPDATE.EQ.1) THEN
 cwc
@@ -850,7 +883,6 @@ cw          AG(J,K,ii,jj,kk)=AA(K,J)
 cw        ENDDO
 cw        ENDDO
 c
-c      write(*,*) aa
       do 1 i1=1,3
       do 1 j1=1,3
       do 1 k1=1,3
@@ -874,6 +906,7 @@ c
       xlsec(i,j)=xlsec(i,j)+caux(i,j)*wgt
       enddo
       enddo
+cwritecaux      write(*,*) caux
 c
       enddo
 c
@@ -913,13 +946,13 @@ c
       enddo
       enddo
 
-c      write(*,*) fsloc(:,:,ii,jj,kk)
+csshc      write(*,*) fsloc(:,:,ii,jj,kk)
 c
       enddo
       enddo
       enddo
 c
-c      write(*,*) xlsec
+csshc      write(*,*) xlsec
       RETURN
       END
 
@@ -1092,7 +1125,6 @@ c     UPDATE SG (LAGRANGE MULTIPLIER)
        SG(I,II,JJ,KK)=SG(I,II,JJ,KK)+DSG(I)
       ENDDO
 c
-c        write(*,*) SG(:,II,JJ,KK)
       ERRD=ERRD+TNORM(DDG,6,1)*WGT
       ERRS=ERRS+TNORM(DSG,6,1)*WGT
 c

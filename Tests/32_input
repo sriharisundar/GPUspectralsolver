@@ -1,5 +1,5 @@
 elast.dat 	* name and path of elastic moduli file (filecrys)
-32x32x32.texture 		* name and path of microstructure file (filetext)
+bi_32x32x32.texture 		* name and path of microstructure file (filetext)
 elfft.out	* name and path of output file
 32 32 32 	* n voxels along X Y Z
 1.  1.  1.  * RVE dimensions
