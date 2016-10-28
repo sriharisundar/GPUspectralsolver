@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 			//arrange data for in
 			//perform forward FFT
 			//debugssh			 cout<<"Forward FFT of polarization field"<<endl<<endl;
+//if(iteration==1){
 			for(n=0;n<6;n++){
 				
 //				cout<<"NEW"<<endl;
@@ -120,6 +121,7 @@ int main(int argc, char *argv[])
 						for(i=0;i<(N1);i++){
 							work[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][0];
 							workim[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][1];
+//							in[k*N2*N1+j*N1+i][0]=0;
 				}
 
 //				fftw_execute(plan_backward);
@@ -128,9 +130,10 @@ int main(int argc, char *argv[])
 //				for(k=0;k<N3;k++)
 //					for(j=0;j<N2;j++)
 //						for(i=0;i<(N1);i++)
-//							cout<<in[k*N2*(N1)+j*(N1)+i][0]/prodDim<<endl;
-//
+//							cout<<stress[k][j][i][n]-in[k*N2*(N1)+j*(N1)+i][0]/prodDim<<endl;
+
 			}
+			//}
 
 			//convert stress to tensorial form
 			//multiply with gamma operator
@@ -142,16 +145,19 @@ int main(int argc, char *argv[])
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
 						if(iteration==1){
+						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
 							print1darray(work[k][j][i],6);
 							print1darray(workim[k][j][i],6);}
-//						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
 //						print2darray(work33);
 //						print2darray(work33im);
+//						print4darray(gammaHat[k*n2*(n1)+j*(n1)+i].tensor);}
 
 						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
 						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+//						if(iteration==1){
+//				cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
 //						print2darray(ddefgrad[k][j][i]);
-//						print2darray(ddefgradim[k][j][i]);
+//						print2darray(ddefgradim[k][j][i]);}
 			}
 			
 			//arrange data for out
@@ -171,7 +177,6 @@ int main(int argc, char *argv[])
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
 							for(i=0;i<N1;i++){
-////								cout<<delta[k][j][i]<<endl;
 								ddefgrad[k][j][i][m][n]=in[k*N2*(N1)+j*(N1)+i][0]/prodDim;
 							}
 
@@ -185,8 +190,9 @@ int main(int argc, char *argv[])
 //						print2darray(ddefgrad[k][j][i]);
 						symmetric(ddefgrad[k][j][i],aux33);
 						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
-						//if(iteration==1)
-							//print1darray(straintilde[k][j][i],6);
+			//			if(iteration==1){
+			//				cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
+			//				print2darray(ddefgrad[k][j][i]);}
 			}
 
 

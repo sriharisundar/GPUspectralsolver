@@ -18,7 +18,7 @@ prodDim=np.prod(dim)
 for k in range(dim[2]):
 	for j in range(dim[1]):
 		for i in range(dim[0]):
-			if (k<dim[2]/2):
+			if (k<dim[2]*0.25):
 				output.write("%3.3f %3.3f %f %d %d %d %d 1 \n" % (0,45,0,i+1,j+1,k+1,1))
 			else:
 				output.write("%3.3f %3.3f %f %d %d %d %d 1 \n" % (45,0,0,i+1,j+1,k+1,2))

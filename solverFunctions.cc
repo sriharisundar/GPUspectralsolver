@@ -63,13 +63,13 @@ void findGammaHat(fourthOrderTensor Cref){
 
     for(k=0;k<n3;k++){
         fourierPoint[2]=k/(n3*RVEdim[2]);
-        if(k>n3/2) fourierPoint[2]=(k-n3)/(n3*RVEdim[2]);
+        if(k>n3/2-1) fourierPoint[2]=(k-n3)/(n3*RVEdim[2]);
         for(j=0;j<n2;j++){
             fourierPoint[1]=j/(n2*RVEdim[1]);
-            if(j>n2/2) fourierPoint[1]=(j-n2)/(n2*RVEdim[1]);
+            if(j>n2/2-1) fourierPoint[1]=(j-n2)/(n2*RVEdim[1]);
             for(i=0;i<n1;i++){
                 fourierPoint[0]=i/(n1*RVEdim[0]);
-                if(i>n1/2) fourierPoint[0]=(i-n1)/(n1*RVEdim[0]);
+                if(i>n1/2-1) fourierPoint[0]=(i-n1)/(n1*RVEdim[0]);
                 
                 normPoint=tnorm((double *)fourierPoint,3,1);
                         
@@ -89,7 +89,7 @@ void findGammaHat(fourthOrderTensor Cref){
 					for(q=0;q<3;q++)
 						for(r=0;r<3;r++)
 							for(s=0;s<3;s++)
-								gammaHat[k*n2*(n1)+j*(n1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][r]; 
+								gammaHat[k*n2*(n1)+j*(n1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][s]; 
 
                 count++;
 //                cout<<count<<endl;

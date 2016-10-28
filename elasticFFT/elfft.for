@@ -79,17 +79,6 @@ c
 777   continue
 c
     
-      do w=1,npts3
-      do t=1,npts2
-      do f=1,npts1
-      
-      write(*,*) f,t,w
-      write(*,*) sg(:,f,t,w)
-
-      end do
-      end do
-      end do
-
       call chg_basis(sbar,stens,aux66,aux3333,1)
       sref=stens(ictrl1,ictrl2)
 
@@ -170,14 +159,15 @@ c
       d6(i)=delta(i,kxx,kyy,kzz)
       d6im(i)=deltaim(i,kxx,kyy,kzz)
 46    continue
-c      if(iter .eq.1) then
-c      write(*,*) d6(:)
-c      write(*,*) d6im(:)
-c      endif
+      if(iter .eq.1) then
+      write(*,*) d6(:)
+      write(*,*) d6im(:)
+      endif
 
       call chg_basis(d6,d33,aux66,aux3333,1)
       call chg_basis(d6im,d33im,aux66,aux3333,1)
 c
+
       if(kxx.le.npts1/2) kx=kxx-1
       if(kxx.gt.npts1/2) kx=kxx-npts1-1
 c
@@ -236,6 +226,21 @@ csshc       write(*,*) g1(p,q,:,:)
 c1900     continue
 c      endif
 
+
+c      if(iter .eq.1) then
+c      write(*,*) kxx,kyy,kzz
+c      write(*,*) d33
+c      write(*,*) d33im
+c      do 1900 p=1,3
+c      do 1900 q=1,3
+c      do i=1,3
+c       write(*,*) (g1(p,q,i,j), j=1,3)
+c      enddo
+c      write(*,*)
+c1900     continue
+c
+c      endif
+
       do 4 i=1,3
       do 4 j=1,3
 c
@@ -259,9 +264,7 @@ c
 c
 
 c      if (iter .eq. 1) then
-c      write(*,*) kxx,kyy,kzz
-c      write(*,*) d6(:)
-c      write(*,*) d6im(:)
+c     write(*,*) kxx,kyy,kzz
 c      write(*,*) velgrad(:,:,kxx,kyy,kzz)
 c      write(*,*) velgradim(:,:,kxx,kyy,kzz)
 c      endif
@@ -321,6 +324,11 @@ c
       do 167 kyy=1,npts2
       do 167 kxx=1,npts1
 c 
+c      if (iter .eq. 1) then
+c      write(*,*) kxx,kyy,kzz
+c      write(*,*) velgrad(:,:,kxx,kyy,kzz)
+c      endif
+
       count=count+1
       do ii=1,3
       do jj=1,3
