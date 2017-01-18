@@ -61,14 +61,12 @@ void readtexture(std::string filename){
 				
 
 				count++;
-//				std::cout<<count;			
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
 						saux[n][m]=cloc[k][j][i][n][m];
 
 
 				findInverse((double *)saux,det,6);
-				//print2darray(cloc[k][j][i]);							
 
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++){
@@ -77,7 +75,6 @@ void readtexture(std::string filename){
 							dummy+=C0_66[n][p]*saux[p][m];
 						taux[n][m]=((n+1)/(m+1))*((m+1)/(n+1))+dummy;
 					}
-				//print2darray(taux);				
 
 				findInverse((double *)taux,det,6);
 
@@ -88,11 +85,8 @@ void readtexture(std::string filename){
 							dummy+=saux[n][p]*taux[p][m];
 						fsloc[k][j][i][n][m]=dummy;
 					}
-				//print2darray(fsloc[k][j][i]);							
 
 		}
-
-//	print2darray(C0_66);
 
 }
 

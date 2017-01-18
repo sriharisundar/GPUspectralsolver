@@ -8,9 +8,9 @@ struct fourthOrderTensor{
 #ifndef global_variables
 #define global_variables
 
-#define N1 4
-#define N2 4
-#define N3 4
+#define N1 32
+#define N2 32
+#define N3 32
 
 //extern int n1,n2,n3;
 
@@ -25,7 +25,7 @@ extern int grainID[N3][N2][N1],phaseID[N3][N2][N1];
 extern double strainbar[6],stressbar[6];
 extern double ddefgrad[N3][N2][N1][3][3],ddefgradim[N3][N2][N1][3][3];
 extern double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
-extern double work[N3][N2][N1/2+1][6],workim[N3][N2][N1/2+1][6];
+extern double work[N3][N2][N1][6],workim[N3][N2][N1][6];
 extern double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 extern fourthOrderTensor *gammaHat;
 extern double stressref,strainref,errstress,errstrain,error;

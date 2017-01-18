@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 	fstream errorOut;
 	errorOut.open("err.out",ios::out);
 
-	//Initialize stress and strain fields
+	// Initialize stress and strain fields
 	// sg - stress
 	// dtilde-straingradient - straintilde
 	
@@ -67,19 +67,7 @@ int main(int argc, char *argv[])
 					}
 					stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 				}
-					//print2darray(cloc[k][j][i]);
-//					cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
-//					print1darray(stress[k][j][i],6);
 	}
-//
-//			for(i=0;i<N1;i++)
-//		for(j=0;j<N2;j++)
-//	for(k=0;k<N3;k++){
-//					cout<<"GrainID:"<<grainID[k][j][i]<<" "<<endl;
-////					print2darray(cloc[k][j][i]);
-//					print1darray(stress[k][j][i],6);}
-//
-//	print1darray((double *) strainbar,6);
 
 	change_basis(stressbar,stressbar33,aux66,aux3333,1);
 	stressref=stressbar33[ictrl1][ictrl2];
@@ -93,16 +81,15 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			//debugssh			 cout<<"--------------------------------------------------------------"<<endl;
-			//debugssh			 cout<<"ITERATION:"<<iteration<<endl;
+			cout<<"--------------------------------------------------------------"<<endl;
+			cout<<"ITERATION:"<<iteration<<endl;
 
-			//arrange data for in
-			//perform forward FFT
-			//debugssh			 cout<<"Forward FFT of polarization field"<<endl<<endl;
-//if(iteration==1){
+			// Arrange data for in
+			// Perform forward FFT
+			cout<<"Forward FFT of polarization field"<<endl<<endl;
+
 			for(n=0;n<6;n++){
 				
-//				cout<<"NEW"<<endl;
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
 						for(i=0;i<N1;i++){
@@ -110,58 +97,34 @@ int main(int argc, char *argv[])
 							in[k*N2*N1+j*N1+i][1]=0;
 							for(m=0;m<6;m++)
 								in[k*N2*N1+j*N1+i][0]-=C0_66[n][m]*straintilde[k][j][i][m];
-//							cout<<in[k*N2*N1+j*N1+i][0]<<endl;
-						}
+				}
 
 				fftw_execute(plan_forward);
-				
 
 				for(k=0;k<N3;k++)
 					for(j=0;j<N2;j++)
-						for(i=0;i<(N1);i++){
-							work[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][0];
-							workim[k][j][i][n]=out[k*N2*(N1)+j*(N1)+i][1];
-//							in[k*N2*N1+j*N1+i][0]=0;
+						for(i=0;i<N1;i++){
+							work[k][j][i][n]=out[k*N2*N1+j*N1+i][0];
+							workim[k][j][i][n]=out[k*N2*N1+j*N1+i][1];
 				}
 
-//				fftw_execute(plan_backward);
-
-//				cout<<"BACK"<<endl;
-//				for(k=0;k<N3;k++)
-//					for(j=0;j<N2;j++)
-//						for(i=0;i<(N1);i++)
-//							cout<<stress[k][j][i][n]-in[k*N2*(N1)+j*(N1)+i][0]/prodDim<<endl;
-
 			}
-			//}
 
-			//convert stress to tensorial form
-			//multiply with gamma operator
-			//debugssh			 cout<<"Gamma convolution"<<endl<<endl;
+			// Convert stress to tensorial form
+			// Multiply with gamma operator
+			cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<(N1);i++){
-
 						change_basis(work[k][j][i],work33,aux66,aux3333,1);
 						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
-						if(iteration==1){
-						cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
-							print1darray(work[k][j][i],6);
-							print1darray(workim[k][j][i],6);}
-//						print2darray(work33);
-//						print2darray(work33im);
-//						print4darray(gammaHat[k*n2*(n1)+j*(n1)+i].tensor);}
-
+						
 						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
 						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
-//						if(iteration==1){
-//				cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
-//						print2darray(ddefgrad[k][j][i]);
-//						print2darray(ddefgradim[k][j][i]);}
 			}
 			
-			//arrange data for out
-			//debugssh			 cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+			// Arrange data for out
+			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
 
@@ -176,27 +139,22 @@ int main(int argc, char *argv[])
 
 					for(k=0;k<N3;k++)
 						for(j=0;j<N2;j++)
-							for(i=0;i<N1;i++){
+							for(i=0;i<N1;i++)
 								ddefgrad[k][j][i][m][n]=in[k*N2*(N1)+j*(N1)+i][0]/prodDim;
-							}
 
 			}
 
-			//get symmetric part of defgrad
+			// Get symmetric part of defgrad
 		
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<N1;i++){
-//						print2darray(ddefgrad[k][j][i]);
 						symmetric(ddefgrad[k][j][i],aux33);
 						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
-			//			if(iteration==1){
-			//				cout<<"Fourier point:"<<i<<" "<<j<<" "<<k<<" "<<endl;
-			//				print2darray(ddefgrad[k][j][i]);}
 			}
 
 
-			//debugssh			 cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 			augmentLagrangian();
 			
 			for(n=0;n<6;n++)
@@ -206,24 +164,40 @@ int main(int argc, char *argv[])
 			for(k=0;k<N3;k++)
 				for(j=0;j<N2;j++)
 					for(i=0;i<N1;i++){
-						if(iteration==50)
-							//print1darray(stress[k][j][i],6);
 						for(n=0;n<6;n++)
 							stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
 			}
 
+			// Write stressbar and strainbar for each iteration to output file
 
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
 			stressref=stressbar33[ictrl1][ictrl2];
-			//print1darray((double *)stressbar,6);
-			//print2darray(C0_66);
+			cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 
-            //debugssh             cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-			//debugssh			 cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
-		}
-	//print2darray(C0_66);
-	}
+			errorOut<<iteration<<" ";
+			errorOut<<errstress/stressref<<" ";
+			errorOut<<errstrain/strainref<<" ";
+			errorOut<<straingradrate33[0][0]<<" ";
+			errorOut<<straingradrate33[1][1]<<" ";
+			errorOut<<straingradrate33[2][2]<<" ";
+			errorOut<<straingradrate33[1][2]<<" ";
+			errorOut<<straingradrate33[0][2]<<" ";
+			errorOut<<straingradrate33[0][1]<<" ";
+			errorOut<<stressbar33[0][0]<<" ";
+			errorOut<<stressbar33[1][1]<<" ";
+			errorOut<<stressbar33[2][2]<<" ";
+			errorOut<<stressbar33[1][2]<<" ";
+			errorOut<<stressbar33[0][2]<<" ";
+			errorOut<<stressbar33[0][1]<<" ";
 
+			errorOut<<endl;
+
+		} // Iteration loop
+
+	} // Step loop
+
+	// Write field output
 	for(k=0;k<N3;k++)
 		for(j=0;j<N2;j++)
 			for(i=0;i<N1;i++){

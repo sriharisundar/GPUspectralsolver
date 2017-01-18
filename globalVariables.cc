@@ -25,7 +25,7 @@ double ddefgrad[N3][N2][N1][3][3],ddefgradim[N3][N2][N1][3][3];
 
 double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
 
-double work[N3][N2][N1/2+1][6],workim[N3][N2][N1/2+1][6];
+double work[N3][N2][N1][6],workim[N3][N2][N1][6];
 
 double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
 
