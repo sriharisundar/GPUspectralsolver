@@ -52,6 +52,32 @@ void augmentLagrangian(void){
         }        
 }
 
+// Refer Lebensohn, Kanjarla, Eisenlohr pg. 5
+float findJacobian(){
+
+    int k,l;
+    float jacobian[6][6],cloc[6][6];
+
+    for(k=0;k<6;k++)
+        for(l=0;l<6;l++){
+
+            //contribution from C0*ClocInv
+
+            findInverse()
+
+
+            for()
+
+            //contribution from plastic flow
+
+            jacobian=identityR66[k][l]
+                     //+contribution from C0*C^-1
+                     //+contribution from plastic flow
+
+
+        }
+}
+
 void findGammaHat(fourthOrderTensor Cref){
 
 	int i,j,k,p,q,r,s,l,m;

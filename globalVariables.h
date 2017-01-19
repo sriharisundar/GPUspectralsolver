@@ -18,6 +18,7 @@ extern int n1,n2,n3;
 extern double C0_66[6][6];
 extern fourthOrderTensor C0_3333,cmat3333;
 extern double identityR2[3][3];
+extern double identityR66[6][6];
 extern double identityR4[3][3][3][3];
 extern double basis[3][3][6];
 extern double euler[N3][N2][N1][3];
