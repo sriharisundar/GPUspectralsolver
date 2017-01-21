@@ -79,4 +79,10 @@ double tnorm(double *a,int nrows, int ncols);
 */
 int findInverse(double *in, double det, int order);
 
+/*
+	Use LU decomposition to find the inverse of a matrix.
+	Currently implemented for 6x6 matrices only
+*/
+int findInverseOutOfPlace(double *in, double *out, double det, int order);
+
 #endif

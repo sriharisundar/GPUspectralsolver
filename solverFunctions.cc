@@ -6,6 +6,9 @@
 
 using namespace std;
 
+void findDedot();
+int findJacobian(double *jacobian, double *Cvox, double *Cref, double delt, double n);
+
 void augmentLagrangian(void){
 	
 	double prodDim=n1*n2*n3;
@@ -53,29 +56,37 @@ void augmentLagrangian(void){
 }
 
 // Refer Lebensohn, Kanjarla, Eisenlohr pg. 5
-float findJacobian(){
+int findJacobian(double *jacobian, double *Cvox, double *Cref, double delt, double n){
 
-    int k,l;
-    float jacobian[6][6],cloc[6][6];
+    int k,l,q;
+    double det=0,CCInvsum=0;
+    double CInv[6][6];
+
+    findInverseOutOfPlace(Cvox,(double *)CInv,det,6);
 
     for(k=0;k<6;k++)
         for(l=0;l<6;l++){
 
+
+            findDedot();
+
             //contribution from C0*ClocInv
-
-            findInverse()
-
-
-            for()
+            CCInvsum=0;
+            for(q=0;q<6;q++)
+                CCInvsum+=Cvox[k*6+q]*CInv[q][l];
 
             //contribution from plastic flow
 
-            jacobian=identityR66[k][l]
-                     //+contribution from C0*C^-1
-                     //+contribution from plastic flow
+            jacobian[k*6+l]=identityR66[k][l]+CCInvsum;
+                     //+dedot
+    }
 
+    return 1;
+}
 
-        }
+// Find platicstrainrate eq 1, d(plasticstrainrate)/d(stress) eq 19
+void findDedot(double *stress, double *ePlasdot, double *dePlasdotDstress, double *schmid, int i, int j, int k){
+
 }
 
 void findGammaHat(fourthOrderTensor Cref){
@@ -124,11 +135,11 @@ void findGammaHat(fourthOrderTensor Cref){
         }
     }
 
-			    for(p=0;p<3;p++)
-					for(q=0;q<3;q++)
-						for(r=0;r<3;r++)
-							for(s=0;s<3;s++)
-								gammaHat[0].tensor[p][q][r][s]=0;
+    for(p=0;p<3;p++)
+		for(q=0;q<3;q++)
+			for(r=0;r<3;r++)
+				for(s=0;s<3;s++)
+					gammaHat[0].tensor[p][q][r][s]=0;
 
 
 }

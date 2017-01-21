@@ -345,6 +345,29 @@ int findInverse(double* in, double det, int order){
 	return 1;
 }
 
+int findInverseOutOfPlace(double *in, double *out, double det, int order){
+
+	int i,j;
+
+	typedef Matrix <double, Dynamic, Dynamic> MatrixXd;
+	MatrixXd matin(order,order);
+	MatrixXd matout(order,order);
+
+	for(i=0;i<order;i++)
+		for(j=0;j<order;j++)
+			matin(i,j)=in[j*order+i];
+
+	matout=matin.inverse();
+	//det=matin.determinant();
+
+	for(i=0;i<order;i++)
+		for(j=0;j<order;j++)
+			out[j*order+i]=matout(i,j);
+
+
+	return 1;
+}
+
 /*
 	Find symmetric part of a matrix
 */
