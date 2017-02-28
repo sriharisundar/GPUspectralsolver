@@ -139,6 +139,20 @@ void readinput(char filename[100]){
 	std::fstream maininputIn;
 	maininputIn.open(filename, std::ios::in);
 
+	// Read dimensions
+	{
+		std::getline(maininputIn,line);
+		std::istringstream iss(line);
+		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+	                     		   std::istream_iterator<std::string>{}};
+		
+		n1=std::stoi(tokens[0]);
+		n2=std::stoi(tokens[1]);
+		n3=std::stoi(tokens[2]);
+	}
+
+	initglobal();
+
 	//Read in propsfile name and execute reading that file
 	{
 		std::getline(maininputIn,line);
@@ -172,18 +186,6 @@ void readinput(char filename[100]){
 		std::strcpy(outputFile, tokens[0].c_str());
 	}
 
-	//
-	{
-		std::getline(maininputIn,line);
-		std::istringstream iss(line);
-		std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
-	                     		   std::istream_iterator<std::string>{}};
-		
-		n1=std::stoi(tokens[0]);
-		n2=std::stoi(tokens[1]);
-		n3=std::stoi(tokens[2]);
-	}
-	
 	// Read in RVE dimensions
 	{	
 		std::getline(maininputIn,line);

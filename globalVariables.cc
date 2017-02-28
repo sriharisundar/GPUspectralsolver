@@ -3,53 +3,32 @@
 #include <cmath>
 #include <string>
 
-int n1=N1,n2=N2,n3=N3;
-
+int n1,n2,n3;
 double C0_66[6][6];
-
 fourthOrderTensor C0_3333,cmat3333;
-
-double identityR2[3][3]={{1,0,0},{0,1,0},{0,0,1}};
-
+double identityR2[3][3];
 double identityR4[3][3][3][3];
-
 double basis[3][3][6];
-
-double euler[N3][N2][N1][3];
-
-int grainID[N3][N2][N1],phaseID[N3][N2][N1];
-
 double strainbar[6],stressbar[6];
-
-double ddefgrad[N3][N2][N1][3][3],ddefgradim[N3][N2][N1][3][3];
-
-double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
-
-double work[N3][N2][N1][6],workim[N3][N2][N1][6];
-
-double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
-
-fourthOrderTensor *gammaHat;
-
-double RVEdim[3];
-
-double velgrad33[3][3];
-
-double straingradrate33[3][3],straingradrate6[6];
-
-double rotationrate33[3][3];
-
-double IDstraingradrate[6];
-
 double stressref,strainref,errstress,errstrain,error;
-
+double RVEdim[3];
+double velgrad33[3][3];
+double straingradrate33[3][3],straingradrate6[6];
+double rotationrate33[3][3];
+double IDstraingradrate[6];
 int nsteps,itermax;
-
 int ictrl,ictrl1,ictrl2;
-
 char *outputFile;
 
-void initglobal(void){
+double euler*;
+int grainID*,phaseID*;
+double ddefgrad*,ddefgradim*;
+double straintilde*,stress*,delta*;
+double work*,workim*;
+double cloc*,fsloc*;
+fourthOrderTensor *gammaHat;
+
+void initglobal(){
 
 	int i,j,k,l;
 	double rsq2=1.0/sqrt(2);		
@@ -90,5 +69,18 @@ void initglobal(void){
     basis[0][0][5]=rsq3;
     basis[1][1][5]=rsq3;
     basis[2][2][5]=rsq3;
+
+	euler*=new double[n3*n2*n1];
+	grainID*=new int[n3*n2*n1];
+	phaseID*=new int[n3*n2*n1];
+	ddefgrad*=new double[n3*n2*n1];
+	ddefgradim*=new double[n3*n2*n1];
+	straintilde*=new double[n3*n2*n1];
+	stress*=new double[n3*n2*n1];
+	delta*=new double[n3*n2*n1];
+	work*=new double[n3*n2*n1];
+	workim*=new double[n3*n2*n1];
+	cloc*=new double[n3*n2*n1];
+	fsloc*=new double[n3*n2*n1];
 
 }
