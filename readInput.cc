@@ -31,13 +31,13 @@ void readtexture(std::string filename){
 
 	for(count=0;count<prodDim;count++){
 		textureIn>>phi1>>Phi>>phi2>>i>>j>>k>>gid>>pid;
-		euler[k-1][j-1][i-1][0]=phi1;
-		euler[k-1][j-1][i-1][1]=Phi;
-		euler[k-1][j-1][i-1][2]=phi2;
-		grainID[k-1][j-1][i-1]=gid;
-		phaseID[k-1][j-1][i-1]=pid;
+		euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1+0]=phi1;
+		euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1+1]=Phi;
+		euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1+2]=phi2;
+		grainID[(k-1)*n2*(n1)+(j-1)*(n1)+i-1]=gid;
+		phaseID[(k-1)*n2*(n1)+(j-1)*(n1)+i-1]=pid;
 
-		transformationMatrix(a,euler[k-1][j-1][i-1],2);
+		transformationMatrix(a,&euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1],2);
 		transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
 		
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
@@ -46,7 +46,7 @@ void readtexture(std::string filename){
 
 		for(n=0;n<6;n++)
 			for(m=0;m<6;m++){
-				cloc[k-1][j-1][i-1][n][m]=cvoxel66[n][m];
+				cloc[(k-1)*n2*(n1)+(j-1)*(n1)+i-1+n*6+m]=cvoxel66[n][m];
 				C0_66[n][m]=C0_66[n][m]+cvoxel66[n][m]*volumeVoxel;
 			}
 	}
@@ -55,15 +55,15 @@ void readtexture(std::string filename){
 
 	count=0;
 
-	for(k=0;k<N3;k++)
-		for(j=0;j<N2;j++)
-			for(i=0;i<N1;i++){
+	for(k=0;k<n3;k++)
+		for(j=0;j<n2;j++)
+			for(i=0;i<n1;i++){
 				
 
 				count++;
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
-						saux[n][m]=cloc[k][j][i][n][m];
+						saux[n][m]=cloc[k*n2*(n1)+j*(n1)+i+6*n+m];
 
 
 				findInverse((double *)saux,det,6);
@@ -83,7 +83,7 @@ void readtexture(std::string filename){
 						dummy=0.0;
 						for(p=0;p<6;p++)
 							dummy+=saux[n][p]*taux[p][m];
-						fsloc[k][j][i][n][m]=dummy;
+						fsloc[k*n2*(n1)+j*(n1)+i+6*n+m]=dummy;
 					}
 
 		}
@@ -211,8 +211,8 @@ void readinput(char filename[100]){
 		velgrad33[i][2]=std::stod(tokens[2]);
 		}
 
-		symmetric(velgrad33,straingradrate33);
-		symmetric(velgrad33,rotationrate33);
+		symmetric((double *) velgrad33,(double *) straingradrate33);
+		symmetric((double *) velgrad33,(double *) rotationrate33);
 
 		for(i=0;i<3;i++)
 			IDstraingradrate[i]=straingradrate33[i][i];

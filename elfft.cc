@@ -185,8 +185,8 @@ int main(int argc, char *argv[])
 	double strain[6],stress6[6];
 	double strainout[3][3],stressout[3][3];
 	double err2mod;
-	double prodDim=n1*n2*n3;
-	double volumeVoxel=1.0/prodDim;
+	double prodDim;
+	double volumeVoxel;
 	int iteration,step;
 	int fftchoice;
 
@@ -196,27 +196,29 @@ int main(int argc, char *argv[])
 	fftw_plan plan_forward;
 
 
-
-	if (argc!=2){
+	if (argc<2){
 		cout<<"Pass input file name as argument"<<endl;
 		return 0;
 	}
 
-	readinput(argv[1]);
-
-	if (argc!=3){
-		cout<<"Enter 1 for FFTW or 2 for clFFT";
+	if (argc<3){
+		cout<<"Enter 1 for FFTW or 2 for clFFT:";
 		cin>>fftchoice;
 	}
 	else
 		fftchoice=atoi(argv[2]);
 
-	if (fftchoice==1){
-		in=(fftw_complex *) *fftw_alloc_complex(N3*N2*(N1));
-		out=(fftw_complex *) *fftw_alloc_complex(N3*N2*(N1));
+	readinput(argv[1]);
 
-		plan_forward=fftw_plan_dft_3d(N3,N2,N1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-		plan_backward=fftw_plan_dft_3d ( N3, N2, N1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
+	prodDim=n1*n2*n3;
+	volumeVoxel=1.0/prodDim;
+
+	if (fftchoice==1){
+		in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+		out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+
+		plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+		plan_backward=fftw_plan_dft_3d ( n3, n2, n1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
 	}
 
 	else { 
@@ -234,22 +236,23 @@ int main(int argc, char *argv[])
 	// sg - stress
 	// dtilde-straingradient - straintilde
 	
-	for(k=0;k<N3;k++)
-		for(j=0;j<N2;j++)
-			for(i=0;i<N1;i++){
+	for(k=0;k<n3;k++)
+		for(j=0;j<n2;j++)
+			for(i=0;i<n1;i++){
 
 				for(n=0;n<6;n++)
-					straintilde[k][j][i][n]=0;
+					straintilde[k*n2*(n1)+j*(n1)+i+n]=0;
 
 				for(n=0;n<6;n++){
-					if(phaseID[k][j][i]==2)
-						stress[k][j][i][n]=0;
+					if(phaseID[k*n2*(n1)+j*(n1)+i]==2)
+						stress[k*n2*(n1)+j*(n1)+i+n]=0;
 					else{
-						stress[k][j][i][n]=0;
-						for(m=0;m<6;m++)
-							stress[k][j][i][n]+=cloc[k][j][i][n][m]*(strainbar[m]);
+						stress[k*n2*(n1)+j*(n1)+i+n]=0;
+						for(m=0;m<6;m++){
+							stress[k*n2*(n1)+j*(n1)+i+n]+=cloc[k*n2*(n1)+j*(n1)+i+n*6+m]*(strainbar[m]);
+						}
 					}
-					stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
+					stressbar[n]+=stress[k*n2*(n1)+j*(n1)+i+n]*volumeVoxel;
 				}
 	}
 
@@ -274,22 +277,24 @@ int main(int argc, char *argv[])
 
 			for(n=0;n<6;n++){
 				
-				for(k=0;k<N3;k++)
-					for(j=0;j<N2;j++)
-						for(i=0;i<N1;i++){
-							in[k*N2*N1+j*N1+i][0]=stress[k][j][i][n];
-							in[k*N2*N1+j*N1+i][1]=0;
+				for(k=0;k<n3;k++)
+					for(j=0;j<n2;j++)
+						for(i=0;i<n1;i++){
+							in[k*n2*n1+j*n1+i][0]=stress[k*n2*(n1)+j*(n1)+i+n];
+							in[k*n2*n1+j*n1+i][1]=0;
 							for(m=0;m<6;m++)
-								in[k*N2*N1+j*N1+i][0]-=C0_66[n][m]*straintilde[k][j][i][m];
+								in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[k*n2*(n1)+j*(n1)+i+m];
 				}
 
 				fftw_execute(plan_forward);
 
-				for(k=0;k<N3;k++)
-					for(j=0;j<N2;j++)
-						for(i=0;i<N1;i++){
-							work[k][j][i][n]=out[k*N2*N1+j*N1+i][0];
-							workim[k][j][i][n]=out[k*N2*N1+j*N1+i][1];
+				for(k=0;k<n3;k++)
+					for(j=0;j<n2;j++)
+						for(i=0;i<n1;i++){
+							work[k*n2*(n1)+j*(n1)+i+n]=out[k*n2*n1+j*n1+i][0];
+							workim[k*n2*(n1)+j*(n1)+i+n]=out[k*n2*n1+j*n1+i][1];
+							if(iteration==1)
+								cout<<work[k*n2*(n1)+j*(n1)+i+n]<<endl;
 				}
 
 			}
@@ -297,14 +302,14 @@ int main(int argc, char *argv[])
 			// Convert stress to tensorial form
 			// Multiply with gamma operator
 			cout<<"Gamma convolution"<<endl<<endl;
-			for(k=0;k<N3;k++)
-				for(j=0;j<N2;j++)
-					for(i=0;i<(N1);i++){
-						change_basis(work[k][j][i],work33,aux66,aux3333,1);
-						change_basis(workim[k][j][i],work33im,aux66,aux3333,1);
+			for(k=0;k<n3;k++)
+				for(j=0;j<n2;j++)
+					for(i=0;i<(n1);i++){
+						change_basis(&work[k*n2*(n1)+j*(n1)+i],work33,aux66,aux3333,1);
+						change_basis(&workim[k*n2*(n1)+j*(n1)+i],work33im,aux66,aux3333,1);
 						
-						multiply3333x33(ddefgrad[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
-						multiply3333x33(ddefgradim[k][j][i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+						multiply3333x33(&ddefgrad[k*n2*(n1)+j*(n1)+i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
+						multiply3333x33(&ddefgradim[k*n2*(n1)+j*(n1)+i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
 			}
 			
 			// Arrange data for out
@@ -312,29 +317,29 @@ int main(int argc, char *argv[])
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
 
-					for(k=0;k<N3;k++)
-						for(j=0;j<N2;j++)
-							for(i=0;i<(N1);i++){
-								out[k*N2*(N1)+j*(N1)+i][0]=ddefgrad[k][j][i][m][n];
-								out[k*N2*(N1)+j*(N1)+i][1]=ddefgradim[k][j][i][m][n];
+					for(k=0;k<n3;k++)
+						for(j=0;j<n2;j++)
+							for(i=0;i<(n1);i++){
+								out[k*n2*(n1)+j*(n1)+i][0]=ddefgrad[k*n2*(n1)+j*(n1)+i+6*m+n];
+								out[k*n2*(n1)+j*(n1)+i][1]=ddefgradim[k*n2*(n1)+j*(n1)+i+6*m+n];
 					}
 
 					fftw_execute(plan_backward);
 
-					for(k=0;k<N3;k++)
-						for(j=0;j<N2;j++)
-							for(i=0;i<N1;i++)
-								ddefgrad[k][j][i][m][n]=in[k*N2*(N1)+j*(N1)+i][0]/prodDim;
+					for(k=0;k<n3;k++)
+						for(j=0;j<n2;j++)
+							for(i=0;i<n1;i++)
+								ddefgrad[k*n2*(n1)+j*(n1)+i+6*m+n]=in[k*n2*(n1)+j*(n1)+i][0]/prodDim;
 
 			}
 
 			// Get symmetric part of defgrad
 		
-			for(k=0;k<N3;k++)
-				for(j=0;j<N2;j++)
-					for(i=0;i<N1;i++){
-						symmetric(ddefgrad[k][j][i],aux33);
-						change_basis(straintilde[k][j][i],aux33,aux66,aux3333,2);
+			for(k=0;k<n3;k++)
+				for(j=0;j<n2;j++)
+					for(i=0;i<n1;i++){
+						symmetric(&ddefgrad[k*n2*(n1)+j*(n1)+i],(double *) aux33);
+						change_basis(&straintilde[k*n2*(n1)+j*(n1)+i],aux33,aux66,aux3333,2);
 			}
 
 
@@ -345,11 +350,11 @@ int main(int argc, char *argv[])
 				stressbar[n]=0;
 
 
-			for(k=0;k<N3;k++)
-				for(j=0;j<N2;j++)
-					for(i=0;i<N1;i++){
+			for(k=0;k<n3;k++)
+				for(j=0;j<n2;j++)
+					for(i=0;i<n1;i++){
 						for(n=0;n<6;n++)
-							stressbar[n]+=stress[k][j][i][n]*volumeVoxel;
+							stressbar[n]+=stress[k*n2*(n1)+j*(n1)+i+n]*volumeVoxel;
 			}
 
 			// Write stressbar and strainbar for each iteration to output file
@@ -382,13 +387,13 @@ int main(int argc, char *argv[])
 	} // Step loop
 
 	// Write field output
-	for(k=0;k<N3;k++)
-		for(j=0;j<N2;j++)
-			for(i=0;i<N1;i++){
+	for(k=0;k<n3;k++)
+		for(j=0;j<n2;j++)
+			for(i=0;i<n1;i++){
 				
 				for(m=0;m<6;m++){
-					strain[m]=strainbar[m]+straintilde[k][j][i][m];
-					stress6[m]=stress[k][j][i][m];
+					strain[m]=strainbar[m]+straintilde[k*n2*(n1)+j*(n1)+i+m];
+					stress6[m]=stress[k*n2*(n1)+j*(n1)+i+m];
 				}
 
 				change_basis(strain,strainout,aux66,aux3333,1);
@@ -397,7 +402,7 @@ int main(int argc, char *argv[])
 				fieldsOut<<i+1<<" ";
 				fieldsOut<<j+1<<" ";
 				fieldsOut<<k+1<<" ";
-				fieldsOut<<grainID[k][j][i]<<" ";
+				fieldsOut<<grainID[k*n2*(n1)+j*(n1)+i]<<" ";
 
 				fieldsOut<<strainout[0][0]<<" ";
 				fieldsOut<<strainout[1][1]<<" ";

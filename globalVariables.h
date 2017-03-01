@@ -8,11 +8,6 @@ struct fourthOrderTensor{
 #ifndef global_variables
 #define global_variables
 
-#define N1 32
-#define N2 32
-#define N3 32
-
-
 // Common data for all voxels
 
 extern int n1,n2,n3;
@@ -33,22 +28,14 @@ extern int ictrl,ictrl1,ictrl2;
 extern char *outputFile;
 
 //Voxel specific data, needs to be dynamically allocated
-extern double euler*;
-extern int grainID*,phaseID*;
-extern double ddefgrad*,ddefgradim*;
-extern double straintilde*,stress*,delta*;
-extern double work*,workim*;
-extern double cloc*,fsloc*;
+extern double *euler;
+extern int *grainID,*phaseID;
+extern double *ddefgrad,*ddefgradim;
+extern double *straintilde,*stress,*delta;
+extern double *work,*workim;
+extern double *cloc,*fsloc;
 extern fourthOrderTensor *gammaHat;
 
 void initglobal();
 
 #endif
-
-//extern double euler[N3][N2][N1][3];
-//extern int grainID[N3][N2][N1],phaseID[N3][N2][N1];
-//extern double ddefgrad[N3][N2][N1][3][3],ddefgradim[N3][N2][N1][3][3];
-//extern double straintilde[N3][N2][N1][6],stress[N3][N2][N1][6],delta[N3][N2][N1];
-//extern double work[N3][N2][N1][6],workim[N3][N2][N1][6];
-//extern double cloc[N3][N2][N1][6][6],fsloc[N3][N2][N1][6][6];
-

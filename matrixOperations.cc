@@ -298,7 +298,7 @@ double tnorm(double *a,int nrows, int ncols){
 	m,n --> non repeated index numbers in right hand side
 	ex: If you want to do c_ij=A_ijkl:b_jl, then m=2, n=4
 */
-void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m, int n){
+void multiply3333x33(double *c, fourthOrderTensor A, double b[3][3], int m, int n){
 	int i,j,k,l;
 
 	//print2darray(b);
@@ -306,19 +306,19 @@ void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m,
 	if(m==3 && n==4)
 		for(i=0;i<3;i++)
 		    for(j=0;j<3;j++){
-		    	c[i][j]=0;
+		    	c[i*3+j]=0;
 	    		for(k=0;k<3;k++)
 				    for(l=0;l<3;l++)
-				    	c[i][j]+=A.tensor[i][j][k][l]*b[k][l];
+				    	c[i*3+j]+=A.tensor[i][j][k][l]*b[k][l];
 			}
 
 	else if(m==2 && n==4)
 		for(i=0;i<3;i++)
 		    for(k=0;k<3;k++){
-		    	c[i][k]=0;
+		    	c[i*3+k]=0;
 	    		for(j=0;j<3;j++)
 				    for(l=0;l<3;l++)
-				    	c[i][k]+=A.tensor[i][j][k][l]*b[j][l];
+				    	c[i*3+k]+=A.tensor[i][j][k][l]*b[j][l];
 				}
 }
 
@@ -348,11 +348,11 @@ int findInverse(double* in, double det, int order){
 /*
 	Find symmetric part of a matrix
 */
-void symmetric(double aIn[3][3], double aOut[3][3]){
+void symmetric(double *aIn, double *aOut){
 
 	for(int i=0; i<3;i++)
 		for(int j=0; j<3;j++)
-			aOut[i][j]=0.5*(aIn[i][j]+aIn[j][i]);
+			aOut[i*3+j]=0.5*(aIn[i*3+j]+aIn[j*3+i]);
 
 }
 

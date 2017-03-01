@@ -16,39 +16,39 @@ void augmentLagrangian(void){
 
     int i,j,k,n,m;
 
-    for(k=0;k<N3;k++)
-        for(j=0;j<N2;j++)
-            for(i=0;i<N1;i++){
+    for(k=0;k<n3;k++)
+        for(j=0;j<n2;j++)
+            for(i=0;i<n1;i++){
                 
                 for(n=0;n<6;n++)
-                    dg[n]=strainbar[n]+straintilde[k][j][i][n];
+                    dg[n]=strainbar[n]+straintilde[k*n2*(n1)+j*(n1)+i+n];
                 
 
                 for(n=0;n<6;n++){
-                    x[n]=stress[k][j][i][n];
+                    x[n]=stress[k*n2*(n1)+j*(n1)+i+n];
                     for(m=0;m<6;m++)
                         x[n]+=C0_66[n][m]*dg[m];
                 }
 
 
-                for(n=0;n<6;n++){
-                    edot[n]=0.0;
-                    for(m=0;m<6;m++)
-                        edot[n]+=fsloc[k][j][i][n][m]*x[m];
+                for(m=0;m<6;m++){
+                    edot[m]=0.0;
+                    for(n=0;n<6;n++)
+                        edot[m]+=fsloc[k*n2*(n1)+j*(n1)+i+6*m+n]*x[n];
                 }
 
-                for(n=0;n<6;n++){
-                    ddg[n]=dg[n]-edot[n];                
-                    dsg[n]=0.0;
-                    for(m=0;m<6;m++)
-                        dsg[n]+=C0_66[n][m]*(dg[n]-edot[n]);
-                    stress[k][j][i][n]+=dsg[n];
+                for(m=0;m<6;m++){
+                    ddg[m]=dg[m]-edot[m];                
+                    dsg[m]=0.0;
+                    for(n=0;n<6;n++)
+                        dsg[m]+=C0_66[m][n]*(dg[m]-edot[m]);
+                    stress[k*n2*(n1)+j*(n1)+i+m]+=dsg[m];
                 }
 
                 errstrain+=tnorm((double *)ddg,6,1)*volumeVoxel;
                 errstress+=tnorm((double *)dsg,6,1)*volumeVoxel;
 
-//                print1darray(stress[k][j][i],6);
+//                print1darray(stress[k*n2*(n1)+j*(n1)+i],6);
         }        
 }
 
@@ -81,7 +81,7 @@ void findGammaHat(fourthOrderTensor Cref){
                     for(m=0;m<3;m++)
                     	fourierTensor[l][m]=fourierPointNorm[l]*fourierPointNorm[m];
 			
-				multiply3333x33(G,Cref,fourierTensor,2,4);
+				multiply3333x33((double *) G,Cref,fourierTensor,2,4);
 	
 				findInverse((double *)G,det,3);
 

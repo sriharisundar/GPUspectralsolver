@@ -56,12 +56,12 @@ void transformSecondOrderTensor(double aIn[3][3], double aOut[3][3], double q[3]
 	m,n --> non repeated index numbers in right hand side
 	ex: If you want to do c_ij=A_ijkl:b_jl, then m=2, n=3
 */
-void multiply3333x33(double c[3][3], fourthOrderTensor A, double b[3][3], int m, int n);
+void multiply3333x33(double *c, fourthOrderTensor A, double b[3][3], int m, int n);
 
 /*
 	Find symmetric part of a matrix
 */
-void symmetric(double aIn[3][3], double aOut[3][3]);
+void symmetric(double *aIn, double *aOut);
 
 /*
 	Find antisymmetric part of a matrix

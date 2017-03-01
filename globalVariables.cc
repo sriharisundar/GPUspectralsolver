@@ -20,12 +20,12 @@ int nsteps,itermax;
 int ictrl,ictrl1,ictrl2;
 char *outputFile;
 
-double euler*;
-int grainID*,phaseID*;
-double ddefgrad*,ddefgradim*;
-double straintilde*,stress*,delta*;
-double work*,workim*;
-double cloc*,fsloc*;
+double *euler;
+int *grainID,*phaseID;
+double *ddefgrad,*ddefgradim;
+double *straintilde,*stress,*delta;
+double *work,*workim;
+double *cloc,*fsloc;
 fourthOrderTensor *gammaHat;
 
 void initglobal(){
@@ -70,17 +70,16 @@ void initglobal(){
     basis[1][1][5]=rsq3;
     basis[2][2][5]=rsq3;
 
-	euler*=new double[n3*n2*n1];
-	grainID*=new int[n3*n2*n1];
-	phaseID*=new int[n3*n2*n1];
-	ddefgrad*=new double[n3*n2*n1];
-	ddefgradim*=new double[n3*n2*n1];
-	straintilde*=new double[n3*n2*n1];
-	stress*=new double[n3*n2*n1];
-	delta*=new double[n3*n2*n1];
-	work*=new double[n3*n2*n1];
-	workim*=new double[n3*n2*n1];
-	cloc*=new double[n3*n2*n1];
-	fsloc*=new double[n3*n2*n1];
+	euler=new double[n3*n2*n1*3];
+	grainID=new int[n3*n2*n1];
+	phaseID=new int[n3*n2*n1];
+	ddefgrad=new double[n3*n2*n1*9];
+	ddefgradim=new double[n3*n2*n1*9];
+	straintilde=new double[n3*n2*n1*6];
+	stress=new double[n3*n2*n1*6];
+	work=new double[n3*n2*n1*6];
+	workim=new double[n3*n2*n1*6];
+	cloc=new double[n3*n2*n1*36];
+	fsloc=new double[n3*n2*n1*36];
 
 }
