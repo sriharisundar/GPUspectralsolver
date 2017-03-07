@@ -235,24 +235,30 @@ int main(int argc, char *argv[])
 	// Initialize stress and strain fields
 	// sg - stress
 	// dtilde-straingradient - straintilde
-	
+	//for(k=0;k<n3;k++)
+		//for(j=0;j<n2;j++)
+			//for(i=0;i<n1;i++){
+				//cout<<k<<" "<<j<<" "<<i<<endl;
+				//print2darray(&cloc[(k*n2*(n1)+j*(n1)+i)*36],6);
+			//}
+		
 	for(k=0;k<n3;k++)
 		for(j=0;j<n2;j++)
 			for(i=0;i<n1;i++){
 
 				for(n=0;n<6;n++)
-					straintilde[k*n2*(n1)+j*(n1)+i+n]=0;
+					straintilde[(k*n2*(n1)+j*(n1)+i)*6+n]=0;
 
 				for(n=0;n<6;n++){
 					if(phaseID[k*n2*(n1)+j*(n1)+i]==2)
-						stress[k*n2*(n1)+j*(n1)+i+n]=0;
+						stress[(k*n2*(n1)+j*(n1)+i)*6+n]=0;
 					else{
-						stress[k*n2*(n1)+j*(n1)+i+n]=0;
+						stress[(k*n2*(n1)+j*(n1)+i)*6+n]=0;
 						for(m=0;m<6;m++){
-							stress[k*n2*(n1)+j*(n1)+i+n]+=cloc[k*n2*(n1)+j*(n1)+i+n*6+m]*(strainbar[m]);
+							stress[(k*n2*(n1)+j*(n1)+i)*6+n]+=cloc[(k*n2*(n1)+j*(n1)+i)*36+n*6+m]*(strainbar[m]);
 						}
 					}
-					stressbar[n]+=stress[k*n2*(n1)+j*(n1)+i+n]*volumeVoxel;
+					stressbar[n]+=stress[(k*n2*(n1)+j*(n1)+i)*6+n]*volumeVoxel;
 				}
 	}
 
@@ -280,10 +286,10 @@ int main(int argc, char *argv[])
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)
 						for(i=0;i<n1;i++){
-							in[k*n2*n1+j*n1+i][0]=stress[k*n2*(n1)+j*(n1)+i+n];
+							in[k*n2*n1+j*n1+i][0]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
 							in[k*n2*n1+j*n1+i][1]=0;
 							for(m=0;m<6;m++)
-								in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[k*n2*(n1)+j*(n1)+i+m];
+								in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
 				}
 
 				fftw_execute(plan_forward);
@@ -291,10 +297,14 @@ int main(int argc, char *argv[])
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)
 						for(i=0;i<n1;i++){
-							work[k*n2*(n1)+j*(n1)+i+n]=out[k*n2*n1+j*n1+i][0];
-							workim[k*n2*(n1)+j*(n1)+i+n]=out[k*n2*n1+j*n1+i][1];
-							if(iteration==1)
-								cout<<work[k*n2*(n1)+j*(n1)+i+n]<<endl;
+							work[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][0];
+							workim[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][1];
+//							if(iteration==1){
+////								cout<<iteration<<" "<<n<<endl;
+////								cout<<stress[(k*n2*(n1)+j*(n1)+i)*6+n]<<endl;
+////								cout<<work[(k*n2*(n1)+j*(n1)+i)*6+n]<<endl;
+////								cout<<workim[(k*n2*(n1)+j*(n1)+i)*6+n]<<endl<<endl;
+//							}
 				}
 
 			}
@@ -305,11 +315,11 @@ int main(int argc, char *argv[])
 			for(k=0;k<n3;k++)
 				for(j=0;j<n2;j++)
 					for(i=0;i<(n1);i++){
-						change_basis(&work[k*n2*(n1)+j*(n1)+i],work33,aux66,aux3333,1);
-						change_basis(&workim[k*n2*(n1)+j*(n1)+i],work33im,aux66,aux3333,1);
-						
-						multiply3333x33(&ddefgrad[k*n2*(n1)+j*(n1)+i],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
-						multiply3333x33(&ddefgradim[k*n2*(n1)+j*(n1)+i],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+						change_basis(&work[(k*n2*(n1)+j*(n1)+i)*6],work33,aux66,aux3333,1);
+						change_basis(&workim[(k*n2*(n1)+j*(n1)+i)*6],work33im,aux66,aux3333,1);
+
+						multiply3333x33(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
+						multiply3333x33(&ddefgradim[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
 			}
 			
 			// Arrange data for out
@@ -320,8 +330,8 @@ int main(int argc, char *argv[])
 					for(k=0;k<n3;k++)
 						for(j=0;j<n2;j++)
 							for(i=0;i<(n1);i++){
-								out[k*n2*(n1)+j*(n1)+i][0]=ddefgrad[k*n2*(n1)+j*(n1)+i+6*m+n];
-								out[k*n2*(n1)+j*(n1)+i][1]=ddefgradim[k*n2*(n1)+j*(n1)+i+6*m+n];
+								out[k*n2*(n1)+j*(n1)+i][0]=ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
+								out[k*n2*(n1)+j*(n1)+i][1]=ddefgradim[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
 					}
 
 					fftw_execute(plan_backward);
@@ -329,7 +339,7 @@ int main(int argc, char *argv[])
 					for(k=0;k<n3;k++)
 						for(j=0;j<n2;j++)
 							for(i=0;i<n1;i++)
-								ddefgrad[k*n2*(n1)+j*(n1)+i+6*m+n]=in[k*n2*(n1)+j*(n1)+i][0]/prodDim;
+								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=in[k*n2*(n1)+j*(n1)+i][0]/prodDim;
 
 			}
 
@@ -338,12 +348,13 @@ int main(int argc, char *argv[])
 			for(k=0;k<n3;k++)
 				for(j=0;j<n2;j++)
 					for(i=0;i<n1;i++){
-						symmetric(&ddefgrad[k*n2*(n1)+j*(n1)+i],(double *) aux33);
-						change_basis(&straintilde[k*n2*(n1)+j*(n1)+i],aux33,aux66,aux3333,2);
+						symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9],(double *) aux33);
+						change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],aux33,aux66,aux3333,2);
 			}
 
 
 			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+//                                        if(iteration==1)
 			augmentLagrangian();
 			
 			for(n=0;n<6;n++)
@@ -354,7 +365,7 @@ int main(int argc, char *argv[])
 				for(j=0;j<n2;j++)
 					for(i=0;i<n1;i++){
 						for(n=0;n<6;n++)
-							stressbar[n]+=stress[k*n2*(n1)+j*(n1)+i+n]*volumeVoxel;
+							stressbar[n]+=stress[(k*n2*(n1)+j*(n1)+i)*6+n]*volumeVoxel;
 			}
 
 			// Write stressbar and strainbar for each iteration to output file
@@ -392,8 +403,8 @@ int main(int argc, char *argv[])
 			for(i=0;i<n1;i++){
 				
 				for(m=0;m<6;m++){
-					strain[m]=strainbar[m]+straintilde[k*n2*(n1)+j*(n1)+i+m];
-					stress6[m]=stress[k*n2*(n1)+j*(n1)+i+m];
+					strain[m]=strainbar[m]+straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
+					stress6[m]=stress[(k*n2*(n1)+j*(n1)+i)*6+m];
 				}
 
 				change_basis(strain,strainout,aux66,aux3333,1);

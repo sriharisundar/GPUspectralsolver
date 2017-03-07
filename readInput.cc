@@ -10,6 +10,7 @@
 #include <vector>
 #include <iterator>
 #include <stdlib.h> //for atoi()
+#include <iomanip>
 
 void readtexture(std::string filename){
 
@@ -42,31 +43,29 @@ void readtexture(std::string filename){
 		
 		change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
-		//print2darray(cvoxel66);
-
-		for(n=0;n<6;n++)
-			for(m=0;m<6;m++){
-				cloc[(k-1)*n2*(n1)+(j-1)*(n1)+i-1+n*6+m]=cvoxel66[n][m];
-				C0_66[n][m]=C0_66[n][m]+cvoxel66[n][m]*volumeVoxel;
+		for(m=0;m<6;m++)
+			for(n=0;n<6;n++){
+				cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=cvoxel66[m][n];
+				C0_66[m][n]=C0_66[m][n]+cvoxel66[m][n]*volumeVoxel;
 			}
 	}
 
 	change_basis(aux6,aux33,C0_66,C0_3333.tensor,3);
 
-	count=0;
-
 	for(k=0;k<n3;k++)
 		for(j=0;j<n2;j++)
 			for(i=0;i<n1;i++){
 				
-
-				count++;
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++)
-						saux[n][m]=cloc[k*n2*(n1)+j*(n1)+i+6*n+m];
-
-
+						saux[n][m]=cloc[(k*n2*(n1)+j*(n1)+i)*36+6*n+m];
+		
 				findInverse((double *)saux,det,6);
+
+                //std::cout<<k<<" "<<j<<" "<<i<<" "<<std::endl;
+                //print1darray(&stress[(k*n2*(n1)+j*(n1)+i)*6],6);
+                //print2darray((double *)saux,6);
+                //print2darray(&fsloc[(k*n2*(n1)+j*(n1)+i)*36],6);
 
 				for(n=0;n<6;n++)
 					for(m=0;m<6;m++){
@@ -83,11 +82,10 @@ void readtexture(std::string filename){
 						dummy=0.0;
 						for(p=0;p<6;p++)
 							dummy+=saux[n][p]*taux[p][m];
-						fsloc[k*n2*(n1)+j*(n1)+i+6*n+m]=dummy;
+						fsloc[(k*n2*(n1)+j*(n1)+i)*36+6*n+m]=dummy;
 					}
-
-		}
-
+	
+	}
 }
 
 void readprops(std::string filename){
@@ -174,6 +172,20 @@ void readinput(char filename[100]){
 		
 		textureFile=tokens[0];
 		readtexture(textureFile);
+
+//		int size=6;
+//		for(int k=0;k<n3;k++)
+//			for(int j=0;j<n2;j++)
+//				for(int i=0;i<n1;i++){
+//					std::cout<<k<<" "<<j<<" "<<i<<std::endl;
+//					for(int m=0;m<size;m++){
+//						for(int n=0;n<size;n++)
+//							std::cout<<std::setw(10)<<cloc[k*n2*(n1)+j*(n1)+i+m*size+n]<<" ";
+//						std::cout<<std::endl;
+//					}	
+//					std::cout<<std::endl;
+//				}
+
 	}
 
 	//Read in ouputfile name and store it in outfile variable
@@ -288,3 +300,12 @@ void readinput(char filename[100]){
 		itermax=std::stoi(tokens[0]);
 	}
 }
+
+//		int size=6;
+//		std::cout<<k<<" "<<j<<" "<<i<<std::endl;
+//		for(int m=0;m<size;m++){
+//			for(int n=0;n<size;n++)
+//				std::cout<<std::setw(10)<<cloc[((k)*n2*(n1)+(j)*(n1)+(i))*36+m*size+n]<<" ";
+//			std::cout<<std::endl;
+//		}	
+//		std::cout<<std::endl;
