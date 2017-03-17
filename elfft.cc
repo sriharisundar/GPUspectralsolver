@@ -15,6 +15,22 @@ using namespace std;
 #define DEVICE CL_DEVICE_TYPE_DEFAULT
 #endif
 
+namespace util {
+
+inline std::string loadProgram(std::string input)
+{
+    std::ifstream stream(input.c_str());
+    if (!stream.is_open()) {
+        std::cout << "Cannot open file: " << input << std::endl;
+        exit(1);
+    }
+
+     return std::string(
+        std::istreambuf_iterator<char>(stream),
+        (std::istreambuf_iterator<char>()));
+}
+
+}
 
 int main(int argc, char *argv[])
 {	
@@ -29,10 +45,18 @@ int main(int argc, char *argv[])
 	int iteration,step;
 	int fftchoice;
 
+//fftw variables
 	fftw_complex *in;
 	fftw_complex *out;
 	fftw_plan plan_backward;
 	fftw_plan plan_forward;
+
+//clFFT variables
+	cl_int err;
+	cl::Buffer d_stress;
+	cl::Buffer d_straintilde;
+	cl::Buffer d_gammaHat;
+	cl::Buffer d_C0_66;
 
     cl::Context context(DEVICE);		
 
@@ -40,7 +64,7 @@ int main(int argc, char *argv[])
 
     cl::Program program(context, util::loadProgram("GPUfunctions.cl"), true);
 
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> convolute(program, "convolute");
+//    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> convolute(program, "convolute");
 
 	clfftPlanHandle planHandle;
 	clfftDim dim = CLFFT_3D;
@@ -73,22 +97,30 @@ int main(int argc, char *argv[])
 	}
 
 	else { 
-	clLengths= {n1, n2, n3};
+	clLengths[0]=n1;
+	clLengths[1]=n2;
+	clLengths[2]=n3;
+
+	d_stress=cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(double)*6*prodDim);
+	d_straintilde=cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(double)*6*prodDim);
+	d_gammaHat=cl::Buffer(context,CL_MEM_READ_ONLY,sizeof(fourthOrderTensor)*prodDim);
+	d_C0_66=cl::Buffer(context,CL_MEM_READ_ONLY,sizeof(double)*36);
 
 	/* Setup clFFT. */
 	err = clfftInitSetupData(&fftSetup);
 	err = clfftSetup(&fftSetup);
 
 	/* Create a default plan for a complex FFT. */
-	err = clfftCreateDefaultPlan(&planHandle, ctx, dim, clLengths);
+	err = clfftCreateDefaultPlan(&planHandle, context(), dim, clLengths);
 
 	/* Set plan parameters. */
-	err = clfftSetPlanPrecision(planHandle, CLFFT_SINGLE);
+	err = clfftSetPlanPrecision(planHandle, CLFFT_DOUBLE);
 	err = clfftSetLayout(planHandle, CLFFT_COMPLEX_PLANAR, CLFFT_COMPLEX_PLANAR);
 	err = clfftSetResultLocation(planHandle, CLFFT_OUTOFPLACE);
+	err= clfftSetPlanBatchSize(planHandle,6);
 
 	/* Bake the plan. */
-	err = clfftBakePlan(planHandle, 1, &queue, NULL, NULL);
+	err = clfftBakePlan(planHandle, 1, &queue(), NULL, NULL);
 	}
 
 	cout<<"Output file:"<<outputFile<<endl;
@@ -138,6 +170,12 @@ int main(int argc, char *argv[])
 		err2mod=2*error;
 
 		findGammaHat(C0_3333);
+
+		err = clEnqueueWriteBuffer(queue(), d_C0_66(), CL_TRUE, 0, 36*sizeof(double),
+									C0_66, 0, NULL, NULL);
+
+		err = clEnqueueWriteBuffer(queue(), d_gammaHat(), CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor),
+									gammaHat, 0, NULL, NULL);
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;

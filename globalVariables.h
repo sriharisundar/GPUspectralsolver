@@ -1,8 +1,8 @@
 #ifndef structures
 #define structures
-struct fourthOrderTensor{
+typedef struct {
 	double tensor[3][3][3][3];
-};
+}fourthOrderTensor;
 #endif
 
 #ifndef global_variables
