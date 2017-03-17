@@ -171,11 +171,17 @@ int main(int argc, char *argv[])
 
 		findGammaHat(C0_3333);
 
-		err = clEnqueueWriteBuffer(queue(), d_C0_66(), CL_TRUE, 0, 36*sizeof(double),
-									C0_66, 0, NULL, NULL);
+		err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double),
+									C0_66);
 
-		err = clEnqueueWriteBuffer(queue(), d_gammaHat(), CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor),
-									gammaHat, 0, NULL, NULL);
+		err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor),
+									gammaHat);
+
+		err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, prodDim*6*sizeof(double),
+									stress);
+
+		err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, prodDim*6*sizeof(double),
+									straintilde);
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
@@ -205,7 +211,6 @@ int main(int argc, char *argv[])
 							work[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][0];
 							workim[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][1];
 				}
-
 			}
 
 			// Convert stress to tensorial form
