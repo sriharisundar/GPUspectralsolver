@@ -1,7 +1,7 @@
 CC=g++ -std=c++11
-CFLAGS=-Wall -lfftw3 -lm -lclFFT -lOpenCL
-HEADERS=-I. -I $(HOME)/clFFT-2.12.2-Linux-x64/include
-LIBS= -L. -L $(HOME)/clFFT-2.12.2-Linux-x64/lib64 
+CFLAGS=-Wall -lfftw3 -lm
+HEADERS=-I. 
+LIBS= -L.
 DEPS = matrixOperations.h readInput.h globalVariables.h printFunctions.h solverFunctions.h
 OBJ = matrixOperations.o readInput.o globalVariables.o printFunctions.o solverFunctions.o 
 

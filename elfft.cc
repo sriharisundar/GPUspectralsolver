@@ -7,175 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <fftw3.h>
-#include "clFFT.h"
-#include <CL/cl.hpp>
 using namespace std;
-
-#ifndef DEVICE
-#define DEVICE CL_DEVICE_TYPE_DEFAULT
-#endif
-
-// From Fabian Dournac
-// https://dournac.org/info/fft_gpu
-int FFT_3D_OpenCL(float *tab[], const char* direction, int sizex, int sizey, int sizez)
-{
-	int i;
-
-	/* OpenCL variables. */
-	cl_int err;
-	cl_platform_id platform = 0;
-	cl_device_id device = 0;
-	cl_context ctx = 0;
-	cl_command_queue queue = 0;
-
-	/* Input and Output  buffer. */
-	cl_mem buffersIn[2]  = {0, 0};
-	cl_mem buffersOut[2] = {0, 0};
-
-	/* Temporary buffer. */
-	cl_mem tmpBuffer = 0;
-
-	/* Size of temp buffer. */
-	size_t tmpBufferSize = 0;
-	int status = 0;
-	int ret = 0;
-
-	/* Total size of FFT. */
-	size_t N = sizex*sizey*sizez;
-
-	/* FFT library realted declarations. */
-	clfftPlanHandle planHandle;
-	clfftDim dim = CLFFT_3D;
-	size_t clLengths[3] = {sizex, sizey, sizez};
-
-	/* Setup OpenCL environment. */
-	err = clGetPlatformIDs(1, &platform, NULL);
-	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
-
-	/* Create an OpenCL context. */
-	ctx = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
-
-	/* Create a command queue. */
-	queue = clCreateCommandQueue(ctx, device, 0, &err);
-
-	/* Setup clFFT. */
-	clfftSetupData fftSetup;
-	err = clfftInitSetupData(&fftSetup);
-	err = clfftSetup(&fftSetup);
-
-	/* Create a default plan for a complex FFT. */
-	err = clfftCreateDefaultPlan(&planHandle, ctx, dim, clLengths);
-
-	/* Set plan parameters. */
-	err = clfftSetPlanPrecision(planHandle, CLFFT_SINGLE);
-	err = clfftSetLayout(planHandle, CLFFT_COMPLEX_PLANAR, CLFFT_COMPLEX_PLANAR);
-	err = clfftSetResultLocation(planHandle, CLFFT_OUTOFPLACE);
-
-	/* Bake the plan. */
-	err = clfftBakePlan(planHandle, 1, &queue, NULL, NULL);
-
-	/* Real and Imaginary arrays. */
-	cl_float* inReal  = (cl_float*) malloc (N * sizeof (cl_float));
-	cl_float* inImag  = (cl_float*) malloc (N * sizeof (cl_float));
-	cl_float* outReal = (cl_float*) malloc (N * sizeof (cl_float));
-	cl_float* outImag = (cl_float*) malloc (N * sizeof (cl_float));
-
-	/* Initialization of inReal, inImag, outReal and outImag. */
-        for(i=0; i<N; i++)
-	{
-		inReal[i]  = tab[0][i];
-		inImag[i]  = 0.0f;
-		outReal[i] = 0.0f;
-		outImag[i] = 0.0f;
-	}
-
-	/* Create temporary buffer. */
-	status = clfftGetTmpBufSize(planHandle, &tmpBufferSize);
-
-	if ((status == 0) && (tmpBufferSize > 0)) {
-		tmpBuffer = clCreateBuffer(ctx, CL_MEM_READ_WRITE, tmpBufferSize, 0, &err);
-		if (err != CL_SUCCESS)
-			printf("Error with tmpBuffer clCreateBuffer\n");
-	}
-
-	/* Prepare OpenCL memory objects : create buffer for input. */
-	buffersIn[0] = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			N * sizeof(cl_float), inReal, &err);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersIn[0] clCreateBuffer\n");
-
-	/* Enqueue write tab array into buffersIn[0]. */
-	err = clEnqueueWriteBuffer(queue, buffersIn[0], CL_TRUE, 0, N *
-			sizeof(float),
-			inReal, 0, NULL, NULL);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersIn[0] clEnqueueWriteBuffer\n");
-
-	/* Prepare OpenCL memory objects : create buffer for input. */
-	buffersIn[1] = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			N * sizeof(cl_float), inImag, &err);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersIn[1] clCreateBuffer\n");
-
-	/* Enqueue write tab array into buffersIn[0]. */
-	err = clEnqueueWriteBuffer(queue, buffersIn[1], CL_TRUE, 0, N * sizeof(float),
-			inImag, 0, NULL, NULL);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersIn[1] clEnqueueWriteBuffer\n");
-
-	/* Prepare OpenCL memory objects : create buffer for output. */
-	buffersOut[0] = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N *
-			sizeof(cl_float), outReal, &err);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersOut[0] clCreateBuffer\n");
-
-	buffersOut[1] = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N *
-			sizeof(cl_float), outImag, &err);
-	if (err != CL_SUCCESS)
-		printf("Error with buffersOut[1] clCreateBuffer\n");
-
-	/* Execute Forward or Backward FFT. */
-	if(strcmp(direction,"forward") == 0)
-	{
-		/* Execute the plan. */
-		err = clfftEnqueueTransform(planHandle, CLFFT_FORWARD, 1, &queue, 0, NULL, NULL,
-				buffersIn, buffersOut, tmpBuffer);
-	}
-	else if(strcmp(direction,"backward") == 0)
-	{
-		/* Execute the plan. */
-		err = clfftEnqueueTransform(planHandle, CLFFT_BACKWARD, 1, &queue, 0, NULL, NULL,
-				buffersIn, buffersOut, tmpBuffer);
-	}
-
-	/* Wait for calculations to be finished. */
-	err = clFinish(queue);
-
-	/* Fetch results of calculations : Real and Imaginary. */
-	err = clEnqueueReadBuffer(queue, buffersOut[0], CL_TRUE, 0, N * sizeof(float), tab[0],
-			0, NULL, NULL);
-	err = clEnqueueReadBuffer(queue, buffersOut[1], CL_TRUE, 0, N * sizeof(float), tab[1],
-			0, NULL, NULL);
-
-	/* Release OpenCL memory objects. */
-	clReleaseMemObject(buffersIn[0]);
-	clReleaseMemObject(buffersIn[1]);
-	clReleaseMemObject(buffersOut[0]);
-	clReleaseMemObject(buffersOut[1]);
-	clReleaseMemObject(tmpBuffer);
-
-	/* Release the plan. */
-	err = clfftDestroyPlan(&planHandle);
-
-	/* Release clFFT library. */
-	clfftTeardown();
-
-	/* Release OpenCL working objects. */
-	clReleaseCommandQueue(queue);
-	clReleaseContext(ctx);
-
-	return ret;
-}
 
 int main(int argc, char *argv[])
 {	
@@ -188,7 +20,6 @@ int main(int argc, char *argv[])
 	double prodDim;
 	double volumeVoxel;
 	int iteration,step;
-	int fftchoice;
 
 	fftw_complex *in;
 	fftw_complex *out;
@@ -201,29 +32,16 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	if (argc<3){
-		cout<<"Enter 1 for FFTW or 2 for clFFT:";
-		cin>>fftchoice;
-	}
-	else
-		fftchoice=atoi(argv[2]);
-
 	readinput(argv[1]);
 
 	prodDim=n1*n2*n3;
 	volumeVoxel=1.0/prodDim;
 
-	if (fftchoice==1){
-		in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
-		out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+	in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
 
-		plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-		plan_backward=fftw_plan_dft_3d ( n3, n2, n1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
-	}
-
-	else { 
-		
-	;}
+	plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_3d ( n3, n2, n1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
 
 	cout<<"Output file:"<<outputFile<<endl;
 	fstream fieldsOut;
