@@ -1,26 +1,34 @@
 #include "kernelUtilFunctions.h"
 
-__kernel void findAuxiliaryStress(__global double* stress, __global double* straintilde, __global double* in, const unsigned int prodDim){
-    int i;
+__kernel void findAuxiliaryStress(__global double* d_stress, __global double* d_straintilde, __global double* d_in, __global const double* d_C0_66, const unsigned int n, const unsigned int prodDim){
+    int i,j;
 
-    if(i<prodDim)
     i=get_global_id(0);
+    j=get_local_id(0);
 
-    in[i][0]=stress[i*6+n];
-    in[i][1]=0;
-    for(m=0;m<6;m++)
-        in[i][0]-=C0_66[n][m]*straintilde[i*6+m];
+    if(i<prodDim){
+        d_in[i][0]=d_stress[i*6+n];
+        d_in[i][1]=0;
+        for(m=0;m<6;m++)
+            in[i][0]-=d_C0_66[n][m]*d_straintilde[i*6+m];
     }
 }
 
-__kernel void convolute()
+__kernel void convolute(__global *work, __global *workim, __global *ddefgrad, __global *ddefgradim, const unsigned int prodDim)
 {
-    
-}
+    int i;
 
-__kernel void change_basis(){
-	/* code */
-	;
+    double work33[3][3],work33im[3][3];
+
+    i=get_global_id(0);
+
+    if(i<prodDim){
+        change_basis(&work[(i)*6],&work33,aux66,aux3333,1);
+        change_basis(&workim[(i)*6],&work33im,aux66,aux3333,1);
+
+        multiply3333x33(&ddefgrad[(i)*9],gammaHat[i],work33,3,4);
+        multiply3333x33(&ddefgradim[(i)*9],gammaHat[i],work33im,3,4);
+    }
 }
 
 __kernel void augmentLagrangian(){

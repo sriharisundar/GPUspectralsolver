@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
     cl::CommandQueue queue(context);
 
-    cl::Program program(context, util::loadProgram("GPUfunctions.cl"), true);
+//    cl::Program program(context, util::loadProgram("GPUfunctions.cl"), true);
 
 //    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> convolute(program, "convolute");
 
@@ -88,15 +88,12 @@ int main(int argc, char *argv[])
 	prodDim=n1*n2*n3;
 	volumeVoxel=1.0/prodDim;
 
-	if (fftchoice==1){
-		in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
-		out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+	in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
 
-		plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-		plan_backward=fftw_plan_dft_3d ( n3, n2, n1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
-	}
+	plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_3d(n3,n2,n1,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
 
-	else { 
 	clLengths[0]=n1;
 	clLengths[1]=n2;
 	clLengths[2]=n3;
@@ -121,7 +118,7 @@ int main(int argc, char *argv[])
 
 	/* Bake the plan. */
 	err = clfftBakePlan(planHandle, 1, &queue(), NULL, NULL);
-	}
+
 
 	cout<<"Output file:"<<outputFile<<endl;
 	fstream fieldsOut;
@@ -171,8 +168,7 @@ int main(int argc, char *argv[])
 
 		findGammaHat(C0_3333);
 
-		err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double),
-									C0_66);
+		err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double),C0_66);
 
 		err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor),
 									gammaHat);
@@ -203,7 +199,6 @@ int main(int argc, char *argv[])
 								in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
 				}
 
-				fftw_execute(plan_forward);
 
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)

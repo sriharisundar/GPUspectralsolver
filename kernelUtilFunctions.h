@@ -39,16 +39,16 @@ void change_basis(double* a,double* b,int iopt){
                 for(j=0;j<3;j++){
                     b[i*3+j]=0;
                     for(k=0;k<6;k++)
-                        b[i*3+j]+=CE2[k]*basis[i][j][k];
+                        b[i*3+j]+=a[k]*basis[i][j][k];
                 }
             break;
 
         case 2:
             for(k=0;k<6;k++){
-                CE2[k]=0.0;
+                a[k]=0.0;
                 for(i=0;i<3;i++)
                     for(j=0;j<3;j++)
-                        CE2[k]+=C2[i][j]*basis[i][j][k];
+                        a[k]+=b[i*3+j]*basis[i][j][k];
             }
             break;
 
@@ -57,23 +57,47 @@ void change_basis(double* a,double* b,int iopt){
                 for(k=0;k<3;k++)
                     for(j=0;j<3;j++)
                         for(l=0;l<3;l++){
-                            C4[i][j][k][l]=0.0;
+                            b[i*3*3*3+j*3*3+k*3+l]=0.0;
                             for(n=0;n<6;n++)
                                 for(m=0;m<6;m++)
-                                    C4[i][j][k][l]+=CE4[n][m]*basis[i][j][n]*basis[k][l][m];
+                                    b[i*3*3*3+j*3*3+k*3+l]+=a[n*3+m]*basis[i][j][n]*basis[k][l][m];
                         }
             break;
 
         case 4:
             for(n=0;n<6;n++)
                 for(m=0;m<6;m++){
-                    CE4[n][m]=0.0;
+                    a[n*3+m]=0.0;
                     for(i=0;i<3;i++)
                         for(k=0;k<3;k++)
                             for(j=0;j<3;j++)
                                 for(l=0;l<3;l++)
-                                    CE4[n][m]+=C4[i][j][k][l]*basis[i][j][n]*basis[k][l][m];
+                                    a[n*3+m]+=b[i*3*3*3+j*3*3+k*3+l]*basis[i][j][n]*basis[k][l][m];
                 }
             break;
     }
+}
+
+void multiply3333x33(double *c, fourthOrderTensor A, double b[3][3], int m, int n){
+    int i,j,k,l;
+
+    //print2darray(b);
+    
+    if(m==3 && n==4)
+        for(i=0;i<3;i++)
+            for(j=0;j<3;j++){
+                c[i*3+j]=0;
+                for(k=0;k<3;k++)
+                    for(l=0;l<3;l++)
+                        c[i*3+j]+=A.tensor[i][j][k][l]*b[k][l];
+            }
+
+    else if(m==2 && n==4)
+        for(i=0;i<3;i++)
+            for(k=0;k<3;k++){
+                c[i*3+k]=0;
+                for(j=0;j<3;j++)
+                    for(l=0;l<3;l++)
+                        c[i*3+k]+=A.tensor[i][j][k][l]*b[j][l];
+                }
 }
