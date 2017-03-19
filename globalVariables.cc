@@ -77,8 +77,8 @@ void initglobal(){
 	ddefgradim=new double[n3*n2*n1*9];
 	straintilde=new double[n3*n2*n1*6];
 	stress=new double[n3*n2*n1*6];
-	work=new double[n3*n2*n1*6];
-	workim=new double[n3*n2*n1*6];
+	work=new double[n3*n2*(n1/2+1)*6];
+	workim=new double[n3*n2*(n1/2+1)*6];
 	cloc=new double[n3*n2*n1*36];
 	fsloc=new double[n3*n2*n1*36];
 
