@@ -35,7 +35,7 @@ inline std::string loadProgram(std::string input)
 int main(int argc, char *argv[])
 {	
 	int i,j,k,n,m;
-	double stressbar33[3][3],work33[3][3],work33im[3][3];
+	double stressbar33[3][3],strainbar33[3][3],work33[3][3],work33im[3][3];
 	double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
 	double strain[6],stress6[6];
 	double strainout[3][3],stressout[3][3];
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 	int fftchoice;
 
 //fftw variables
-	fftw_complex *in;
+	double *delta;
 	fftw_complex *out;
 	fftw_plan plan_backward;
 	fftw_plan plan_forward;
@@ -88,11 +88,11 @@ int main(int argc, char *argv[])
 	prodDim=n1*n2*n3;
 	volumeVoxel=1.0/prodDim;
 
-	in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
-	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+	delta=new double[n3*n2*n1];
+	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
 
-	plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-	plan_backward=fftw_plan_dft_3d(n3,n2,n1,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
+	plan_forward=fftw_plan_dft_r2c_3d(n3,n2,n1,delta,out,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_c2r_3d(n3,n2,n1,out,delta,FFTW_ESTIMATE );	
 
 	clLengths[0]=n1;
 	clLengths[1]=n2;
@@ -193,19 +193,20 @@ int main(int argc, char *argv[])
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)
 						for(i=0;i<n1;i++){
-							in[k*n2*n1+j*n1+i][0]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
-							in[k*n2*n1+j*n1+i][1]=0;
+							delta[(k*n2*(n1)+j*(n1)+i)]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
 							for(m=0;m<6;m++)
-								in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
+								delta[(k*n2*(n1)+j*(n1)+i)]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
 				}
 
+				fftw_execute(plan_forward);
 
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)
-						for(i=0;i<n1;i++){
-							work[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][0];
-							workim[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][1];
+						for(i=0;i<(n1/2+1);i++){
+							work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
+							workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];							
 				}
+
 			}
 
 			// Convert stress to tensorial form
@@ -213,35 +214,38 @@ int main(int argc, char *argv[])
 			cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<n3;k++)
 				for(j=0;j<n2;j++)
-					for(i=0;i<(n1);i++){
-						change_basis(&work[(k*n2*(n1)+j*(n1)+i)*6],work33,aux66,aux3333,1);
-						change_basis(&workim[(k*n2*(n1)+j*(n1)+i)*6],work33im,aux66,aux3333,1);
+					for(i=0;i<(n1/2+1);i++){
+						change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33,aux66,aux3333,1);
+						change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33im,aux66,aux3333,1);
 
-						multiply3333x33(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
-						multiply3333x33(&ddefgradim[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+						multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33,3,4);
+						multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33im,3,4);
 			}
 			
+			//change_basis(strainbar,strainbar33,aux66,aux3333,1);
+
 			// Arrange data for out
 			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
-
 					for(k=0;k<n3;k++)
 						for(j=0;j<n2;j++)
-							for(i=0;i<(n1);i++){
-								out[k*n2*(n1)+j*(n1)+i][0]=ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
-								out[k*n2*(n1)+j*(n1)+i][1]=ddefgradim[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
+							for(i=0;i<(n1/2+1);i++){
+								out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]=ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
+								out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
 					}
+
+					//out[0][0]=strainbar33[m][n];
 
 					fftw_execute(plan_backward);
 
 					for(k=0;k<n3;k++)
 						for(j=0;j<n2;j++)
-							for(i=0;i<n1;i++)
-								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=in[k*n2*(n1)+j*(n1)+i][0]/prodDim;
+							for(i=0;i<n1;i++){
+								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
+							}
 
 			}
-
 			// Get symmetric part of defgrad
 		
 			for(k=0;k<n3;k++)

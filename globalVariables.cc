@@ -23,7 +23,7 @@ char *outputFile;
 double *euler;
 int *grainID,*phaseID;
 double *ddefgrad,*ddefgradim;
-double *straintilde,*stress,*delta;
+double *straintilde,*stress;
 double *work,*workim;
 double *cloc,*fsloc;
 fourthOrderTensor *gammaHat;

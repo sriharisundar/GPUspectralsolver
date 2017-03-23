@@ -52,57 +52,46 @@ void augmentLagrangian(void){
         }        
 }
 
+// Check if normalization is necessary. Think it is necessary only if equilibrium is 
+// sought after in the Fourier space
 void findGammaHat(fourthOrderTensor Cref){
 
-	int i,j,k,p,q,r,s,l,m;
-    double fourierPoint[3],fourierPointNorm[3],fourierTensor[3][3],normPoint,det=0;
+    int i,j,k,p,q,r,s,l,m;
+    double fourierPoint[3],fourierTensor[3][3],det=0;
     double G[3][3];
 
-    gammaHat=new fourthOrderTensor[n3*n2*(n1)];
-    int count=0;
+    gammaHat=new fourthOrderTensor[n3*n2*(n1/2+1)];
 
     for(k=0;k<n3;k++){
-        fourierPoint[2]=k/(n3*RVEdim[2]);
-        if(k>n3/2-1) fourierPoint[2]=(k-n3)/(n3*RVEdim[2]);
+        fourierPoint[2]=k;
+        if(k>n3/2-1) fourierPoint[2]=(k-n3);
         for(j=0;j<n2;j++){
-            fourierPoint[1]=j/(n2*RVEdim[1]);
-            if(j>n2/2-1) fourierPoint[1]=(j-n2)/(n2*RVEdim[1]);
-            for(i=0;i<n1;i++){
-                fourierPoint[0]=i/(n1*RVEdim[0]);
-                if(i>n1/2-1) fourierPoint[0]=(i-n1)/(n1*RVEdim[0]);
-                
-                normPoint=tnorm((double *)fourierPoint,3,1);
-                        
-                fourierPointNorm[0]=fourierPoint[0]/normPoint;
-                fourierPointNorm[1]=fourierPoint[1]/normPoint;
-                fourierPointNorm[2]=fourierPoint[2]/normPoint;
-                
+            fourierPoint[1]=j;
+            if(j>n2/2-1) fourierPoint[1]=(j-n2);
+            for(i=0;i<n1/2+1;i++){
+                fourierPoint[0]=i;
+
                 for(l=0;l<3;l++)
                     for(m=0;m<3;m++)
-                    	fourierTensor[l][m]=fourierPointNorm[l]*fourierPointNorm[m];
-			
-				multiply3333x33((double *) G,Cref,fourierTensor,2,4);
-	
-				findInverse((double *)G,det,3);
+                        fourierTensor[l][m]=fourierPoint[l]*fourierPoint[m];
+            
+                multiply3333x33((double *) G,Cref,fourierTensor,2,4);
+    
+                findInverse((double *)G,det,3);
 
-				for(p=0;p<3;p++)
-					for(q=0;q<3;q++)
-						for(r=0;r<3;r++)
-							for(s=0;s<3;s++)
-								gammaHat[k*n2*(n1)+j*(n1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][s]; 
-
-                count++;
-//                cout<<count<<endl;
-//                print4darray(gammaHat[k*n2*(n1)+j*(n1)+i].tensor);
+                for(p=0;p<3;p++)
+                    for(q=0;q<3;q++)
+                        for(r=0;r<3;r++)
+                            for(s=0;s<3;s++)
+                                gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][s]; 
             }
         }
     }
 
-			    for(p=0;p<3;p++)
-					for(q=0;q<3;q++)
-						for(r=0;r<3;r++)
-							for(s=0;s<3;s++)
-								gammaHat[0].tensor[p][q][r][s]=0;
-
+                for(p=0;p<3;p++)
+                    for(q=0;q<3;q++)
+                        for(r=0;r<3;r++)
+                            for(s=0;s<3;s++)
+                                gammaHat[0].tensor[p][q][r][s]=0;
 
 }

@@ -31,7 +31,7 @@ extern char *outputFile;
 extern double *euler;
 extern int *grainID,*phaseID;
 extern double *ddefgrad,*ddefgradim;
-extern double *straintilde,*stress,*delta;
+extern double *straintilde,*stress;
 extern double *work,*workim;
 extern double *cloc,*fsloc;
 extern fourthOrderTensor *gammaHat;
