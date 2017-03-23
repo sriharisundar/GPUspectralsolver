@@ -12,7 +12,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {	
 	int i,j,k,n,m;
-	double stressbar33[3][3],work33[3][3],work33im[3][3];
+	double stressbar33[3][3],strainbar33[3][3],work33[3][3],work33im[3][3];
 	double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
 	double strain[6],stress6[6];
 	double strainout[3][3],stressout[3][3];
@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
 	double volumeVoxel;
 	int iteration,step;
 	double *delta;
-	
+
 	int N1,N2,N3; 
-	fftw_complex *out,*outback;
+	fftw_complex *out;
 	fftw_plan plan_backward;
 	fftw_plan plan_forward;
 
@@ -44,10 +44,9 @@ int main(int argc, char *argv[])
 
 	delta=new double[n3*n2*n1];
 	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
-	outback=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
 
-	plan_forward=fftw_plan_dft_r2c_3d(n3,n2,n1,delta,out,FFTW_ESTIMATE);
-	plan_backward=fftw_plan_dft_3d(n3, n2, n1, out, outback,FFTW_BACKWARD, FFTW_ESTIMATE);	
+	plan_forward=fftw_plan_dft_r2c_3d(N3,N2,N1,delta,out,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_c2r_3d ( N3, N2, N1, out, delta, FFTW_ESTIMATE );	
 
 	cout<<"Output file:"<<outputFile<<endl;
 	fstream fieldsOut;
@@ -59,13 +58,7 @@ int main(int argc, char *argv[])
 	// Initialize stress and strain fields
 	// sg - stress
 	// dtilde-straingradient - straintilde
-	//for(k=0;k<n3;k++)
-		//for(j=0;j<n2;j++)
-			//for(i=0;i<n1;i++){
-				//cout<<k<<" "<<j<<" "<<i<<endl;
-				//print2darray(&cloc[(k*n2*(n1)+j*(n1)+i)*36],6);
-			//}
-		
+	
 	for(k=0;k<n3;k++)
 		for(j=0;j<n2;j++)
 			for(i=0;i<n1;i++){
@@ -98,12 +91,12 @@ int main(int argc, char *argv[])
 
 		while(iteration<itermax && err2mod > error){
 			iteration++;
-			//debughermitkimaakacout<<"--------------------------------------------------------------"<<endl;
-			//debughermitkimaakacout<<"ITERATION:"<<iteration<<endl;
+			cout<<"--------------------------------------------------------------"<<endl;
+			cout<<"ITERATION:"<<iteration<<endl;
 
 			// Arrange data for in
 			// Perform forward FFT
-			//debughermitkimaakacout<<"Forward FFT of polarization field"<<endl<<endl;
+			cout<<"Forward FFT of polarization field"<<endl<<endl;
 
 			for(n=0;n<6;n++){
 				
@@ -121,8 +114,6 @@ int main(int argc, char *argv[])
 				for(k=0;k<n3;k++)
 					for(j=0;j<n2;j++)
 						for(i=0;i<(n1/2+1);i++){
-							//if(iteration == 1)
-								//cout<<i<<" "<<j<<" "<<k<<" "<<out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]<<endl;
 							work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
 							workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];							
 				}
@@ -131,33 +122,23 @@ int main(int argc, char *argv[])
 
 			// Convert stress to tensorial form
 			// Multiply with gamma operator
-			//debughermitkimaakacout<<"Gamma convolution"<<endl<<endl;
+			cout<<"Gamma convolution"<<endl<<endl;
 			for(k=0;k<n3;k++)
 				for(j=0;j<n2;j++)
 					for(i=0;i<(n1/2+1);i++){
 						change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33,aux66,aux3333,1);
 						change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33im,aux66,aux3333,1);
 
-						//if(iteration == 1){
-							//cout<<i<<" "<<j<<" "<<k<<" "<<endl;
-							//print2darray((double*)work33,3);}
-
 						multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33,3,4);
 						multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33im,3,4);
-
-						//if(iteration == 1){
-							//print2darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],3);
-							//print4darray(gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor);}
-
-
 			}
 			
+			change_basis(strainbar,strainbar33,aux66,aux3333,1);
+
 			// Arrange data for out
-			//debughermitkimaakacout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+			cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
-								if(iteration == 1)
-									cout<<m<<" "<<n<<endl;
 					for(k=0;k<n3;k++)
 						for(j=0;j<n2;j++)
 							for(i=0;i<(n1/2+1);i++){
@@ -165,19 +146,19 @@ int main(int argc, char *argv[])
 								out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
 					}
 
+					out[0][0]=strainbar33[m][n];
+
 					fftw_execute(plan_backward);
 
-					for(k=0;k<N3;k++)
-						for(j=0;j<N2;j++)
-							for(i=0;i<N1;i++){
-								if(iteration == 1)
-									cout<<i<<" "<<j<<" "<<k<<" "<<outback[(k*n2*(n1)+j*(n1)+i)][0]<<endl;
+					for(k=0;k<n3;k++)
+						for(j=0;j<n2;j++)
+							for(i=0;i<n1;i++){
 								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
 							}
+
 			}
 
-			// Get symmetric part of defgrad
-		
+			// Get symmetric part of defgrad		
 			for(k=0;k<n3;k++)
 				for(j=0;j<n2;j++)
 					for(i=0;i<n1;i++){
@@ -186,8 +167,8 @@ int main(int argc, char *argv[])
 			}
 
 
-			//debughermitkimaakacout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
-//                                        if(iteration==1)
+			cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
+
 			augmentLagrangian();
 			
 			for(n=0;n<6;n++)
@@ -205,8 +186,8 @@ int main(int argc, char *argv[])
 
 			change_basis(stressbar,stressbar33,aux66,aux3333,1);
 			stressref=stressbar33[ictrl1][ictrl2];
-			//debughermitkimaakacout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-			//debughermitkimaakacout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+			cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+			cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 
 			errorOut<<iteration<<" ";
 			errorOut<<errstress/stressref<<" ";

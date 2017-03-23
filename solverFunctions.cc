@@ -79,7 +79,7 @@ void findGammaHat(fourthOrderTensor Cref){
                     for(m=0;m<3;m++)
                     	fourierTensor[l][m]=fourierPointNorm[l]*fourierPointNorm[m];
 			
-				multiply3333x33((double *) G,Cref,fourierTensor,1,3);
+				multiply3333x33((double *) G,Cref,fourierTensor,2,4);
 	
 				findInverse((double *)G,det,3);
 
@@ -87,11 +87,7 @@ void findGammaHat(fourthOrderTensor Cref){
 					for(q=0;q<3;q++)
 						for(r=0;r<3;r++)
 							for(s=0;s<3;s++)
-								gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor[p][q][r][s]=G[p][r]*fourierTensor[q][s]; 
-
-//                            std::cout<<i<<" "<<j<<" "<<k<<" "<<std::endl;
-//                            print4darray(gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor);
-
+								gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i].tensor[p][q][r][s]=-1*G[p][r]*fourierTensor[q][s]; 
             }
         }
     }
