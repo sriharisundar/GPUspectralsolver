@@ -320,6 +320,15 @@ void multiply3333x33(double *c, fourthOrderTensor A, double b[3][3], int m, int 
 				    for(l=0;l<3;l++)
 				    	c[i*3+k]+=A.tensor[i][j][k][l]*b[j][l];
 				}
+
+	else if(m==1 && n==3)
+		for(j=0;j<3;j++)
+		    for(l=0;l<3;l++){
+		    	c[j*3+l]=0;
+	    		for(i=0;i<3;i++)
+				    for(k=0;k<3;k++)
+				    	c[j*3+l]+=A.tensor[i][j][k][l]*b[i][k];
+				}
 }
 
 int findInverse(double* in, double det, int order){

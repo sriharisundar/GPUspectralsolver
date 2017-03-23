@@ -21,10 +21,9 @@ int main(int argc, char *argv[])
 	double volumeVoxel;
 	int iteration,step;
 	double *delta;
-	double *deltaout;
-
+	
 	int N1,N2,N3; 
-	fftw_complex *out;
+	fftw_complex *out,*outback;
 	fftw_plan plan_backward;
 	fftw_plan plan_forward;
 
@@ -44,11 +43,11 @@ int main(int argc, char *argv[])
 	volumeVoxel=1.0/prodDim;
 
 	delta=new double[n3*n2*n1];
-	deltaout=new double[n3*n2*n1];
 	out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
+	outback=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
 
-	plan_forward=fftw_plan_dft_r2c_3d(N3,N2,N1,delta,out,FFTW_ESTIMATE);
-	plan_backward=fftw_plan_dft_c2r_3d ( N3, N2, N1, out, deltaout, FFTW_ESTIMATE );	
+	plan_forward=fftw_plan_dft_r2c_3d(n3,n2,n1,delta,out,FFTW_ESTIMATE);
+	plan_backward=fftw_plan_dft_3d(n3, n2, n1, out, outback,FFTW_BACKWARD, FFTW_ESTIMATE);	
 
 	cout<<"Output file:"<<outputFile<<endl;
 	fstream fieldsOut;
@@ -157,14 +156,13 @@ int main(int argc, char *argv[])
 			//debughermitkimaakacout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 			for(m=0;m<3;m++)
 				for(n=0;n<3;n++){
-
 								if(iteration == 1)
 									cout<<m<<" "<<n<<endl;
-					for(k=0;k<N3;k++)
-						for(j=0;j<N2;j++)
-							for(i=0;i<(N1/2+1);i++){
-								out[k*N2*(N1/2+1)+j*(N1/2+1)+i][0]=ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
-								out[k*N2*(N1/2+1)+j*(N1/2+1)+i][1]=ddefgradim[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
+					for(k=0;k<n3;k++)
+						for(j=0;j<n2;j++)
+							for(i=0;i<(n1/2+1);i++){
+								out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]=ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
+								out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
 					}
 
 					fftw_execute(plan_backward);
@@ -173,10 +171,9 @@ int main(int argc, char *argv[])
 						for(j=0;j<N2;j++)
 							for(i=0;i<N1;i++){
 								if(iteration == 1)
-									cout<<i<<" "<<j<<" "<<k<<" "<<deltaout[(k*n2*(n1)+j*(n1)+i)]<<endl;
-								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=deltaout[(k*n2*(n1)+j*(n1)+i)]/prodDim;
+									cout<<i<<" "<<j<<" "<<k<<" "<<outback[(k*n2*(n1)+j*(n1)+i)][0]<<endl;
+								ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
 							}
-
 			}
 
 			// Get symmetric part of defgrad
