@@ -7,10 +7,10 @@
 using namespace std;
 
 void augmentLagrangian(void){
-	
-	double prodDim=n1*n2*n3;
-	double volumeVoxel=1.0/prodDim;
-	double x[6],dg[6],edot[6],dsg[6],ddg[6];
+    
+    double prodDim=n1*n2*n3;
+    double volumeVoxel=1.0/prodDim;
+    double x[6],dg[6],edot[6],dsg[6],ddg[6];
 
     errstrain=errstress=0.0;
 

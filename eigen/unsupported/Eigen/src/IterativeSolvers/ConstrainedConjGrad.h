@@ -86,9 +86,9 @@ void pseudo_inverse(const CMatrix &C, CINVMatrix &CINV)
     // FIXME add a generic "prune/filter" expression for both dense and sparse object to sparse
     for (Index j=0; j<l.size(); ++j)
       if (l[j]<1e-15)
-	tripletList.push_back(T(i,j,l(j)));
+    tripletList.push_back(T(i,j,l(j)));
 
-	
+    
     d[i] = 0.0;
   }
   CINV.setFromTriplets(tripletList.begin(), tripletList.end());

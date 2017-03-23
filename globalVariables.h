@@ -1,7 +1,7 @@
 #ifndef structures
 #define structures
 typedef struct {
-	double tensor[3][3][3][3];
+    double tensor[3][3][3][3];
 }fourthOrderTensor;
 #endif
 
