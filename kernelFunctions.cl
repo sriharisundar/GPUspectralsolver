@@ -1,4 +1,4 @@
-//#include "kernelUtilFunctions.h"
+#include "kernelUtilFunctions.h"
 
 __kernel void findAuxiliaryStress(
     __global double* d_stress, 
@@ -18,22 +18,26 @@ __kernel void findAuxiliaryStress(
             d_stress[i*6+n]-=d_C0_66[n*6+m]*d_straintilde[i*6+m];
 }
 
-//__kernel void convolute(__global *work, __global *workim, __global *ddefgrad, __global *ddefgradim, const unsigned int prodDim)
-//{
-//    int i;
-//
-//    double work33[3][3],work33im[3][3];
-//
-//    i=get_global_id(0);
-//
-//    if(i<prodDim){
-//        change_basis(&work[(i)*6],&work33,aux66,aux3333,1);
-//        change_basis(&workim[(i)*6],&work33im,aux66,aux3333,1);
-//
+__kernel void convolute(
+    __global vector6_complex* stressFourier, 
+    __global tensor33_complex* ddefgradFourier, 
+    __global fourthOrderTensor* gammaHat, 
+    const unsigned int prodDim)
+{
+    int i;
+
+    double work33[3][3],work33im[3][3];
+
+    i=get_global_id(0);
+     
+    if(i<prodDim){
+        change_basis(stressFourier,ddefgradFourier,1);
+        //change_basis(a,&work33im,1);
+
 //        multiply3333x33(&ddefgrad[(i)*9],gammaHat[i],work33,3,4);
-//        multiply3333x33(&ddefgradim[(i)*9],gammaHat[i],work33im,3,4);
-//    }
-//}
+    }
+}
+
 //
 //__kernel void augmentLagrangian(){
 //

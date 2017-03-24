@@ -48,8 +48,7 @@ int main(int argc, char *argv[])
 //fftw variables
     double *delta;
     fftw_complex *out;
-    fftw_plan plan_backward;
-    fftw_plan plan_forward;
+    fftw_plan plan_backward, plan_forward;
 
 //clFFT variables
     cl_int err;
@@ -64,14 +63,13 @@ int main(int argc, char *argv[])
 
     cl::Program program(context,util::loadProgram("kernelFunctions.cl"),true);
 
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int,int> findAuxiliaryStress(program,"findAuxiliaryStress");
 
-    clfftPlanHandle planHandleFWD;
-    clfftPlanHandle planHandleBWD;
+    clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
     clfftSetupData fftSetup;
     size_t clLengths[3];
-    size_t clStrides[3];
+    size_t clStridesFWD[3],clStridesBWD[3];
 
     if (argc<2){
         cout<<"Pass input file name as argument"<<endl;
@@ -100,49 +98,60 @@ int main(int argc, char *argv[])
     clLengths[1]=n2;
     clLengths[2]=n3;
 
-    clStrides[0]=6;
-    clStrides[1]=6*n1;
-    clStrides[2]=6*n1*n2;
+    clStridesFWD[0]=6;
+    clStridesFWD[1]=6*n1;
+    clStridesFWD[2]=6*n1*n2;
+
+    clStridesBWD[0]=9;
+    clStridesBWD[1]=9*n1;
+    clStridesBWD[2]=9*n1*n2;
 
     d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
     d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
     d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDim);
     d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(double)*36);
 
-    /* Setup clFFT. */
+    // Setup clFFT
     err=clfftInitSetupData(&fftSetup);
     err=clfftSetup(&fftSetup);
 
-    /* Create a default plan for a complex FFT. */
+    // Create a default plan for a complex FFT. This will be modified further to satisfy our conditions
     err=clfftCreateDefaultPlan(&planHandleFWD, context(), dim, clLengths);
-    err=clfftCreateDefaultPlan(&planHandleBWD, context(), dim, clLengths);
 
-    /* Set plan parameters. */
+    // Set plan parameters
     err=clfftSetPlanPrecision(planHandleFWD, CLFFT_DOUBLE);
-    err=clfftSetPlanPrecision(planHandleBWD, CLFFT_DOUBLE);
+    err=clfftSetResultLocation(planHandleFWD, CLFFT_OUTOFPLACE);
+    
+    // Batching is required as we will be executing the plan for all the six components of the auxiliary stress tensor together
+    err=clfftSetPlanBatchSize(planHandleFWD, 6);
+    
+    // Distance specifies the separation between the starting elements of the arrays corresponding to each batch for input & output arrays
+    err=clfftSetPlanDistance(planHandleFWD, 1, 1);
+    
+    /* Due to batching of the transform, the separation between consecutive elements for one particular batch, along each dimension
+       is not the default values anymore. The x stride becomes 6, y stride becomes 6*lenX, z stride becomes 6*lenX*lenY. This is 
+       specified by the clStrides variable defined previously. */
+    err=clfftSetPlanInStride(planHandleFWD, dim, clStridesFWD);
+    err=clfftSetPlanOutStride(planHandleFWD, dim, clStridesFWD);
 
+    /* Since we will be using the Hermitian symmetry which is applicable when the input data for the forward transform is all real,
+       we choose the plan input and output accordingly. For real transforms clFFT selects the direction of transform based on type
+       of the input and output buffers. Thus we create two plan handles one for forward transform and one for reverse transform. */
+    err=clfftCopyPlan(&planHandleBWD,context(), planHandleFWD);
+
+    // Specify the type of input and output buffers for forward and reverse transforms
     err=clfftSetLayout(planHandleFWD, CLFFT_REAL, CLFFT_HERMITIAN_INTERLEAVED);
     err=clfftSetLayout(planHandleBWD, CLFFT_HERMITIAN_INTERLEAVED, CLFFT_REAL);
     
-    err=clfftSetResultLocation(planHandleFWD, CLFFT_OUTOFPLACE);
-    err=clfftSetResultLocation(planHandleBWD, CLFFT_OUTOFPLACE);
-    
-    err=clfftSetPlanBatchSize(planHandleFWD, 6);
-    err=clfftSetPlanBatchSize(planHandleBWD, 6);
-    
-    err=clfftSetPlanDistance(planHandleFWD, 1, 1);
-    err=clfftSetPlanDistance(planHandleBWD, 1, 1);
-    
-    err=clfftSetPlanInStride(planHandleFWD, dim, clStrides);
-    err=clfftSetPlanInStride(planHandleBWD, dim, clStrides);
-    
-    err=clfftSetPlanOutStride(planHandleFWD, dim, clStrides);
-    err=clfftSetPlanOutStride(planHandleBWD, dim, clStrides);
+    err=clfftSetPlanBatchSize(planHandleFWD, 9);
 
-    /* Bake the plan. */
+    err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWD);
+    err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWD);
+
+
+    // Bake the plan
     err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
     err=clfftBakePlan(planHandleBWD, 1, &queue(), NULL, NULL);
-
 
     cout<<"Output file:"<<outputFile<<endl;
     fstream fieldsOut;
@@ -358,3 +367,11 @@ int main(int argc, char *argv[])
     fftw_free(out);
     return 0;
 }
+
+//    err=clfftCreateDefaultPlan(&planHandleBWD, context(), dim, clLengths);
+//    err=clfftSetPlanPrecision(planHandleBWD, CLFFT_DOUBLE);
+//    err=clfftSetResultLocation(planHandleBWD, CLFFT_OUTOFPLACE);
+//    err=clfftSetPlanBatchSize(planHandleBWD, 6);
+//    err=clfftSetPlanDistance(planHandleBWD, 1, 1);
+//    err=clfftSetPlanInStride(planHandleBWD, dim, clStrides);
+//    err=clfftSetPlanOutStride(planHandleBWD, dim, clStrides);
