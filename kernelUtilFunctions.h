@@ -18,7 +18,7 @@ void change_basis(double* a,double* b,int iopt){
     basis[2][2][1]= 2.0*rsq6;
 
     basis[0][0][0]=-rsq2;
-    basis[1][1][0]= rsq2;
+    basis[1][1][0]=rsq2;
 
     basis[1][2][2]=rsq2;
     basis[2][1][2]=rsq2;

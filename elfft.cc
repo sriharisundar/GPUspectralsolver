@@ -26,7 +26,7 @@ inline std::string loadProgram(std::string input)
     }
 
      return std::string(
-        std::istreambuf_iterator<char>(stream),
+        std::istreambuf_iterator<char>(stream), 
         (std::istreambuf_iterator<char>()));
 }
 
@@ -62,27 +62,28 @@ int main(int argc, char *argv[])
 
     cl::CommandQueue queue(context);
 
-//    cl::Program program(context, util::loadProgram("GPUfunctions.cl"), true);
+    cl::Program program(context,util::loadProgram("kernelFunctions.cl"),true);
 
-//    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, int> convolute(program, "convolute");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
 
     clfftPlanHandle planHandleFWD;
     clfftPlanHandle planHandleBWD;
     clfftDim dim = CLFFT_3D;
     clfftSetupData fftSetup;
     size_t clLengths[3];
+    size_t clStrides[3];
 
     if (argc<2){
         cout<<"Pass input file name as argument"<<endl;
         return 0;
     }
 
-    if (argc<3){
-        cout<<"Enter 1 for FFTW or 2 for clFFT:";
-        cin>>fftchoice;
-    }
-    else
-        fftchoice=atoi(argv[2]);
+    //if (argc<3){
+    //    cout<<"Enter 1 for FFTW or 2 for clFFT:";
+    //    cin>>fftchoice;
+    //}
+    //else
+    //    fftchoice=atoi(argv[2]);
 
     readinput(argv[1]);
 
@@ -92,47 +93,63 @@ int main(int argc, char *argv[])
     delta=new double[n3*n2*n1];
     out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
 
-    plan_forward=fftw_plan_dft_r2c_3d(n3,n2,n1,delta,out,FFTW_ESTIMATE);
-    plan_backward=fftw_plan_dft_c2r_3d(n3,n2,n1,out,delta,FFTW_ESTIMATE );
+    plan_forward=fftw_plan_dft_r2c_3d(n3, n2, n1, delta, out, FFTW_ESTIMATE);
+    plan_backward=fftw_plan_dft_c2r_3d(n3, n2, n1, out, delta, FFTW_ESTIMATE);
 
     clLengths[0]=n1;
     clLengths[1]=n2;
     clLengths[2]=n3;
 
-    d_stress=cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(double)*6*prodDim);
-    d_straintilde=cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(double)*6*prodDim);
-    d_gammaHat=cl::Buffer(context,CL_MEM_READ_ONLY,sizeof(fourthOrderTensor)*prodDim);
-    d_C0_66=cl::Buffer(context,CL_MEM_READ_ONLY,sizeof(double)*36);
+    clStrides[0]=6;
+    clStrides[1]=6*n1;
+    clStrides[2]=6*n1*n2;
+
+    d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
+    d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
+    d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDim);
+    d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(double)*36);
 
     /* Setup clFFT. */
-    err = clfftInitSetupData(&fftSetup);
-    err = clfftSetup(&fftSetup);
+    err=clfftInitSetupData(&fftSetup);
+    err=clfftSetup(&fftSetup);
 
     /* Create a default plan for a complex FFT. */
-    err = clfftCreateDefaultPlan(&planHandleFWD, context(), dim, clLengths);
-    err = clfftCreateDefaultPlan(&planHandleBWD, context(), dim, clLengths);
+    err=clfftCreateDefaultPlan(&planHandleFWD, context(), dim, clLengths);
+    err=clfftCreateDefaultPlan(&planHandleBWD, context(), dim, clLengths);
 
     /* Set plan parameters. */
-    err = clfftSetPlanPrecision(planHandleFWD, CLFFT_DOUBLE);
-    err = clfftSetPlanPrecision(planHandleBWD, CLFFT_DOUBLE);
-    err = clfftSetLayout(planHandleFWD, CLFFT_REAL, CLFFT_HERMITIAN_INTERLEAVED);
-    err = clfftSetLayout(planHandleBWD, CLFFT_HERMITIAN_INTERLEAVED, CLFFT_REAL);
-    err = clfftSetResultLocation(planHandleFWD, CLFFT_OUTOFPLACE);
-    err = clfftSetResultLocation(planHandleBWD, CLFFT_OUTOFPLACE);
-    err= clfftSetPlanBatchSize(planHandleFWD,6);
-    err= clfftSetPlanBatchSize(planHandleBWD,6);
+    err=clfftSetPlanPrecision(planHandleFWD, CLFFT_DOUBLE);
+    err=clfftSetPlanPrecision(planHandleBWD, CLFFT_DOUBLE);
+
+    err=clfftSetLayout(planHandleFWD, CLFFT_REAL, CLFFT_HERMITIAN_INTERLEAVED);
+    err=clfftSetLayout(planHandleBWD, CLFFT_HERMITIAN_INTERLEAVED, CLFFT_REAL);
+    
+    err=clfftSetResultLocation(planHandleFWD, CLFFT_OUTOFPLACE);
+    err=clfftSetResultLocation(planHandleBWD, CLFFT_OUTOFPLACE);
+    
+    err=clfftSetPlanBatchSize(planHandleFWD, 6);
+    err=clfftSetPlanBatchSize(planHandleBWD, 6);
+    
+    err=clfftSetPlanDistance(planHandleFWD, 1, 1);
+    err=clfftSetPlanDistance(planHandleBWD, 1, 1);
+    
+    err=clfftSetPlanInStride(planHandleFWD, dim, clStrides);
+    err=clfftSetPlanInStride(planHandleBWD, dim, clStrides);
+    
+    err=clfftSetPlanOutStride(planHandleFWD, dim, clStrides);
+    err=clfftSetPlanOutStride(planHandleBWD, dim, clStrides);
 
     /* Bake the plan. */
-    err = clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
-    err = clfftBakePlan(planHandleBWD, 1, &queue(), NULL, NULL);
+    err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
+    err=clfftBakePlan(planHandleBWD, 1, &queue(), NULL, NULL);
 
 
     cout<<"Output file:"<<outputFile<<endl;
     fstream fieldsOut;
-    fieldsOut.open(outputFile,ios::out);
+    fieldsOut.open(outputFile, ios::out);
 
     fstream errorOut;
-    errorOut.open("err.out",ios::out);
+    errorOut.open("err.out", ios::out);
 
     // Initialize stress and strain fields
     // sg - stress
@@ -158,7 +175,7 @@ int main(int argc, char *argv[])
                 }
     }
 
-    change_basis(stressbar,stressbar33,aux66,aux3333,1);
+    change_basis(stressbar, stressbar33, aux66, aux3333, 1);
     stressref=stressbar33[ictrl1][ictrl2];
 
     for(step=1;step<=nsteps;step++){
@@ -168,15 +185,15 @@ int main(int argc, char *argv[])
 
         findGammaHat(C0_3333);
 
-        err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double),C0_66);
+        err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double), C0_66);
 
-        err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor),
+        err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor), 
                                     gammaHat);
 
-        err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, prodDim*6*sizeof(double),
+        err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, prodDim*6*sizeof(double), 
                                     stress);
 
-        err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, prodDim*6*sizeof(double),
+        err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, prodDim*6*sizeof(double), 
                                     straintilde);
 
         while(iteration<itermax && err2mod > error){
@@ -190,22 +207,24 @@ int main(int argc, char *argv[])
 
             for(n=0;n<6;n++){
                 
-                for(k=0;k<n3;k++)
-                    for(j=0;j<n2;j++)
-                        for(i=0;i<n1;i++){
-                            delta[(k*n2*(n1)+j*(n1)+i)]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
-                            for(m=0;m<6;m++)
-                                delta[(k*n2*(n1)+j*(n1)+i)]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
-                }
+            err=clFinish(queue());
 
-                fftw_execute(plan_forward);
-
-                for(k=0;k<n3;k++)
-                    for(j=0;j<n2;j++)
-                        for(i=0;i<(n1/2+1);i++){
-                            work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
-                            workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];                            
-                }
+//                for(k=0;k<n3;k++)
+//                    for(j=0;j<n2;j++)
+//                        for(i=0;i<n1;i++){
+//                            delta[(k*n2*(n1)+j*(n1)+i)]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
+//                            for(m=0;m<6;m++)
+//                                delta[(k*n2*(n1)+j*(n1)+i)]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
+//                }
+//
+//                fftw_execute(plan_forward);
+//
+//                for(k=0;k<n3;k++)
+//                    for(j=0;j<n2;j++)
+//                        for(i=0;i<(n1/2+1);i++){
+//                            work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
+//                            workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];                            
+                //}
 
             }
 
@@ -215,14 +234,14 @@ int main(int argc, char *argv[])
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
                     for(i=0;i<(n1/2+1);i++){
-                        change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33,aux66,aux3333,1);
-                        change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],work33im,aux66,aux3333,1);
+                        change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33, aux66, aux3333, 1);
+                        change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33im, aux66, aux3333, 1);
 
-                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33,3,4);
-                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i],work33im,3,4);
+                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33, 3, 4);
+                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33im, 3, 4);
             }
             
-            //change_basis(strainbar,strainbar33,aux66,aux3333,1);
+            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
 
             // Arrange data for out
             cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
@@ -251,8 +270,8 @@ int main(int argc, char *argv[])
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
                     for(i=0;i<n1;i++){
-                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9],(double *) aux33);
-                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],aux33,aux66,aux3333,2);
+                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9], (double *) aux33);
+                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
             }
 
 
@@ -272,8 +291,7 @@ int main(int argc, char *argv[])
             }
 
             // Write stressbar and strainbar for each iteration to output file
-
-            change_basis(stressbar,stressbar33,aux66,aux3333,1);
+            change_basis(stressbar, stressbar33, aux66, aux3333, 1);
             stressref=stressbar33[ictrl1][ictrl2];
             cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
             cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
@@ -300,6 +318,8 @@ int main(int argc, char *argv[])
 
     } // Step loop
 
+    clfftTeardown();
+
     // Write field output
     for(k=0;k<n3;k++)
         for(j=0;j<n2;j++)
@@ -310,8 +330,8 @@ int main(int argc, char *argv[])
                     stress6[m]=stress[(k*n2*(n1)+j*(n1)+i)*6+m];
                 }
 
-                change_basis(strain,strainout,aux66,aux3333,1);
-                change_basis(stress6,stressout,aux66,aux3333,1);
+                change_basis(strain, strainout, aux66, aux3333, 1);
+                change_basis(stress6, stressout, aux66, aux3333, 1);
 
                 fieldsOut<<i+1<<" ";
                 fieldsOut<<j+1<<" ";
