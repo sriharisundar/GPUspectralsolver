@@ -4,37 +4,33 @@ __kernel void findAuxiliaryStress(
     __global double* d_stress, 
     __global double* d_straintilde, 
     __global const double* d_C0_66, 
-    const unsigned int n, 
     const unsigned int prodDim)
 {
     int i,j,m;
 
     i=get_global_id(0);
     j=get_local_id(0);
-    m=5;
 
     if(i<prodDim)
         for(m=0;m<6;m++)
-            d_stress[i*6+n]-=d_C0_66[n*6+m]*d_straintilde[i*6+m];
+            d_stress[i*6+j]-=d_C0_66[j*6+m]*d_straintilde[i*6+m];
 }
 
 __kernel void convolute(
-    __global vector6_complex* stressFourier, 
-    __global tensor33_complex* ddefgradFourier, 
+    __global vector6_complex* d_stressFourier, 
+    __global tensor33_complex* d_ddefgradFourier, 
     __global fourthOrderTensor* gammaHat, 
-    const unsigned int prodDim)
+    const unsigned int prodDimHermitian)
 {
     int i;
 
-    double work33[3][3],work33im[3][3];
-
     i=get_global_id(0);
      
-    if(i<prodDim){
-        change_basis(stressFourier,ddefgradFourier,1);
+    if(i<prodDimHermitian){
+        change_basis(d_stressFourier,d_ddefgradFourier,1,i);
         //change_basis(a,&work33im,1);
 
-//        multiply3333x33(&ddefgrad[(i)*9],gammaHat[i],work33,3,4);
+        multiply3333x33(d_ddefgradFourier,gammaHat,3,4,i);
     }
 }
 

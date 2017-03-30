@@ -60,8 +60,6 @@ void findGammaHat(fourthOrderTensor Cref){
     double fourierPoint[3],fourierTensor[3][3],det=0;
     double G[3][3];
 
-    gammaHat=new fourthOrderTensor[n3*n2*(n1/2+1)];
-
     for(k=0;k<n3;k++){
         fourierPoint[2]=k;
         if(k>n3/2-1) fourierPoint[2]=(k-n3);

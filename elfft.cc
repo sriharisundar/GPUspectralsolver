@@ -35,12 +35,12 @@ inline std::string loadProgram(std::string input)
 int main(int argc, char *argv[])
 {    
     int i,j,k,n,m;
-    double stressbar33[3][3],strainbar33[3][3],work33[3][3],work33im[3][3];
+    double stressbar33[3][3],work33[3][3],work33im[3][3];
     double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
     double strain[6],stress6[6];
     double strainout[3][3],stressout[3][3];
     double err2mod;
-    double prodDim;
+    double prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
     int fftchoice;
@@ -54,8 +54,10 @@ int main(int argc, char *argv[])
     cl_int err;
     cl::Buffer d_stress;
     cl::Buffer d_straintilde;
-    cl::Buffer d_gammaHat;
     cl::Buffer d_C0_66;
+    cl::Buffer d_gammaHat;
+    cl::Buffer d_stressFourier;
+    cl::Buffer d_ddefgradFourier;
 
     cl::Context context(DEVICE);        
 
@@ -64,6 +66,7 @@ int main(int argc, char *argv[])
     cl::Program program(context,util::loadProgram("kernelFunctions.cl"),true);
 
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int,int> findAuxiliaryStress(program,"findAuxiliaryStress");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> convolute(program,"convolute");
 
     clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
@@ -86,6 +89,7 @@ int main(int argc, char *argv[])
     readinput(argv[1]);
 
     prodDim=n1*n2*n3;
+    prodDimHermitian=(n1/2+1)*n2*n3;
     volumeVoxel=1.0/prodDim;
 
     delta=new double[n3*n2*n1];
@@ -108,8 +112,10 @@ int main(int argc, char *argv[])
 
     d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
     d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
-    d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDim);
     d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(double)*36);
+    d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDimHermitian);
+    d_stressFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(vector6_complex)*prodDimHermitian);
+    d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor33_complex)*prodDimHermitian);
 
     // Setup clFFT
     err=clfftInitSetupData(&fftSetup);
@@ -147,7 +153,6 @@ int main(int argc, char *argv[])
 
     err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWD);
     err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWD);
-
 
     // Bake the plan
     err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
@@ -196,14 +201,14 @@ int main(int argc, char *argv[])
 
         err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double), C0_66);
 
-        err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDim*sizeof(fourthOrderTensor), 
-                                    gammaHat);
-
         err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, prodDim*6*sizeof(double), 
                                     stress);
 
         err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, prodDim*6*sizeof(double), 
                                     straintilde);
+
+        err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDimHermitian*sizeof(fourthOrderTensor), 
+                                    gammaHat);
 
         while(iteration<itermax && err2mod > error){
             iteration++;
@@ -214,9 +219,7 @@ int main(int argc, char *argv[])
             // Perform forward FFT
             cout<<"Forward FFT of polarization field"<<endl<<endl;
 
-            for(n=0;n<6;n++){
-                
-            err=clFinish(queue());
+//            for(n=0;n<6;n++){
 
 //                for(k=0;k<n3;k++)
 //                    for(j=0;j<n2;j++)
@@ -233,56 +236,61 @@ int main(int argc, char *argv[])
 //                        for(i=0;i<(n1/2+1);i++){
 //                            work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
 //                            workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];                            
-                //}
+//                }
+//
+//            }
+//
+//            // Convert stress to tensorial form
+//            // Multiply with gamma operator
+//            cout<<"Gamma convolution"<<endl<<endl;
+//            for(k=0;k<n3;k++)
+//                for(j=0;j<n2;j++)
+//                    for(i=0;i<(n1/2+1);i++){
+//                        change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33, aux66, aux3333, 1);
+//                        change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33im, aux66, aux3333, 1);
+//
+//                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33, 3, 4);
+//                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33im, 3, 4);
+//            }
+            //
+//            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
+//
+//            // Arrange data for out
+//            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+//            for(m=0;m<3;m++)
+//                for(n=0;n<3;n++){
+//                    for(k=0;k<n3;k++)
+//                        for(j=0;j<n2;j++)
+//                            for(i=0;i<(n1/2+1);i++){
+//                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]=ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
+//                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
+//                    }
+//
+//                    //out[0][0]=strainbar33[m][n];
+//
+//                    fftw_execute(plan_backward);
+//
+//                    for(k=0;k<n3;k++)
+//                        for(j=0;j<n2;j++)
+//                            for(i=0;i<n1;i++){
+//                                ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
+//                            }
+//
+//            }
+//            // Get symmetric part of defgrad
+        //
+//            for(k=0;k<n3;k++)
+//                for(j=0;j<n2;j++)
+//                    for(i=0;i<n1;i++){
+//                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9], (double *) aux33);
+//                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
+//            }
+//
 
-            }
-
-            // Convert stress to tensorial form
-            // Multiply with gamma operator
-            cout<<"Gamma convolution"<<endl<<endl;
-            for(k=0;k<n3;k++)
-                for(j=0;j<n2;j++)
-                    for(i=0;i<(n1/2+1);i++){
-                        change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33, aux66, aux3333, 1);
-                        change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33im, aux66, aux3333, 1);
-
-                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33, 3, 4);
-                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33im, 3, 4);
-            }
-            
-            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
-
-            // Arrange data for out
-            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
-            for(m=0;m<3;m++)
-                for(n=0;n<3;n++){
-                    for(k=0;k<n3;k++)
-                        for(j=0;j<n2;j++)
-                            for(i=0;i<(n1/2+1);i++){
-                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]=ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
-                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
-                    }
-
-                    //out[0][0]=strainbar33[m][n];
-
-                    fftw_execute(plan_backward);
-
-                    for(k=0;k<n3;k++)
-                        for(j=0;j<n2;j++)
-                            for(i=0;i<n1;i++){
-                                ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
-                            }
-
-            }
-            // Get symmetric part of defgrad
-        
-            for(k=0;k<n3;k++)
-                for(j=0;j<n2;j++)
-                    for(i=0;i<n1;i++){
-                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9], (double *) aux33);
-                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
-            }
-
+        NDRange global(prodDim);
+        NDRange local(6);
+        //queue.enqueueNDRangeKernel(kernel, NullRange, global, local);
+        //findAuxiliaryStress()
 
             cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 
@@ -290,7 +298,6 @@ int main(int argc, char *argv[])
             
             for(n=0;n<6;n++)
                 stressbar[n]=0;
-
 
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
