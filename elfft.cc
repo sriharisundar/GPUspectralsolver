@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     cl::Buffer d_gammaHat;
     cl::Buffer d_stressFourier;
     cl::Buffer d_ddefgradFourier;
+    cl::Buffer d_ddefgrad;
 
     cl::Context context(DEVICE);        
 
@@ -65,14 +66,15 @@ int main(int argc, char *argv[])
 
     cl::Program program(context,util::loadProgram("kernelFunctions.cl"),true);
 
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int,int> findAuxiliaryStress(program,"findAuxiliaryStress");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> convolute(program,"convolute");
 
     clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
     clfftSetupData fftSetup;
     size_t clLengths[3];
-    size_t clStridesFWD[3],clStridesBWD[3];
+    size_t clStridesFWDin[3], clStridesFWDout[3];
+    size_t clStridesBWDin[3], clStridesBWDout[3];
 
     if (argc<2){
         cout<<"Pass input file name as argument"<<endl;
@@ -102,20 +104,30 @@ int main(int argc, char *argv[])
     clLengths[1]=n2;
     clLengths[2]=n3;
 
-    clStridesFWD[0]=6;
-    clStridesFWD[1]=6*n1;
-    clStridesFWD[2]=6*n1*n2;
+    clStridesFWDin[0]=6;
+    clStridesFWDin[1]=6*n1;
+    clStridesFWDin[2]=6*n1*n2;
 
-    clStridesBWD[0]=9;
-    clStridesBWD[1]=9*n1;
-    clStridesBWD[2]=9*n1*n2;
+    clStridesFWDout[0]=6;
+    clStridesFWDout[1]=6*(n1/2+1);
+    clStridesFWDout[2]=6*(n1/2+1)*n2;
+    
+    clStridesBWDin[0]=9;
+    clStridesBWDin[1]=9*(n1/2+1);
+    clStridesBWDin[2]=9*(n1/2+1)*n2;
 
-    d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
-    d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*6*prodDim);
+    clStridesBWDout[0]=9;
+    clStridesBWDout[1]=9*n1;
+    clStridesBWDout[2]=9*n1*n2;
+
+    d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
+    d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
     d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(double)*36);
     d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDimHermitian);
     d_stressFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(vector6_complex)*prodDimHermitian);
     d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor33_complex)*prodDimHermitian);
+    d_ddefgrad=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor33)*prodDim);
+
 
     // Setup clFFT
     err=clfftInitSetupData(&fftSetup);
@@ -137,8 +149,8 @@ int main(int argc, char *argv[])
     /* Due to batching of the transform, the separation between consecutive elements for one particular batch, along each dimension
        is not the default values anymore. The x stride becomes 6, y stride becomes 6*lenX, z stride becomes 6*lenX*lenY. This is 
        specified by the clStrides variable defined previously. */
-    err=clfftSetPlanInStride(planHandleFWD, dim, clStridesFWD);
-    err=clfftSetPlanOutStride(planHandleFWD, dim, clStridesFWD);
+    err=clfftSetPlanInStride(planHandleFWD, dim, clStridesFWDin);
+    err=clfftSetPlanOutStride(planHandleFWD, dim, clStridesFWDout);
 
     /* Since we will be using the Hermitian symmetry which is applicable when the input data for the forward transform is all real,
        we choose the plan input and output accordingly. For real transforms clFFT selects the direction of transform based on type
@@ -151,8 +163,8 @@ int main(int argc, char *argv[])
     
     err=clfftSetPlanBatchSize(planHandleFWD, 9);
 
-    err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWD);
-    err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWD);
+    err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWDin);
+    err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWDout);
 
     // Bake the plan
     err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
@@ -217,10 +229,10 @@ int main(int argc, char *argv[])
 
             // Arrange data for in
             // Perform forward FFT
-            cout<<"Forward FFT of polarization field"<<endl<<endl;
-
+//            cout<<"Forward FFT of polarization field"<<endl<<endl;
+//
 //            for(n=0;n<6;n++){
-
+//
 //                for(k=0;k<n3;k++)
 //                    for(j=0;j<n2;j++)
 //                        for(i=0;i<n1;i++){
@@ -287,10 +299,31 @@ int main(int argc, char *argv[])
 //            }
 //
 
-        NDRange global(prodDim);
-        NDRange local(6);
-        //queue.enqueueNDRangeKernel(kernel, NullRange, global, local);
-        //findAuxiliaryStress()
+            cl::NDRange global(prodDim*6);
+            cl::NDRange local(6);
+
+            try{findAuxiliaryStress(
+                cl::EnqueueArgs(queue,global,local),
+                d_stress, d_straintilde, d_C0_66, prodDim);}
+            catch(cl::Error error){
+                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }
+
+            cout<<"Forward FFT of polarization field"<<endl<<endl;
+            err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
+                    &d_stress(), &d_stressFourier(), NULL);
+
+            cout<<"Gamma convolution"<<endl<<endl;
+            try{convolute(
+                cl::EnqueueArgs(queue,cl::NDRange(prodDimHermitian)),
+                d_stressFourier, d_ddefgradFourier, d_gammaHat, prodDimHermitian);}
+            catch(cl::Error error){
+                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }            
+
+            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+            err = clfftEnqueueTransform(planHandleFWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
+                    &d_ddefgradFourier(), &d_ddefgradFourier(), NULL);
 
             cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 

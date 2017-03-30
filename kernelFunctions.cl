@@ -1,25 +1,25 @@
 #include "kernelUtilFunctions.h"
 
 __kernel void findAuxiliaryStress(
-    __global double* d_stress, 
-    __global double* d_straintilde, 
+    __global vector6* d_stress, 
+    __global vector6* d_straintilde, 
     __global const double* d_C0_66, 
     const unsigned int prodDim)
 {
     int i,j,m;
 
-    i=get_global_id(0);
+    i=get_group_id(0);
     j=get_local_id(0);
 
     if(i<prodDim)
         for(m=0;m<6;m++)
-            d_stress[i*6+j]-=d_C0_66[j*6+m]*d_straintilde[i*6+m];
+            d_stress[i].vector[j]-=d_C0_66[j*6+m]*d_straintilde[i].vector[m];
 }
 
 __kernel void convolute(
     __global vector6_complex* d_stressFourier, 
     __global tensor33_complex* d_ddefgradFourier, 
-    __global fourthOrderTensor* gammaHat, 
+    __global fourthOrderTensor* d_gammaHat, 
     const unsigned int prodDimHermitian)
 {
     int i;
@@ -27,10 +27,29 @@ __kernel void convolute(
     i=get_global_id(0);
      
     if(i<prodDimHermitian){
-        change_basis(d_stressFourier,d_ddefgradFourier,1,i);
-        //change_basis(a,&work33im,1);
+        change_basis_fourier(d_stressFourier,d_ddefgradFourier,1,i);
+        multiply3333x33(d_ddefgradFourier,d_gammaHat,3,4,i);
+    }
+}
 
-        multiply3333x33(d_ddefgradFourier,gammaHat,3,4,i);
+__kernel void getStrainTilde(
+    __global tensor33* d_ddefgrad,
+    __global vector6* d_straintilde, 
+    const unsigned int prodDim)
+{
+    int i,k,l;
+
+    __local tensor33 strain33;
+
+    i=get_global_id(0);
+
+    if(i<prodDimHermitian){
+
+        for(int k=0; k<3;k++)
+            for(int l=0; l<3;l++)
+                strain33.tensor[k][l]=0.5*(d_ddefgrad[i].tensor[k][l]+d_ddefgrad[i].tensor[l][k]);
+
+        change_basis(d_straintilde,&strain33,2,i);
     }
 }
 
