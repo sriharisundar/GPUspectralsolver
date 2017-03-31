@@ -2,13 +2,11 @@
 #include <iostream>
 #include <iomanip>
 
-
 void print1darray(double *a,int size){
     int i;
     for(i=0;i<size;i++)
         std::cout<<std::setw(10)<<a[i]<<" ";
     std::cout<<std::endl;    
-
 }
 
 void print2darray(double *a, int size){

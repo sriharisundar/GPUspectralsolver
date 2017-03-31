@@ -30,6 +30,7 @@ __kernel void convolute(
         change_basis_fourier(d_stressFourier,d_ddefgradFourier,1,i);
         multiply3333x33(d_ddefgradFourier,d_gammaHat,3,4,i);
     }
+
 }
 
 __kernel void getStrainTilde(
@@ -39,14 +40,14 @@ __kernel void getStrainTilde(
 {
     int i,k,l;
 
-    __local tensor33 strain33;
+    tensor33 strain33;
 
     i=get_global_id(0);
 
-    if(i<prodDimHermitian){
-
-        for(int k=0; k<3;k++)
-            for(int l=0; l<3;l++)
+    if(i<prodDim){
+        
+        for(k=0; k<3;k++)
+            for(l=0; l<3;l++)
                 strain33.tensor[k][l]=0.5*(d_ddefgrad[i].tensor[k][l]+d_ddefgrad[i].tensor[l][k]);
 
         change_basis(d_straintilde,&strain33,2,i);

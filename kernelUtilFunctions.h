@@ -97,7 +97,7 @@ void change_basis_fourier(__global vector6_complex* a,__global tensor33_complex*
     }
 }
 
-void change_basis(__global vector6* a, __local tensor33* b, int iopt, int id)
+void change_basis(__global vector6* a, tensor33* b, int iopt, int id)
 {
     int i,j,k,l,m,n;
 
@@ -131,9 +131,9 @@ void change_basis(__global vector6* a, __local tensor33* b, int iopt, int id)
         case 1:
             for(i=0;i<3;i++)
                 for(j=0;j<3;j++){
-                    b.tensor[i][j]=0;
+                    *b.tensor[i][j]=0;
                     for(k=0;k<6;k++)
-                        b.tensor[i][j]+=a[id].vector[k]*basis[i][j][k];
+                        *b.tensor[i][j]+=a[id].vector[k]*basis[i][j][k];
                 }
             break;
 
@@ -142,7 +142,7 @@ void change_basis(__global vector6* a, __local tensor33* b, int iopt, int id)
                 a[id].vector[k]=0.0;
                 for(i=0;i<3;i++)
                     for(j=0;j<3;j++)
-                        a[id].vector[k]+=b.tensor[i][j]*basis[i][j][k];
+                        a[id].vector[k]+=*b.tensor[i][j]*basis[i][j][k];
             }
             break;
     }

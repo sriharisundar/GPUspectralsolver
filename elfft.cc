@@ -5,6 +5,7 @@
 #include "matrixOperations.h"
 #include "printFunctions.h"
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <fftw3.h>
 #include "clFFT.h"
@@ -40,10 +41,12 @@ int main(int argc, char *argv[])
     double strain[6],stress6[6];
     double strainout[3][3],stressout[3][3];
     double err2mod;
-    double prodDim,prodDimHermitian;
+    long prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
     int fftchoice;
+
+    vector6_complex* stressFourier;
 
 //fftw variables
     double *delta;
@@ -68,6 +71,7 @@ int main(int argc, char *argv[])
 
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> convolute(program,"convolute");
+    cl::make_kernel<cl::Buffer,cl::Buffer,int> getStrainTilde(program,"getStrainTilde");
 
     clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
@@ -93,6 +97,8 @@ int main(int argc, char *argv[])
     prodDim=n1*n2*n3;
     prodDimHermitian=(n1/2+1)*n2*n3;
     volumeVoxel=1.0/prodDim;
+
+    stressFourier = new vector6_complex[prodDimHermitian];
 
     delta=new double[n3*n2*n1];
     out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
@@ -176,7 +182,7 @@ int main(int argc, char *argv[])
 
     fstream errorOut;
     errorOut.open("err.out", ios::out);
-
+    
     // Initialize stress and strain fields
     // sg - stress
     // dtilde-straingradient - straintilde
@@ -213,23 +219,72 @@ int main(int argc, char *argv[])
 
         err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double), C0_66);
 
-        err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, prodDim*6*sizeof(double), 
+        err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                     stress);
 
-        err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, prodDim*6*sizeof(double), 
+        err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                     straintilde);
 
         err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDimHermitian*sizeof(fourthOrderTensor), 
                                     gammaHat);
 
         while(iteration<itermax && err2mod > error){
+            
             iteration++;
-            cout<<"--------------------------------------------------------------"<<endl;
-            cout<<"ITERATION:"<<iteration<<endl;
+//debugopenCL            cout<<"--------------------------------------------------------------"<<endl;
+//debugopenCL            cout<<"ITERATION:"<<iteration<<endl;
 
             // Arrange data for in
             // Perform forward FFT
-//            cout<<"Forward FFT of polarization field"<<endl<<endl;
+
+            try{findAuxiliaryStress(
+                cl::EnqueueArgs(queue,cl::NDRange(prodDim*6),cl::NDRange(6)),
+                d_stress, d_straintilde, d_C0_66, prodDim);}
+            catch(cl::Error error){
+//debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }
+
+//debugopenCL            cout<<"Forward FFT of polarization field"<<endl<<endl;
+            err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
+                    &d_stress(), &d_stressFourier(), NULL);
+
+            err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
+                                          stressFourier);
+
+//debugopenCL            cout<<"Gamma convolution"<<endl<<endl;
+            try{convolute(
+                cl::EnqueueArgs(queue,cl::NDRange(prodDimHermitian)),
+                d_stressFourier, d_ddefgradFourier, d_gammaHat, prodDimHermitian);}
+            catch(cl::Error error){
+//debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }            
+
+//debugopenCL            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+            err = clfftEnqueueTransform(planHandleFWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
+                    &d_ddefgradFourier(), &d_ddefgrad(), NULL);
+
+            try{getStrainTilde(
+                cl::EnqueueArgs(queue,cl::NDRange(prodDim)),
+                d_ddefgrad, d_straintilde, prodDim);}
+            catch(cl::Error error){
+//debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }
+
+            if(iteration==1)
+            for(k=0;k<n3;k++)
+                for(j=0;j<n2;j++)
+                    for(i=0;i<(n1/2+1);i++){
+                        cout<<i<<" "<<j<<" "<<k<<endl;
+                        for(int count=0;count<6;count++)
+                            cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
+                        cout<<endl;
+                        for(int count=0;count<6;count++)
+                            cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
+                        cout<<endl;
+                        cout<<endl;}
+
+
+//debugopenCL//            cout<<"Forward FFT of polarization field"<<endl<<endl;
 //
 //            for(n=0;n<6;n++){
 //
@@ -254,7 +309,7 @@ int main(int argc, char *argv[])
 //
 //            // Convert stress to tensorial form
 //            // Multiply with gamma operator
-//            cout<<"Gamma convolution"<<endl<<endl;
+//debugopenCL//            cout<<"Gamma convolution"<<endl<<endl;
 //            for(k=0;k<n3;k++)
 //                for(j=0;j<n2;j++)
 //                    for(i=0;i<(n1/2+1);i++){
@@ -268,7 +323,7 @@ int main(int argc, char *argv[])
 //            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
 //
 //            // Arrange data for out
-//            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+//debugopenCL//            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
 //            for(m=0;m<3;m++)
 //                for(n=0;n<3;n++){
 //                    for(k=0;k<n3;k++)
@@ -299,34 +354,7 @@ int main(int argc, char *argv[])
 //            }
 //
 
-            cl::NDRange global(prodDim*6);
-            cl::NDRange local(6);
-
-            try{findAuxiliaryStress(
-                cl::EnqueueArgs(queue,global,local),
-                d_stress, d_straintilde, d_C0_66, prodDim);}
-            catch(cl::Error error){
-                cout<<error.what()<<"("<<error.err()<<")"<<endl;
-            }
-
-            cout<<"Forward FFT of polarization field"<<endl<<endl;
-            err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
-                    &d_stress(), &d_stressFourier(), NULL);
-
-            cout<<"Gamma convolution"<<endl<<endl;
-            try{convolute(
-                cl::EnqueueArgs(queue,cl::NDRange(prodDimHermitian)),
-                d_stressFourier, d_ddefgradFourier, d_gammaHat, prodDimHermitian);}
-            catch(cl::Error error){
-                cout<<error.what()<<"("<<error.err()<<")"<<endl;
-            }            
-
-            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
-            err = clfftEnqueueTransform(planHandleFWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
-                    &d_ddefgradFourier(), &d_ddefgradFourier(), NULL);
-
-            cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
-
+//debugopenCL            cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
             augmentLagrangian();
             
             for(n=0;n<6;n++)
@@ -342,8 +370,8 @@ int main(int argc, char *argv[])
             // Write stressbar and strainbar for each iteration to output file
             change_basis(stressbar, stressbar33, aux66, aux3333, 1);
             stressref=stressbar33[ictrl1][ictrl2];
-            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-            cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+//debugopenCL            cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
+//debugopenCL            cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
 
             errorOut<<iteration<<" ";
             errorOut<<errstress/stressref<<" ";
