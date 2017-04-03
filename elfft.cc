@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
     err=clfftSetLayout(planHandleFWD, CLFFT_REAL, CLFFT_HERMITIAN_INTERLEAVED);
     err=clfftSetLayout(planHandleBWD, CLFFT_HERMITIAN_INTERLEAVED, CLFFT_REAL);
     
-    err=clfftSetPlanBatchSize(planHandleFWD, 9);
+    err=clfftSetPlanBatchSize(planHandleBWD, 9);
 
     err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWDin);
     err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWDout);
@@ -259,6 +259,9 @@ int main(int argc, char *argv[])
 //debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }            
 
+            err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
+                                          stressFourier);
+
 //debugopenCL            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
             err = clfftEnqueueTransform(planHandleFWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
                     &d_ddefgradFourier(), &d_ddefgrad(), NULL);
@@ -271,17 +274,17 @@ int main(int argc, char *argv[])
             }
 
             if(iteration==1)
-            for(k=0;k<n3;k++)
-                for(j=0;j<n2;j++)
-                    for(i=0;i<(n1/2+1);i++){
-                        cout<<i<<" "<<j<<" "<<k<<endl;
-                        for(int count=0;count<6;count++)
-                            cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
-                        cout<<endl;
-                        for(int count=0;count<6;count++)
-                            cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
-                        cout<<endl;
-                        cout<<endl;}
+                for(k=0;k<n3;k++)
+                    for(j=0;j<n2;j++)
+                        for(i=0;i<(n1/2+1);i++){
+                            cout<<i<<" "<<j<<" "<<k<<endl;
+                            for(int count=0;count<6;count++)
+                                cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
+                            cout<<endl;
+                            for(int count=0;count<6;count++)
+                                cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
+                            cout<<endl;
+                            cout<<endl;}
 
 
 //debugopenCL//            cout<<"Forward FFT of polarization field"<<endl<<endl;
