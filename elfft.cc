@@ -33,6 +33,26 @@ inline std::string loadProgram(std::string input)
 
 }
 
+unsigned getDeviceList(std::vector<cl::Device>& devices)
+{
+  cl_int err;
+
+  // Get list of platforms
+  std::vector<cl::Platform> platforms;
+  cl::Platform::get(&platforms);
+
+  // Enumerate devices
+  for (int i = 0; i < platforms.size(); i++)
+  {
+    cl_uint num = 0;
+    std::vector<cl::Device> plat_devices;
+    platforms[i].getDevices(CL_DEVICE_TYPE_ALL, &plat_devices);
+    devices.insert(devices.end(), plat_devices.begin(), plat_devices.end());
+  }
+
+  return devices.size();
+}
+
 int main(int argc, char *argv[])
 {    
     int i,j,k,n,m;
@@ -47,6 +67,7 @@ int main(int argc, char *argv[])
     int fftchoice;
 
     vector6_complex* stressFourier;
+    tensor33_complex* ddefgradFourier;
 
 //fftw variables
     double *delta;
@@ -63,11 +84,36 @@ int main(int argc, char *argv[])
     cl::Buffer d_ddefgradFourier;
     cl::Buffer d_ddefgrad;
 
-    cl::Context context(DEVICE);        
+    cl_uint deviceIndex = 0;
 
-    cl::CommandQueue queue(context);
+    // Get list of devices
+    std::vector<cl::Device> devices;
+    unsigned numDevices = getDeviceList(devices);
 
-    cl::Program program(context,util::loadProgram("kernelFunctions.cl"),true);
+    // Check device index in range
+    if (deviceIndex >= numDevices)
+    {
+      std::cout << "Invalid device index (try '--list')\n";
+      return EXIT_FAILURE;
+    }
+
+    cl::Device device = devices[0];
+
+    std::vector<cl::Device> chosen_device;
+    chosen_device.push_back(device);
+    cl::Context context(chosen_device);
+    cl::CommandQueue queue(context, device);
+
+    //cl::Context context(DEVICE);        
+
+    //cl::CommandQueue queue(context);
+
+    cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
+    try{program.build({device});}
+    catch(cl::Error error){
+        std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)<<"\n";
+        exit(1);
+    }
 
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> convolute(program,"convolute");
@@ -99,6 +145,7 @@ int main(int argc, char *argv[])
     volumeVoxel=1.0/prodDim;
 
     stressFourier = new vector6_complex[prodDimHermitian];
+    ddefgradFourier = new tensor33_complex[prodDimHermitian];
 
     delta=new double[n3*n2*n1];
     out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
@@ -168,9 +215,10 @@ int main(int argc, char *argv[])
     err=clfftSetLayout(planHandleBWD, CLFFT_HERMITIAN_INTERLEAVED, CLFFT_REAL);
     
     err=clfftSetPlanBatchSize(planHandleBWD, 9);
+    err=clfftSetPlanDistance(planHandleBWD, 1, 1);
 
     err=clfftSetPlanInStride(planHandleBWD, dim, clStridesBWDin);
-    err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWDout);
+    err=clfftSetPlanOutStride(planHandleBWD, dim, clStridesBWDin);
 
     // Bake the plan
     err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
@@ -227,6 +275,7 @@ int main(int argc, char *argv[])
 
         err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDimHermitian*sizeof(fourthOrderTensor), 
                                     gammaHat);
+        queue.finish();
 
         while(iteration<itermax && err2mod > error){
             
@@ -248,6 +297,7 @@ int main(int argc, char *argv[])
             err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
                     &d_stress(), &d_stressFourier(), NULL);
 
+            queue.finish();
             err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
                                           stressFourier);
 
@@ -259,13 +309,17 @@ int main(int argc, char *argv[])
 //debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }            
 
-            err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
-                                          stressFourier);
+            queue.finish();
+            err = queue.enqueueReadBuffer(d_ddefgradFourier, CL_TRUE, 0, sizeof(tensor33_complex)*prodDimHermitian, 
+                                          ddefgradFourier);
 
 //debugopenCL            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
-            err = clfftEnqueueTransform(planHandleFWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
+            err = clfftEnqueueTransform(planHandleBWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
                     &d_ddefgradFourier(), &d_ddefgrad(), NULL);
 
+            queue.finish();
+            err = queue.enqueueReadBuffer(d_ddefgrad, CL_TRUE, 0, sizeof(tensor33)*prodDim, 
+                                          ddefgrad);
             try{getStrainTilde(
                 cl::EnqueueArgs(queue,cl::NDRange(prodDim)),
                 d_ddefgrad, d_straintilde, prodDim);}
@@ -273,19 +327,42 @@ int main(int argc, char *argv[])
 //debugopenCL                cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
 
+            err = queue.enqueueReadBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
+                                          straintilde);
+
             if(iteration==1)
                 for(k=0;k<n3;k++)
                     for(j=0;j<n2;j++)
                         for(i=0;i<(n1/2+1);i++){
-                            cout<<i<<" "<<j<<" "<<k<<endl;
+                            //debugreversefft cout<<i<<" "<<j<<" "<<k<<endl;
                             for(int count=0;count<6;count++)
-                                cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
-                            cout<<endl;
+                                //debugreversefft cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
+                            //debugreversefft cout<<endl;
                             for(int count=0;count<6;count++)
-                                cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
-                            cout<<endl;
-                            cout<<endl;}
+                                //debugreversefft cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
+                            //debugreversefft cout<<endl<<endl;
+                            for(int count1=0;count1<3;count1++){
+                                for(int count2=0;count2<3;count2++)
+                                    //debugreversefft cout<<setw(10)<<ddefgradFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].tensor[count1][count2][0]<<" ";
+                                //debugreversefft cout<<endl;
+                            ;}    
+                            //debugreversefft cout<<endl;    
+                            for(int count1=0;count1<3;count1++){
+                                for(int count2=0;count2<3;count2++)
+                                    //debugreversefft cout<<setw(10)<<ddefgradFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].tensor[count1][count2][1]<<" ";
+                                //debugreversefft cout<<endl;
+                            ;}    
+                            //debugreversefft cout<<endl;
+                        }
 
+            if(iteration==1)
+                for(k=0;k<n3;k++)
+                    for(j=0;j<n2;j++)
+                        for(i=0;i<n1;i++){
+                            cout<<i<<" "<<j<<" "<<k<<endl;
+                            print2darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],3);
+                            print1darray(&straintilde[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6],6);
+                }
 
 //debugopenCL//            cout<<"Forward FFT of polarization field"<<endl<<endl;
 //

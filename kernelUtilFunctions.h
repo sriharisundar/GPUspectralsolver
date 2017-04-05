@@ -54,9 +54,10 @@ void change_basis_fourier(__global vector6_complex* a,__global tensor33_complex*
                 for(j=0;j<3;j++){
                     b[id].tensor[i][j][0]=0;
                     b[id].tensor[i][j][1]=0;
-                    for(k=0;k<6;k++)
+                    for(k=0;k<6;k++){
                         b[id].tensor[i][j][0]+=a[id].vector[k][0]*basis[i][j][k];
                         b[id].tensor[i][j][1]+=a[id].vector[k][1]*basis[i][j][k];
+                    }
                 }
             break;
 
@@ -65,35 +66,12 @@ void change_basis_fourier(__global vector6_complex* a,__global tensor33_complex*
                 a[id].vector[k][0]=0.0;
                 a[id].vector[k][1]=0.0;
                 for(i=0;i<3;i++)
-                    for(j=0;j<3;j++)
+                    for(j=0;j<3;j++){
                         a[id].vector[k][0]+=b[id].tensor[i][j][0]*basis[i][j][k];
                         a[id].vector[k][1]+=b[id].tensor[i][j][1]*basis[i][j][k];
+                }
             }
             break;
-
-//        case 3:
-//            for(i=0;i<3;i++)
-//                for(k=0;k<3;k++)
-//                    for(j=0;j<3;j++)
-//                        for(l=0;l<3;l++){
-//                            b[i*3*3][j*3][k][l]=0.0;
-//                            for(n=0;n<6;n++)
-//                                for(m=0;m<6;m++)
-//                                    b[i*3*3][j*3][k][l]+=a[n][m]*basis[i][j][n]*basis[k][l][m];
-//                        }
-//            break;
-//
-//        case 4:
-//            for(n=0;n<6;n++)
-//                for(m=0;m<6;m++){
-//                    a[n][m]=0.0;
-//                    for(i=0;i<3;i++)
-//                        for(k=0;k<3;k++)
-//                            for(j=0;j<3;j++)
-//                                for(l=0;l<3;l++)
-//                                    a[n][m]+=b[i*3*3][j*3][k][l]*basis[i][j][n]*basis[k][l][m];
-//                }
-//           break;
     }
 }
 
@@ -131,9 +109,9 @@ void change_basis(__global vector6* a, tensor33* b, int iopt, int id)
         case 1:
             for(i=0;i<3;i++)
                 for(j=0;j<3;j++){
-                    *b.tensor[i][j]=0;
+                    b->tensor[i][j]=0;
                     for(k=0;k<6;k++)
-                        *b.tensor[i][j]+=a[id].vector[k]*basis[i][j][k];
+                        b->tensor[i][j]+=a[id].vector[k]*basis[i][j][k];
                 }
             break;
 
@@ -142,7 +120,7 @@ void change_basis(__global vector6* a, tensor33* b, int iopt, int id)
                 a[id].vector[k]=0.0;
                 for(i=0;i<3;i++)
                     for(j=0;j<3;j++)
-                        a[id].vector[k]+=*b.tensor[i][j]*basis[i][j][k];
+                        a[id].vector[k]+=b->tensor[i][j]*basis[i][j][k];
             }
             break;
     }
@@ -169,3 +147,27 @@ void multiply3333x33(__global tensor33_complex* b, __global fourthOrderTensor* A
                     b[id].tensor[i][j][realorim]=c[i][j];
         }
 }
+
+//        case 3:
+//            for(i=0;i<3;i++)
+//                for(k=0;k<3;k++)
+//                    for(j=0;j<3;j++)
+//                        for(l=0;l<3;l++){
+//                            b[i*3*3][j*3][k][l]=0.0;
+//                            for(n=0;n<6;n++)
+//                                for(m=0;m<6;m++)
+//                                    b[i*3*3][j*3][k][l]+=a[n][m]*basis[i][j][n]*basis[k][l][m];
+//                        }
+//            break;
+//
+//        case 4:
+//            for(n=0;n<6;n++)
+//                for(m=0;m<6;m++){
+//                    a[n][m]=0.0;
+//                    for(i=0;i<3;i++)
+//                        for(k=0;k<3;k++)
+//                            for(j=0;j<3;j++)
+//                                for(l=0;l<3;l++)
+//                                    a[n][m]+=b[i*3*3][j*3][k][l]*basis[i][j][n]*basis[k][l][m];
+//                }
+//           break;
