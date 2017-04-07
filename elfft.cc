@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <fftw3.h>
+//#include <fftw3.h>
 #include "clFFT.h"
 #include <CL/cl.hpp>
 using namespace std;
@@ -71,10 +71,10 @@ int main(int argc, char *argv[])
     vector6_complex* stressFourier;
     tensor33_complex* ddefgradFourier;
 
-//fftw variables
+////fftw variables
     double *delta;
-    fftw_complex *out;
-    fftw_plan plan_backward, plan_forward;
+//    fftw_complex *out;
+//    fftw_plan plan_backward, plan_forward;
 
 //clFFT variables
     cl_int err;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     //cl::CommandQueue queue(context);
 
-    cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
+    cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
     try{program.build({device});}
     catch(cl::Error error){
         std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)<<"\n";
@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
     ddefgradFourier = new tensor33_complex[prodDimHermitian];
 
     delta=new double[n3*n2*n1];
-    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
+//    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
 
-    plan_forward=fftw_plan_dft_r2c_3d(n3, n2, n1, delta, out, FFTW_ESTIMATE);
-    plan_backward=fftw_plan_dft_c2r_3d(n3, n2, n1, out, delta, FFTW_ESTIMATE);
+//    plan_forward=fftw_plan_dft_r2c_3d(n3, n2, n1, delta, out, FFTW_ESTIMATE);
+//    plan_backward=fftw_plan_dft_c2r_3d(n3, n2, n1, out, delta, FFTW_ESTIMATE);
 
     clLengths[0]=n1;
     clLengths[1]=n2;
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
 //                                delta[(k*n2*(n1)+j*(n1)+i)]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
 //                }
 //
-//                fftw_execute(plan_forward);
+////                fftw_execute(plan_forward);
 //
 //                for(k=0;k<n3;k++)
 //                    for(j=0;j<n2;j++)
@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
 //
 //                    //out[0][0]=strainbar33[m][n];
 //
-//                    fftw_execute(plan_backward);
+////                    fftw_execute(plan_backward);
 //
 //                    for(k=0;k<n3;k++)
 //                        for(j=0;j<n2;j++)

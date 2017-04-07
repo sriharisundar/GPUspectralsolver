@@ -1,10 +1,10 @@
-#include "/data2/srihari/DDP/GPUspectralsolver/kernelUtilFunctions.h"
+#include "/home/hpc/srihari_hpc/GPUspectralsolver/kernelUtilFunctions.h"
 
 __kernel void findAuxiliaryStress(
     __global vector6* d_stress, 
     __global vector6* d_straintilde, 
     __global const double* d_C0_66, 
-    const unsigned long prodDim)
+    const unsigned int prodDim)
 {
     int i,j,m;
 
