@@ -23,12 +23,12 @@ void augmentLagrangian(void){
                 for(n=0;n<6;n++)
                     dg[n]=strainbar[n]+straintilde[(k*n2*(n1)+j*(n1)+i)*6+n];
                 
+
                 for(n=0;n<6;n++){
                     x[n]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
                     for(m=0;m<6;m++)
                         x[n]+=C0_66[n][m]*dg[m];
                 }
-
 
                 for(m=0;m<6;m++){
                     edot[m]=0.0;
@@ -36,12 +36,11 @@ void augmentLagrangian(void){
                         edot[m]+=fsloc[(k*n2*(n1)+j*(n1)+i)*36+6*m+n]*x[n];
                 }
 
-
                 for(m=0;m<6;m++){
                     ddg[m]=dg[m]-edot[m];                
                     dsg[m]=0.0;
                     for(n=0;n<6;n++)
-                        dsg[m]+=C0_66[m][n]*(dg[m]-edot[m]);
+                        dsg[m]+=C0_66[m][n]*(dg[n]-edot[n]);
                     stress[(k*n2*(n1)+j*(n1)+i)*6+m]+=dsg[m];
                 }
 

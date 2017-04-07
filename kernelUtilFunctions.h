@@ -3,7 +3,7 @@ typedef struct {
 }vector6;
 
 typedef struct {
-	double vector[6][2];
+    double vector[6][2];
 }vector6_complex;
 
 typedef struct {
@@ -133,7 +133,7 @@ void multiply3333x33(__global tensor33_complex* b, __global fourthOrderTensor* A
     double c[3][3];
 
     if(m==3 && n==4)
-        for (int realorim = 0; realorim < 2; ++realorim){
+        for(realorim = 0; realorim < 2; ++realorim){
             for(i=0;i<3;i++)
                 for(j=0;j<3;j++){
                     c[i][j]=0;
@@ -147,27 +147,3 @@ void multiply3333x33(__global tensor33_complex* b, __global fourthOrderTensor* A
                     b[id].tensor[i][j][realorim]=c[i][j];
         }
 }
-
-//        case 3:
-//            for(i=0;i<3;i++)
-//                for(k=0;k<3;k++)
-//                    for(j=0;j<3;j++)
-//                        for(l=0;l<3;l++){
-//                            b[i*3*3][j*3][k][l]=0.0;
-//                            for(n=0;n<6;n++)
-//                                for(m=0;m<6;m++)
-//                                    b[i*3*3][j*3][k][l]+=a[n][m]*basis[i][j][n]*basis[k][l][m];
-//                        }
-//            break;
-//
-//        case 4:
-//            for(n=0;n<6;n++)
-//                for(m=0;m<6;m++){
-//                    a[n][m]=0.0;
-//                    for(i=0;i<3;i++)
-//                        for(k=0;k<3;k++)
-//                            for(j=0;j<3;j++)
-//                                for(l=0;l<3;l++)
-//                                    a[n][m]+=b[i*3*3][j*3][k][l]*basis[i][j][n]*basis[k][l][m];
-//                }
-//           break;
