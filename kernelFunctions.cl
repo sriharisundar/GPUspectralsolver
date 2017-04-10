@@ -2,10 +2,10 @@
 //#include "/data2/srihari/DDP/GPUspectralsolver/kernelUtilFunctions.h"
 
 __kernel void findAuxiliaryStress(
-    __global vector6* d_stress, 
-    __global vector6* d_stressaux, 
-    __global vector6* d_straintilde, 
-    __global const tensor66* d_C0_66, 
+    __global vector6* stress, 
+    __global vector6* stressaux, 
+    __global vector6* straintilde, 
+    __global const tensor66* C0_66, 
     const unsigned long prodDim)
 {
     int i,j,m;
@@ -14,16 +14,16 @@ __kernel void findAuxiliaryStress(
     j=get_local_id(0);
 
     if(i<prodDim){
-	d_stressaux[i].vector[j]=d_stress[i].vector[j];
+	stressaux[i].vector[j]=stress[i].vector[j];
         for(m=0;m<6;m++)
-            d_stressaux[i].vector[j]-=d_C0_66->tensor[j][m]*d_straintilde[i].vector[m];
+            stressaux[i].vector[j]-=C0_66->tensor[j][m]*straintilde[i].vector[m];
     }
 }
 
 __kernel void convolute(
-    __global vector6_complex* d_stressFourier, 
-    __global tensor33_complex* d_ddefgradFourier, 
-    __global fourthOrderTensor* d_gammaHat, 
+    __global vector6_complex* stressFourier, 
+    __global tensor33_complex* ddefgradFourier, 
+    __global fourthOrderTensor* gammaHat, 
     const unsigned long prodDimHermitian)
 {
     int i;
@@ -31,15 +31,15 @@ __kernel void convolute(
     i=get_global_id(0);
      
     if(i<prodDimHermitian){
-        change_basis_fourier(d_stressFourier,d_ddefgradFourier,1,i);
-        multiply3333x33(d_ddefgradFourier,d_gammaHat,3,4,i);
+        change_basis_fourier(stressFourier,ddefgradFourier,1,i);
+        multiply3333x33(ddefgradFourier,gammaHat,3,4,i);
     }
 
 }
 
 __kernel void getStrainTilde(
-    __global tensor33* d_ddefgrad,
-    __global vector6* d_straintilde, 
+    __global tensor33* ddefgrad,
+    __global vector6* straintilde, 
     const unsigned long prodDim)
 {
     int i,k,l;
@@ -52,9 +52,9 @@ __kernel void getStrainTilde(
         
         for(k=0; k<3;k++)
             for(l=0; l<3;l++)
-                strain33.tensor[k][l]=0.5*(d_ddefgrad[i].tensor[k][l]+d_ddefgrad[i].tensor[l][k]);
+                strain33.tensor[k][l]=0.5*(ddefgrad[i].tensor[k][l]+ddefgrad[i].tensor[l][k]);
 
-        change_basis(d_straintilde,&strain33,2,i);
+        change_basis(straintilde,&strain33,2,i);
     }
 }
 

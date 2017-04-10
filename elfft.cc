@@ -65,12 +65,7 @@ int main(int argc, char *argv[])
     double volumeVoxel;
     int iteration,step;
     int fftchoice;
-
-    double* stressaux;
     double* errors;
-
-    vector6_complex* stressFourier;
-    tensor33_complex* ddefgradFourier;
 
 ////fftw variables
     double *delta;
@@ -154,11 +149,7 @@ int main(int argc, char *argv[])
     prodDimHermitian=(n1/2+1)*n2*n3;
     volumeVoxel=1.0/prodDim;
 
-    stressaux=new double[prodDim*6];
     errors=new double[prodDim*2];
-
-    stressFourier = new vector6_complex[prodDimHermitian];
-    ddefgradFourier = new tensor33_complex[prodDimHermitian];
 
 //    delta=new double[n3*n2*n1];
 //    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
@@ -291,6 +282,12 @@ int main(int argc, char *argv[])
         err = queue.enqueueWriteBuffer(d_fsloc, CL_TRUE, 0, prodDim*sizeof(tensor66), 
                                        fsloc);
 
+        err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
+                                    stress);
+
+        err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
+                                    straintilde);
+
         queue.finish();
 
         while(iteration<itermax && err2mod > error){
@@ -299,11 +296,6 @@ int main(int argc, char *argv[])
 
             errstrain=errstress=0.0;
 
-            err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
-                                        stress);
-
-            err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
-                                        straintilde);
 
             queue.finish();
 
@@ -320,17 +312,12 @@ int main(int argc, char *argv[])
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
 
-            //err = queue.enqueueReadBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
-                                          //stressaux);
-
             cout<<"Forward FFT of polarization field"<<endl<<endl;
 
             err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
                     &d_stressaux(), &d_stressFourier(), NULL);
 
             queue.finish();
-//            err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
-//                                          stressFourier);
 
             cout<<"Gamma convolution"<<endl<<endl;
             try{convolute(
@@ -341,8 +328,6 @@ int main(int argc, char *argv[])
             }            
 
             queue.finish();
-//            err = queue.enqueueReadBuffer(d_ddefgradFourier, CL_TRUE, 0, sizeof(tensor33_complex)*prodDimHermitian, 
-//                                          ddefgradFourier);
 
             cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
             err = clfftEnqueueTransform(planHandleBWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
@@ -353,9 +338,6 @@ int main(int argc, char *argv[])
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
 
-//            err = queue.enqueueReadBuffer(d_ddefgrad, CL_TRUE, 0, sizeof(tensor33)*prodDim, 
-//                                          ddefgrad);
-
             try{getStrainTilde(
                 cl::EnqueueArgs(queue,cl::NDRange(prodDim)),
                 d_ddefgrad, d_straintilde, prodDim);}
@@ -363,39 +345,7 @@ int main(int argc, char *argv[])
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
 
-//            if(iteration==2){
-//                for(k=0;k<n3;k++)
-//                    for(j=0;j<n2;j++)
-//                        for(i=0;i<n1;i++){
-//                            cout<<i<<" "<<j<<" "<<k<<endl;
-//                            //print1darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],9);
-//                            print1darray(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],6);
-//            }}
-
-            if(iteration==1)
-                for(k=0;k<n3;k++)
-                    for(j=0;j<n2;j++)
-                        for(i=0;i<(n1/2+1);i++){
-                            //cout <<i<<" "<<j<<" "<<k<<endl;
-                            //debugreversefft for(int count=0;count<6;count++)
-                                //debugreversefft cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][0]<<" ";
-                            //debugreversefft cout<<endl;
-                            //debugreversefft for(int count=0;count<6;count++)
-                                //debugreversefft cout<<setw(10)<<stressFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].vector[count][1]<<" ";
-                            //debugreversefft cout<<endl<<endl;
-                            //for(int count1=0;count1<3;count1++){
-                                //for(int count2=0;count2<3;count2++)
-                                    //cout<<setw(10)<<ddefgradFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].tensor[count1][count2][0]<<" ";
-                                ////cout<<endl;
-                            //;}    
-                            //cout<<endl<<endl;    
-                            //for(int count1=0;count1<3;count1++){
-                                //for(int count2=0;count2<3;count2++)
-                                    //cout<<setw(10)<<ddefgradFourier[(k*n2*(n1/2+1)+j*(n1/2+1)+i)].tensor[count1][count2][1]<<" ";
-                                ////cout<<endl;
-                            //;}    
-                            //cout<<endl<<endl;    
-                        }
+            cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 
             try{augmentLagrangianCL(
                 cl::EnqueueArgs(queue,cl::NDRange(6*prodDim),cl::NDRange(6)),
@@ -415,9 +365,6 @@ int main(int argc, char *argv[])
 
     	    queue.finish();
 
-            cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
-
-//            augmentLagrangian();
 
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
@@ -425,23 +372,6 @@ int main(int argc, char *argv[])
                         errstrain+=errors[(k*n2*(n1)+j*(n1)+i)*2+0]*volumeVoxel;
                         errstress+=errors[(k*n2*(n1)+j*(n1)+i)*2+1]*volumeVoxel;
             }                        
-
-            for(k=0;k<n3;k++)
-                for(j=0;j<n2;j++)
-                    for(i=0;i<n1;i++){
-                            //print1darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],9);
-                        //if(iteration==1)
-                            //print1darray(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],6);
-                        //if(iteration==1)
-                            //cout<<i<<" "<<j<<" "<<k<<" actual"<<endl;
-                            //print1darray(&stress[(k*n2*(n1)+j*(n1)+i)*6],6);}
-                        //else if(iteration==2)
-                            //cout<<i<<" "<<j<<" "<<k<<" aux"<<endl;
-                            //print1darray(&stressaux[(k*n2*(n1)+j*(n1)+i)*6],6);}
-                        //print2darray((double *) C0_66,6);
-            }
-
-
 
 //            cout<<"Forward FFT of polarization field"<<endl<<endl;
 //
@@ -512,18 +442,6 @@ int main(int argc, char *argv[])
 //                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
 //            }
 //
-
-            
-//            if(iteration==2){
-//                for(k=0;k<n3;k++)
-//                    for(j=0;j<n2;j++)
-//                        for(i=0;i<n1;i++){
-//                            cout<<i<<" "<<j<<" "<<k<<endl;
-//                            //print1darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],9);
-//                            print1darray(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],6);
-//                            print1darray(&stress[(k*n2*(n1)+j*(n1)+i)*6],6);
-//                }
-//            }
 
             for(n=0;n<6;n++)
                 stressbar[n]=0;
