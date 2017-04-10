@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 //clFFT variables
     cl_int err;
     cl::Buffer d_stress;
+    cl::Buffer d_stressaux;
     cl::Buffer d_straintilde;
     cl::Buffer d_C0_66;
     cl::Buffer d_gammaHat;
@@ -114,8 +115,8 @@ int main(int argc, char *argv[])
 
     //cl::CommandQueue queue(context);
 
-    //cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
-    cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
+    cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
+    //cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
     
     try{program.build({device});}
     catch(cl::Error error){
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,long> findAuxiliaryStress(program,"findAuxiliaryStress");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> findAuxiliaryStress(program,"findAuxiliaryStress");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,long> convolute(program,"convolute");
     cl::make_kernel<cl::Buffer,cl::Buffer,long> getStrainTilde(program,"getStrainTilde");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> augmentLagrangianCL(program,"augmentLagrangian");
@@ -186,6 +187,7 @@ int main(int argc, char *argv[])
     clStridesBWDout[2]=9*n1*n2;
 
     d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
+    d_stressaux=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
     d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
     d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor66));
     d_strainbar=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6));
@@ -313,7 +315,7 @@ int main(int argc, char *argv[])
 
             try{findAuxiliaryStress(
                 cl::EnqueueArgs(queue,cl::NDRange(prodDim*6),cl::NDRange(6)),
-                d_stress, d_straintilde, d_C0_66, prodDim);}
+                d_stress, d_stressaux, d_straintilde, d_C0_66, prodDim);}
             catch(cl::Error error){
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
@@ -324,7 +326,7 @@ int main(int argc, char *argv[])
             cout<<"Forward FFT of polarization field"<<endl<<endl;
 
             err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
-                    &d_stress(), &d_stressFourier(), NULL);
+                    &d_stressaux(), &d_stressFourier(), NULL);
 
             queue.finish();
 //            err = queue.enqueueReadBuffer(d_stressFourier, CL_TRUE, 0, sizeof(vector6_complex)*prodDimHermitian, 
