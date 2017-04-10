@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
     double strain[6],stress6[6];
     double strainout[3][3],stressout[3][3];
-    double err2mod;
+    double err2mod,errors[2];
     long prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
@@ -82,9 +82,12 @@ int main(int argc, char *argv[])
     cl::Buffer d_straintilde;
     cl::Buffer d_C0_66;
     cl::Buffer d_gammaHat;
+    cl::Buffer d_strainbar;
+    cl::Buffer d_fsloc;
     cl::Buffer d_stressFourier;
     cl::Buffer d_ddefgradFourier;
     cl::Buffer d_ddefgrad;
+    cl::Buffer d_errors;
 
     cl_uint deviceIndex = 0;
 
@@ -111,15 +114,18 @@ int main(int argc, char *argv[])
     //cl::CommandQueue queue(context);
 
     cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
+    //cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
+    
     try{program.build({device});}
     catch(cl::Error error){
         std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)<<"\n";
         exit(1);
     }
 
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> findAuxiliaryStress(program,"findAuxiliaryStress");
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,int> convolute(program,"convolute");
-    cl::make_kernel<cl::Buffer,cl::Buffer,int> getStrainTilde(program,"getStrainTilde");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,long> findAuxiliaryStress(program,"findAuxiliaryStress");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,long> convolute(program,"convolute");
+    cl::make_kernel<cl::Buffer,cl::Buffer,long> getStrainTilde(program,"getStrainTilde");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> augmentLagrangianCL(program,"augmentLagrangian");
 
     clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
@@ -179,11 +185,14 @@ int main(int argc, char *argv[])
 
     d_stress=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
     d_straintilde=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6)*prodDim);
-    d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(double)*36);
+    d_C0_66=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor66));
+    d_strainbar=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6));
+    d_fsloc=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor66)*prodDim);
     d_gammaHat=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(fourthOrderTensor)*prodDimHermitian);
-    d_stressFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(vector6_complex)*prodDimHermitian);
-    d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor33_complex)*prodDimHermitian);
-    d_ddefgrad=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(tensor33)*prodDim);
+    d_stressFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6_complex)*prodDimHermitian);
+    d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33_complex)*prodDimHermitian);
+    d_ddefgrad=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33)*prodDim);
+    d_errors=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*2);
 
     // Setup clFFT
     err=clfftInitSetupData(&fftSetup);
@@ -268,10 +277,15 @@ int main(int argc, char *argv[])
 
         findGammaHat(C0_3333);
 
-        err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, 36*sizeof(double), C0_66);
+        err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, sizeof(tensor66), C0_66);
 
         err = queue.enqueueWriteBuffer(d_gammaHat, CL_TRUE, 0, prodDimHermitian*sizeof(fourthOrderTensor), 
                                     gammaHat);
+
+        err = queue.enqueueWriteBuffer(d_strainbar, CL_TRUE, 0, sizeof(vector6), strainbar);
+
+        err = queue.enqueueWriteBuffer(d_fsloc, CL_TRUE, 0, prodDim*sizeof(tensor66), 
+                                       fsloc);
 
         queue.finish();
 
@@ -328,7 +342,11 @@ int main(int argc, char *argv[])
             err = clfftEnqueueTransform(planHandleBWD, CLFFT_BACKWARD, 1, &queue(), 0, NULL, NULL,
                     &d_ddefgradFourier(), &d_ddefgrad(), NULL);
 
-            queue.finish();
+            try{queue.finish();}
+            catch(cl::Error error){
+                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }
+
 //            err = queue.enqueueReadBuffer(d_ddefgrad, CL_TRUE, 0, sizeof(tensor33)*prodDim, 
 //                                          ddefgrad);
 
@@ -347,12 +365,6 @@ int main(int argc, char *argv[])
 //                            //print1darray(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9],9);
 //                            print1darray(&straintilde[(k*n2*(n1)+j*(n1)+i)*6],6);
 //            }}
-
-            err = queue.enqueueReadBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
-                                          straintilde);
-
-//            err = queue.enqueueReadBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
-//                                          stress);
 
             if(iteration==1)
                 for(k=0;k<n3;k++)
@@ -379,9 +391,24 @@ int main(int argc, char *argv[])
                             //cout<<endl<<endl;    
                         }
 
+            try{augmentLagrangianCL(
+                cl::EnqueueArgs(queue,cl::NDRange(6*prodDim),cl::NDRange(6)),
+                d_stress, d_straintilde, d_fsloc, d_strainbar, d_C0_66, d_errors, prodDim);}
+            catch(cl::Error error){
+                cout<<error.what()<<"("<<error.err()<<")"<<endl;
+            }
+
+            err = queue.enqueueReadBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
+                                          straintilde);
+
+            err = queue.enqueueReadBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
+                                          stress);
+            
+	    queue.finish();
+
             cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 
-            augmentLagrangian();
+//            augmentLagrangian();
 
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)

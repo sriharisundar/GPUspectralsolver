@@ -15,6 +15,10 @@ typedef struct {
 }tensor33_complex;
 
 typedef struct {
+    double tensor[6][6];
+}tensor66;
+
+typedef struct {
     double tensor[3][3][3][3];
 }fourthOrderTensor;
 
