@@ -1,5 +1,5 @@
-#include "/home/hpc/srihari_hpc/GPUspectralsolver/kernelUtilFunctions.h"
-//#include "/data2/srihari/DDP/GPUspectralsolver/kernelUtilFunctions.h"
+//#include "/home/hpc/srihari_hpc/GPUspectralsolver/kernelUtilFunctions.h"
+#include "/data2/srihari/DDP/GPUspectralsolver/kernelUtilFunctions.h"
 
 __kernel void findAuxiliaryStress(
     __global vector6* d_stress, 
@@ -94,16 +94,19 @@ __kernel void augmentLagrangian(
             dsg[j]+=C0_66->tensor[j][m]*(dg[m]-edot[m]);
         stress[i].vector[j]+=dsg[j];
 
-        if(j==0){
+//        if(j==0){
             for(m=0;m<6;m++)
                 errorstrain += ddg[m]*ddg[m];
             errorstrain=sqrt(errorstrain);
-        }
+//        }
 
-        if(j==1){
+//        if(j==1){
             for(m=0;m<6;m++)
                 errorstress += dsg[m]*dsg[m];
             errorstress=sqrt(errorstress);
-        }
+//        }
+
+        errors[i*2+0]=errorstrain;
+        errors[i*2+1]=errorstress;
     }
 }

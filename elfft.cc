@@ -60,13 +60,14 @@ int main(int argc, char *argv[])
     double aux33[3][3],aux66[6][6],aux3333[3][3][3][3];
     double strain[6],stress6[6];
     double strainout[3][3],stressout[3][3];
-    double err2mod,errors[2];
+    double err2mod;
     long prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
     int fftchoice;
 
     double* stressaux;
+    double* errors;
 
     vector6_complex* stressFourier;
     tensor33_complex* ddefgradFourier;
@@ -113,8 +114,8 @@ int main(int argc, char *argv[])
 
     //cl::CommandQueue queue(context);
 
-    cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
-    //cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
+    //cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
+    cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
     
     try{program.build({device});}
     catch(cl::Error error){
@@ -148,16 +149,17 @@ int main(int argc, char *argv[])
 
     readinput(argv[1]);
 
-    stressaux=new double[n3*n2*n1*6];
-
     prodDim=n1*n2*n3;
     prodDimHermitian=(n1/2+1)*n2*n3;
     volumeVoxel=1.0/prodDim;
 
+    stressaux=new double[prodDim*6];
+    errors=new double[prodDim*2];
+
     stressFourier = new vector6_complex[prodDimHermitian];
     ddefgradFourier = new tensor33_complex[prodDimHermitian];
 
-    delta=new double[n3*n2*n1];
+//    delta=new double[n3*n2*n1];
 //    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
 
 //    plan_forward=fftw_plan_dft_r2c_3d(n3, n2, n1, delta, out, FFTW_ESTIMATE);
@@ -192,7 +194,7 @@ int main(int argc, char *argv[])
     d_stressFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6_complex)*prodDimHermitian);
     d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33_complex)*prodDimHermitian);
     d_ddefgrad=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33)*prodDim);
-    d_errors=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*2);
+    d_errors=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*2*prodDim);
 
     // Setup clFFT
     err=clfftInitSetupData(&fftSetup);
@@ -292,6 +294,8 @@ int main(int argc, char *argv[])
         while(iteration<itermax && err2mod > error){
             
             iteration++;
+
+            errstrain=errstress=0.0;
 
             err = queue.enqueueWriteBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                         stress);
@@ -404,11 +408,21 @@ int main(int argc, char *argv[])
             err = queue.enqueueReadBuffer(d_stress, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                           stress);
             
-	    queue.finish();
+            err = queue.enqueueReadBuffer(d_errors, CL_TRUE, 0, sizeof(double)*2*prodDim, 
+                                          errors);
+
+    	    queue.finish();
 
             cout<<"Augmented Lagrangian method for stress update"<<endl<<endl;
 
 //            augmentLagrangian();
+
+            for(k=0;k<n3;k++)
+                for(j=0;j<n2;j++)
+                    for(i=0;i<n1;i++){
+                        errstrain+=errors[(k*n2*(n1)+j*(n1)+i)*2+0]*volumeVoxel;
+                        errstress+=errors[(k*n2*(n1)+j*(n1)+i)*2+1]*volumeVoxel;
+            }                        
 
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
