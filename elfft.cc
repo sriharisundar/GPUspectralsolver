@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 //                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33, 3, 4);
 //                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33im, 3, 4);
 //            }
-            //
+//
 //            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
 //
 //            // Arrange data for out
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
 //
 //            }
 //            // Get symmetric part of defgrad
-        //
+//
 //            for(k=0;k<n3;k++)
 //                for(j=0;j<n2;j++)
 //                    for(i=0;i<n1;i++){

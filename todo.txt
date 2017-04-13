@@ -1,8 +1,9 @@
 TO DO:
 
-1) Modify the CPU functions to completely use pointers
-2) Implement a reduction alogrithm for getting errors on card itself
-3) Have compiler directives to choose between FFTW and clFFT, and CPU vs GPU so on
+1) Avoid calculation of the basis tensor on GPU, instead pass on from CPU
+2) Modify the CPU functions to completely use pointers
+3) Implement a reduction alogrithm for getting errors on card itself
+4) Have compiler directives to choose between FFTW and clFFT, and CPU vs GPU so on
 
 DONE:
 1) Convert to use of Hermitian symmetry
