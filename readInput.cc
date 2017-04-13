@@ -38,16 +38,23 @@ void readtexture(std::string filename){
         grainID[(k-1)*n2*(n1)+(j-1)*(n1)+i-1]=gid;
         phaseID[(k-1)*n2*(n1)+(j-1)*(n1)+i-1]=pid;
 
-        transformationMatrix(a,&euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1],2);
-        transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
-        
-        change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
+        if(pid==2){
+            for(m=0;m<6;m++)
+                for(n=0;n<6;n++)
+                    cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=0;                    
+        }
+        else{
+            transformationMatrix(a,&euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1],2);
+            transformFourthOrderTensor(cmat3333.tensor,cvoxel3333.tensor,a,1);
+            
+            change_basis(aux6,aux33,cvoxel66,cvoxel3333.tensor,4);
 
-        for(m=0;m<6;m++)
-            for(n=0;n<6;n++){
-                cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=cvoxel66[m][n];
-                C0_66[m][n]=C0_66[m][n]+cvoxel66[m][n]*volumeVoxel;
+            for(m=0;m<6;m++)
+                for(n=0;n<6;n++){
+                    cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=cvoxel66[m][n];
+                    C0_66[m][n]=C0_66[m][n]+cvoxel66[m][n]*volumeVoxel;
             }
+        }
     }
 
     change_basis(aux6,aux33,C0_66,C0_3333.tensor,3);
@@ -61,11 +68,6 @@ void readtexture(std::string filename){
                         saux[n][m]=cloc[(k*n2*(n1)+j*(n1)+i)*36+6*n+m];
         
                 findInverse((double *)saux,det,6);
-
-                //std::cout<<k<<" "<<j<<" "<<i<<" "<<std::endl;
-                //print1darray(&stress[(k*n2*(n1)+j*(n1)+i)*6],6);
-                //print2darray((double *)saux,6);
-                //print2darray(&fsloc[(k*n2*(n1)+j*(n1)+i)*36],6);
 
                 for(n=0;n<6;n++)
                     for(m=0;m<6;m++){
@@ -172,19 +174,6 @@ void readinput(char filename[100]){
         
         textureFile=tokens[0];
         readtexture(textureFile);
-
-//        int size=6;
-//        for(int k=0;k<n3;k++)
-//            for(int j=0;j<n2;j++)
-//                for(int i=0;i<n1;i++){
-//                    std::cout<<k<<" "<<j<<" "<<i<<std::endl;
-//                    for(int m=0;m<size;m++){
-//                        for(int n=0;n<size;n++)
-//                            std::cout<<std::setw(10)<<cloc[k*n2*(n1)+j*(n1)+i+m*size+n]<<" ";
-//                        std::cout<<std::endl;
-//                    }    
-//                    std::cout<<std::endl;
-//                }
 
     }
 
@@ -300,12 +289,3 @@ void readinput(char filename[100]){
         itermax=std::stoi(tokens[0]);
     }
 }
-
-//        int size=6;
-//        std::cout<<k<<" "<<j<<" "<<i<<std::endl;
-//        for(int m=0;m<size;m++){
-//            for(int n=0;n<size;n++)
-//                std::cout<<std::setw(10)<<cloc[((k)*n2*(n1)+(j)*(n1)+(i))*36+m*size+n]<<" ";
-//            std::cout<<std::endl;
-//        }    
-//        std::cout<<std::endl;

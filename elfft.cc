@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     cl::Buffer d_stressFourier;
     cl::Buffer d_ddefgradFourier;
     cl::Buffer d_ddefgrad;
+    cl::Buffer d_phaseID;
     cl::Buffer d_errors;
 
     cl_uint deviceIndex = 0;
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> findAuxiliaryStress(program,"findAuxiliaryStress");
     cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,long> convolute(program,"convolute");
     cl::make_kernel<cl::Buffer,cl::Buffer,long> getStrainTilde(program,"getStrainTilde");
-    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> augmentLagrangianCL(program,"augmentLagrangian");
+    cl::make_kernel<cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,cl::Buffer,long> augmentLagrangianCL(program,"augmentLagrangian");
 
     clfftPlanHandle planHandleFWD,planHandleBWD;
     clfftDim dim = CLFFT_3D;
@@ -187,6 +188,7 @@ int main(int argc, char *argv[])
     d_stressFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6_complex)*prodDimHermitian);
     d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33_complex)*prodDimHermitian);
     d_ddefgrad=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33)*prodDim);
+    d_phaseID=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*prodDim);
     d_errors=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*2*prodDim);
 
     // Setup clFFT
@@ -288,6 +290,9 @@ int main(int argc, char *argv[])
         err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                     straintilde);
 
+        err = queue.enqueueReadBuffer(d_phaseID, CL_TRUE, 0, sizeof(double)*prodDim, 
+                                      phaseID);
+
         queue.finish();
 
         while(iteration<itermax && err2mod > error){
@@ -349,7 +354,7 @@ int main(int argc, char *argv[])
 
             try{augmentLagrangianCL(
                 cl::EnqueueArgs(queue,cl::NDRange(6*prodDim),cl::NDRange(6)),
-                d_stress, d_straintilde, d_fsloc, d_strainbar, d_C0_66, d_errors, prodDim);}
+                d_stress, d_straintilde, d_fsloc, d_strainbar, d_C0_66, d_phaseID, d_errors, prodDim);}
             catch(cl::Error error){
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }

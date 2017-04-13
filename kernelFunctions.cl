@@ -64,6 +64,7 @@ __kernel void augmentLagrangian(
     __global tensor66* fsloc, 
     __global const vector6* strainbar,
     __global const tensor66* C0_66,
+    __global double* phaseID,
     __global double* errors,
     const unsigned long prodDim)
 {
@@ -77,7 +78,7 @@ __kernel void augmentLagrangian(
 
     double errorstress=0,errorstrain=0;    
 
-    if(i<prodDim && j<6){
+    if(i<prodDim && j<6 && phaseID[i*6+j]!=2){
         dg[j]=strainbar->vector[j]+straintilde[i].vector[j];
 
         x[j]=stress[i].vector[j];
@@ -87,7 +88,6 @@ __kernel void augmentLagrangian(
         edot[j]=0.0;
         for(m=0;m<6;m++)
             edot[j]+=fsloc[i].tensor[j][m]*x[m];
-
 
         ddg[j]=dg[j]-edot[j];                
         dsg[j]=0.0;

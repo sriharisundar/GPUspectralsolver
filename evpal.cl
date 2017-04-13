@@ -25,3 +25,13 @@ __kernel()
 
     
 }
+
+void edotp_sg_eval()
+{
+    int i,l,m;
+
+    for(l=0;l<nsyst(phase);l++){
+
+    }
+
+}
