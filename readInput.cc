@@ -41,7 +41,7 @@ void readtexture(std::string filename){
         if(pid==2){
             for(m=0;m<6;m++)
                 for(n=0;n<6;n++)
-                    cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=0;                    
+                    cloc[((k-1)*n2*n1+(j-1)*n1+i-1)*36+m*6+n]=0;                   
         }
         else{
             transformationMatrix(a,&euler[(k-1)*n2*(n1)+(j-1)*(n1)+i-1],2);

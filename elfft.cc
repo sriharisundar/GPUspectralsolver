@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     d_stressFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(vector6_complex)*prodDimHermitian);
     d_ddefgradFourier=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33_complex)*prodDimHermitian);
     d_ddefgrad=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(tensor33)*prodDim);
-    d_phaseID=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*prodDim);
+    d_phaseID=cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(int)*prodDim);
     d_errors=cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(double)*2*prodDim);
 
     // Setup clFFT
@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
         err = queue.enqueueWriteBuffer(d_straintilde, CL_TRUE, 0, sizeof(vector6)*prodDim, 
                                     straintilde);
 
-        err = queue.enqueueReadBuffer(d_phaseID, CL_TRUE, 0, sizeof(double)*prodDim, 
+        err = queue.enqueueWriteBuffer(d_phaseID, CL_TRUE, 0, sizeof(int)*prodDim, 
                                       phaseID);
 
         queue.finish();
@@ -310,14 +310,14 @@ int main(int argc, char *argv[])
             // Arrange data for in
             // Perform forward FFT
 
+            cout<<"Forward FFT of polarization field"<<endl<<endl;
+
             try{findAuxiliaryStress(
                 cl::EnqueueArgs(queue,cl::NDRange(prodDim*6),cl::NDRange(6)),
                 d_stress, d_stressaux, d_straintilde, d_C0_66, prodDim);}
             catch(cl::Error error){
                 cout<<error.what()<<"("<<error.err()<<")"<<endl;
             }
-
-            cout<<"Forward FFT of polarization field"<<endl<<endl;
 
             err = clfftEnqueueTransform(planHandleFWD, CLFFT_FORWARD, 1, &queue(), 0, NULL, NULL,
                     &d_stressaux(), &d_stressFourier(), NULL);
@@ -374,6 +374,7 @@ int main(int argc, char *argv[])
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
                     for(i=0;i<n1;i++){
+			//cout<<errors[(k*n2*(n1)+j*(n1)+i)*2+0]<<" "<<phaseID[(k*n2*(n1)+j*(n1)+i)]<<endl;
                         errstrain+=errors[(k*n2*(n1)+j*(n1)+i)*2+0]*volumeVoxel;
                         errstress+=errors[(k*n2*(n1)+j*(n1)+i)*2+1]*volumeVoxel;
             }                        
@@ -462,7 +463,7 @@ int main(int argc, char *argv[])
             change_basis(stressbar, stressbar33, aux66, aux3333, 1);
             stressref=stressbar33[ictrl1][ictrl2];
             cout<<"STRESS FIELD ERROR:"<<errstress/stressref<<endl;
-            cout<<"STRAIN FIELD ERROR:"<<errstrain/strainref<<endl;
+            cout<<"STRAIN FIELD ERROR:"<<errstrain<<endl;
 
             errorOut<<iteration<<" ";
             errorOut<<errstress/stressref<<" ";
