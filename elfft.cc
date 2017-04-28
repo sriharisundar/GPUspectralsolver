@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sys/time.h>
 //#include <fftw3.h>
 #include "clFFT.h"
 #include <CL/cl.hpp>
@@ -53,6 +54,16 @@ unsigned getDeviceList(std::vector<cl::Device>& devices)
   return devices.size();
 }
 
+double rtclock(void)
+{
+  struct timezone Tzp;
+  struct timeval Tp;
+  int stat;
+  stat = gettimeofday (&Tp, &Tzp);
+  if (stat != 0) printf("Error return from gettimeofday: %d",stat);
+  return(Tp.tv_sec + Tp.tv_usec*1.0e-6);
+}
+
 int main(int argc, char *argv[])
 {    
     int i,j,k,n,m;
@@ -61,6 +72,7 @@ int main(int argc, char *argv[])
     double strain[6],stress6[6];
     double strainout[3][3],stressout[3][3];
     double err2mod;
+    double starttime, endtime;
     long prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
@@ -267,6 +279,7 @@ int main(int argc, char *argv[])
     change_basis(stressbar, stressbar33, aux66, aux3333, 1);
     stressref=stressbar33[ictrl1][ictrl2];
 
+    starttime=rtclock();
     for(step=1;step<=nsteps;step++){
         iteration=0;
 
@@ -374,7 +387,6 @@ int main(int argc, char *argv[])
             for(k=0;k<n3;k++)
                 for(j=0;j<n2;j++)
                     for(i=0;i<n1;i++){
-			//cout<<errors[(k*n2*(n1)+j*(n1)+i)*2+0]<<" "<<phaseID[(k*n2*(n1)+j*(n1)+i)]<<endl;
                         errstrain+=errors[(k*n2*(n1)+j*(n1)+i)*2+0]*volumeVoxel;
                         errstress+=errors[(k*n2*(n1)+j*(n1)+i)*2+1]*volumeVoxel;
             }                        
@@ -487,6 +499,8 @@ int main(int argc, char *argv[])
 
     } // Step loop
 
+    endtime=rtclock();
+
     clfftTeardown();
 
     // Write field output
@@ -524,5 +538,9 @@ int main(int argc, char *argv[])
                 fieldsOut<<endl;
     }
 
+    cout<<"Time taken to run (s) = "<<endtime-starttime<<endl;
+
     return 0;
 }
+
+
