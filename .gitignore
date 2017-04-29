@@ -1,3 +1,5 @@
 *.o
 *.out
-elfft
+elfft_fftw
+elfft_clfft
+core
