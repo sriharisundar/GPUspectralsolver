@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <fstream>
 #include <sys/time.h>
-//#include <fftw3.h>
+#include <fftw3.h>
 #include "clFFT.h"
 #include <CL/cl.hpp>
 using namespace std;
@@ -76,15 +76,29 @@ int main(int argc, char *argv[])
     long prodDim,prodDimHermitian;
     double volumeVoxel;
     int iteration,step;
-    int fftchoice;
-    double* errors;
 
-////fftw variables
-    double *delta;
-//    fftw_complex *out;
-//    fftw_plan plan_backward, plan_forward;
+    if (argc<2){
+        cout<<"Pass input file name as argument"<<endl;
+        return 0;
+    }
+
+    readinput(argv[1]);
+
+    prodDim=n1*n2*n3;
+    prodDimHermitian=(n1/2+1)*n2*n3;
+    volumeVoxel=1.0/prodDim;
+
 
 //clFFT variables
+#if USECLFFT==1
+
+    cout<<"Using clFFT on GPU"<<endl;
+    
+    gammaHat=new fourthOrderTensor[n3*n2*(n1/2+1)];
+
+    double* errors;
+    errors=new double[prodDim*2];
+
     cl_int err;
     cl::Buffer d_stress;
     cl::Buffer d_stressaux;
@@ -119,10 +133,6 @@ int main(int argc, char *argv[])
     cl::Context context(chosen_device);
     cl::CommandQueue queue(context, device);
 
-    //cl::Context context(DEVICE);        
-
-    //cl::CommandQueue queue(context);
-
     cl::Program program(context,util::loadProgram("/home/hpc/srihari_hpc/GPUspectralsolver/kernelFunctions.cl"));
     //cl::Program program(context,util::loadProgram("/data2/srihari/DDP/GPUspectralsolver/kernelFunctions.cl"));
     
@@ -143,32 +153,6 @@ int main(int argc, char *argv[])
     size_t clLengths[3];
     size_t clStridesFWDin[3], clStridesFWDout[3];
     size_t clStridesBWDin[3], clStridesBWDout[3];
-
-    if (argc<2){
-        cout<<"Pass input file name as argument"<<endl;
-        return 0;
-    }
-
-    //if (argc<3){
-    //    cout<<"Enter 1 for FFTW or 2 for clFFT:";
-    //    cin>>fftchoice;
-    //}
-    //else
-    //    fftchoice=atoi(argv[2]);
-
-    readinput(argv[1]);
-
-    prodDim=n1*n2*n3;
-    prodDimHermitian=(n1/2+1)*n2*n3;
-    volumeVoxel=1.0/prodDim;
-
-    errors=new double[prodDim*2];
-
-//    delta=new double[n3*n2*n1];
-//    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1/2+1));
-
-//    plan_forward=fftw_plan_dft_r2c_3d(n3, n2, n1, delta, out, FFTW_ESTIMATE);
-//    plan_backward=fftw_plan_dft_c2r_3d(n3, n2, n1, out, delta, FFTW_ESTIMATE);
 
     clLengths[0]=n1;
     clLengths[1]=n2;
@@ -245,6 +229,27 @@ int main(int argc, char *argv[])
     err=clfftBakePlan(planHandleFWD, 1, &queue(), NULL, NULL);
     err=clfftBakePlan(planHandleBWD, 1, &queue(), NULL, NULL);
 
+#endif
+
+//fftw variables
+#if USEFFTW == 1
+    cout<<"Using FFTW on CPU"<<endl;
+
+    gammaHat=new fourthOrderTensor[n3*n2*(n1)];
+    
+    fftw_complex *in;
+    fftw_complex *out;
+    fftw_plan plan_backward;
+    fftw_plan plan_forward;
+
+    in=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+    out=(fftw_complex *) *fftw_alloc_complex(n3*n2*(n1));
+
+    plan_forward=fftw_plan_dft_3d(n3,n2,n1,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+    plan_backward=fftw_plan_dft_3d ( n3, n2, n1, out, in, FFTW_BACKWARD,FFTW_ESTIMATE );
+
+#endif
+
     cout<<"Output file:"<<outputFile<<endl;
     fstream fieldsOut;
     fieldsOut.open(outputFile, ios::out);
@@ -285,7 +290,9 @@ int main(int argc, char *argv[])
 
         err2mod=2*error;
 
-        findGammaHat(C0_3333);
+
+#if USECLFFT==1
+        findGammaHat(C0_3333,1);
 
         err = queue.enqueueWriteBuffer(d_C0_66, CL_TRUE, 0, sizeof(tensor66), C0_66);
 
@@ -307,6 +314,11 @@ int main(int argc, char *argv[])
                                       phaseID);
 
         queue.finish();
+#endif
+        
+#if USEFFTW==1
+        findGammaHat(C0_3333,2);
+#endif
 
         while(iteration<itermax && err2mod > error){
             
@@ -314,15 +326,13 @@ int main(int argc, char *argv[])
 
             errstrain=errstress=0.0;
 
-
-            queue.finish();
-
             cout<<"--------------------------------------------------------------"<<endl;
             cout<<"ITERATION:"<<iteration<<endl;
 
             // Arrange data for in
             // Perform forward FFT
 
+#if USECLFFT==1
             cout<<"Forward FFT of polarization field"<<endl<<endl;
 
             try{findAuxiliaryStress(
@@ -391,75 +401,77 @@ int main(int argc, char *argv[])
                         errstress+=errors[(k*n2*(n1)+j*(n1)+i)*2+1]*volumeVoxel;
             }                        
 
-//            cout<<"Forward FFT of polarization field"<<endl<<endl;
-//
-//            for(n=0;n<6;n++){
-//
-//                for(k=0;k<n3;k++)
-//                    for(j=0;j<n2;j++)
-//                        for(i=0;i<n1;i++){
-//                            delta[(k*n2*(n1)+j*(n1)+i)]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
-//                            for(m=0;m<6;m++)
-//                                delta[(k*n2*(n1)+j*(n1)+i)]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
-//                }
-//
-////                fftw_execute(plan_forward);
-//
-//                for(k=0;k<n3;k++)
-//                    for(j=0;j<n2;j++)
-//                        for(i=0;i<(n1/2+1);i++){
-//                            work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0];
-//                            workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6+n]=out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1];                            
-//                }
-//
-//            }
-//
-//            // Convert stress to tensorial form
-//            // Multiply with gamma operator
-//            cout<<"Gamma convolution"<<endl<<endl;
-//            for(k=0;k<n3;k++)
-//                for(j=0;j<n2;j++)
-//                    for(i=0;i<(n1/2+1);i++){
-//                        change_basis(&work[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33, aux66, aux3333, 1);
-//                        change_basis(&workim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*6], work33im, aux66, aux3333, 1);
-//
-//                        multiply3333x33(&ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33, 3, 4);
-//                        multiply3333x33(&ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9], gammaHat[k*n2*(n1/2+1)+j*(n1/2+1)+i], work33im, 3, 4);
-//            }
-//
-//            //change_basis(strainbar, strainbar33, aux66, aux3333, 1);
-//
-//            // Arrange data for out
-//            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
-//            for(m=0;m<3;m++)
-//                for(n=0;n<3;n++){
-//                    for(k=0;k<n3;k++)
-//                        for(j=0;j<n2;j++)
-//                            for(i=0;i<(n1/2+1);i++){
-//                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][0]=ddefgrad[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
-//                                out[k*n2*(n1/2+1)+j*(n1/2+1)+i][1]=ddefgradim[(k*n2*(n1/2+1)+j*(n1/2+1)+i)*9+3*m+n];
-//                    }
-//
-//                    //out[0][0]=strainbar33[m][n];
-//
-////                    fftw_execute(plan_backward);
-//
-//                    for(k=0;k<n3;k++)
-//                        for(j=0;j<n2;j++)
-//                            for(i=0;i<n1;i++){
-//                                ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=delta[(k*n2*(n1)+j*(n1)+i)]/prodDim;
-//                            }
-//
-//            }
-//            // Get symmetric part of defgrad
-//
-//            for(k=0;k<n3;k++)
-//                for(j=0;j<n2;j++)
-//                    for(i=0;i<n1;i++){
-//                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9], (double *) aux33);
-//                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
-//            }
-//
+#endif
+
+#if USEFFTW==1
+            cout<<"Forward FFT of polarization field"<<endl<<endl;
+
+            for(n=0;n<6;n++){
+                
+                for(k=0;k<n3;k++)
+                    for(j=0;j<n2;j++)
+                        for(i=0;i<n1;i++){
+                            in[k*n2*n1+j*n1+i][0]=stress[(k*n2*(n1)+j*(n1)+i)*6+n];
+                            in[k*n2*n1+j*n1+i][1]=0;
+                            for(m=0;m<6;m++)
+                                in[k*n2*n1+j*n1+i][0]-=C0_66[n][m]*straintilde[(k*n2*(n1)+j*(n1)+i)*6+m];
+                }
+
+                fftw_execute(plan_forward);
+
+                for(k=0;k<n3;k++)
+                    for(j=0;j<n2;j++)
+                        for(i=0;i<n1;i++){
+                            work[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][0];
+                            workim[(k*n2*(n1)+j*(n1)+i)*6+n]=out[k*n2*n1+j*n1+i][1];
+                }
+
+            }
+
+            // Convert stress to tensorial form
+            // Multiply with gamma operator
+            cout<<"Gamma convolution"<<endl<<endl;
+            for(k=0;k<n3;k++)
+                for(j=0;j<n2;j++)
+                    for(i=0;i<(n1);i++){
+                        change_basis(&work[(k*n2*(n1)+j*(n1)+i)*6],work33,aux66,aux3333,1);
+                        change_basis(&workim[(k*n2*(n1)+j*(n1)+i)*6],work33im,aux66,aux3333,1);
+
+                        multiply3333x33(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33,3,4);
+                        multiply3333x33(&ddefgradim[(k*n2*(n1)+j*(n1)+i)*9],gammaHat[k*n2*(n1)+j*(n1)+i],work33im,3,4);
+            }
+            
+            // Arrange data for out
+            cout<<"Inverse FFT to get deformation gradient"<<endl<<endl;
+            for(m=0;m<3;m++)
+                for(n=0;n<3;n++){
+
+                    for(k=0;k<n3;k++)
+                        for(j=0;j<n2;j++)
+                            for(i=0;i<(n1);i++){
+                                out[k*n2*(n1)+j*(n1)+i][0]=ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
+                                out[k*n2*(n1)+j*(n1)+i][1]=ddefgradim[(k*n2*(n1)+j*(n1)+i)*9+3*m+n];
+                    }
+
+                    fftw_execute(plan_backward);
+
+                    for(k=0;k<n3;k++)
+                        for(j=0;j<n2;j++)
+                            for(i=0;i<n1;i++)
+                                ddefgrad[(k*n2*(n1)+j*(n1)+i)*9+3*m+n]=in[k*n2*(n1)+j*(n1)+i][0]/prodDim;
+
+            }
+
+            // Get symmetric part of defgrad
+            for(k=0;k<n3;k++)
+                for(j=0;j<n2;j++)
+                    for(i=0;i<n1;i++){
+                        symmetric(&ddefgrad[(k*n2*(n1)+j*(n1)+i)*9], (double *) aux33);
+                        change_basis(&straintilde[(k*n2*(n1)+j*(n1)+i)*6], aux33, aux66, aux3333, 2);
+            }
+
+            augmentLagrangian();
+#endif
 
             for(n=0;n<6;n++)
                 stressbar[n]=0;
@@ -498,7 +510,6 @@ int main(int argc, char *argv[])
         } // Iteration loop
 
     } // Step loop
-
     endtime=rtclock();
 
     clfftTeardown();
@@ -542,5 +553,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-

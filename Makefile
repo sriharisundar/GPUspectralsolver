@@ -8,12 +8,18 @@ OBJ = matrixOperations.o readInput.o globalVariables.o printFunctions.o solverFu
 %.o: %.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) $(HEADERS) $(LIBS) 
 
-elfft: elfft.o $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(HEADERS) $(LIBS)
+fftw: $(OBJ)
+	$(CC) -DUSEFFTW=1 -c elfft.cc $(CFLAGS) $(HEADERS) $(LIBS) 
+	$(CC) -o elfft_fftw elfft.o $^ $(CFLAGS) $(HEADERS) $(LIBS) 
+
+clfft: $(OBJ)
+	$(CC) -DUSECLFFT=1 -c elfft.cc $(CFLAGS) $(HEADERS) $(LIBS) 
+	$(CC) -o elfft_clfft elfft.o $^ $(CFLAGS) $(HEADERS) $(LIBS) 
 
 all: elfft
-	make elfft
+	make fftw
 
 clean: 
 	rm *.o
-	rm elfft
+	rm elfft_fftw
+	rm elfft_clfft

@@ -2,6 +2,6 @@
 #define solver_functions
 
 void augmentLagrangian();
-void findGammaHat(fourthOrderTensor);
+void findGammaHat(fourthOrderTensor,int);
 
 #endif

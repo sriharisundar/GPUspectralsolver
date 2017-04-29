@@ -81,6 +81,4 @@ void initglobal(){
     workim=new double[n3*n2*n1*6];
     cloc=new double[n3*n2*n1*36];
     fsloc=new double[n3*n2*n1*36];
-    gammaHat=new fourthOrderTensor[n3*n2*(n1/2+1)];
-
 }
